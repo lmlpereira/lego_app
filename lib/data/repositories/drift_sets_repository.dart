@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../data/database.dart';
+import '../database.dart';
 import 'sets_repository.dart';
 
 /// Implementação de hoje: tudo guardado localmente com Drift/SQLite.

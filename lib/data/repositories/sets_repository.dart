@@ -1,4 +1,4 @@
-import '../data/database.dart';
+import '../database.dart';
 
 /// Modelo de domínio simples (não depende do código gerado pelo Drift),
 /// para a UI e os providers não terem de conhecer a camada de BD.

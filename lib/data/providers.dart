@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database.dart';
-import '../repositories/sets_repository.dart';
-import '../repositories/drift_sets_repository.dart';
+import 'repositories/sets_repository.dart';
+import 'repositories/drift_sets_repository.dart';
 
 /// Uma única instância da base de dados para toda a app.
 final databaseProvider = Provider<AppDatabase>((ref) {

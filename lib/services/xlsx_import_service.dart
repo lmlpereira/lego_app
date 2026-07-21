@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 
-import '../repositories/sets_repository.dart';
+import '../data/repositories/sets_repository.dart';
 
 /// Lê o teu ficheiro "Lista Legos (STOCK).xlsx" e converte a folha
 /// "Lista Sets" numa lista de LegoSet prontos a inserir via repository.

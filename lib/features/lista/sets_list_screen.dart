@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/providers.dart';
-import '../../repositories/sets_repository.dart';
+import '../../data/repositories/sets_repository.dart';
 import 'edit_set_screen.dart';
 
 class SetsListScreen extends ConsumerWidget {
