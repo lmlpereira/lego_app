@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../data/providers.dart';
-import '../../data/repositories/sets_repository.dart';
+import '../../../data/providers.dart';
+import '../../../data/repositories/sets_repository.dart';
 
 /// Ecrã de formulário. Se [set] for null, cria um set novo; caso
 /// contrário, edita o set passado (usa o mesmo ecrã para os dois casos).

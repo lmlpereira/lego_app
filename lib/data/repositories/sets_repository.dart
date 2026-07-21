@@ -44,6 +44,24 @@ class LegoSet {
     if (!vendido || valorVenda == null || valorComprado <= 0) return null;
     return ((valorVenda! - valorComprado) / valorComprado) * 100;
   }
+
+  /// Cópia com o [id] substituído — usado quando descobrimos que um set
+  /// vindo de fora (ex: import) corresponde a um registo já existente.
+  LegoSet withId(int novoId) => LegoSet(
+    id: novoId,
+    numeroSet: numeroSet,
+    tema: tema,
+    descricao: descricao,
+    ano: ano,
+    valorSet: valorSet,
+    valorComprado: valorComprado,
+    dataCompra: dataCompra,
+    quantidade: quantidade,
+    vendido: vendido,
+    valorVenda: valorVenda,
+    dataVenda: dataVenda,
+    notas: notas,
+  );
 }
 
 /// Contrato que a UI e os providers usam. Hoje tem uma única implementação
@@ -73,17 +91,17 @@ abstract class SetsRepository {
   Future<double> totalVendasEntre(DateTime inicio, DateTime fimExclusivo);
 
   // ---- Import / export ----
-  /// Insere em bloco (usado pelo import do xlsx), ignorando linhas que já
-  /// existem (mesmo número de set + mesma data de compra + mesmo valor
-  /// pago), para poderes reimportar o mesmo ficheiro sem duplicar dados.
+  /// Insere em bloco (usado pelo import do xlsx). Uma linha que já exista
+  /// (mesmo número de set + mesma data de compra) não é duplicada — todos
+  /// os restantes campos (valor pago, quantidade, vendido, valor de venda,
+  /// etc.) são atualizados com os valores do ficheiro importado.
   Future<ImportResult> addAll(List<LegoSet> sets);
 }
 
 /// Resultado de uma importação em bloco.
 class ImportResult {
   final int inseridos;
-  final int duplicadosIgnorados;
+  final int atualizados;
 
-  const ImportResult(
-      {required this.inseridos, required this.duplicadosIgnorados});
+  const ImportResult({required this.inseridos, required this.atualizados});
 }

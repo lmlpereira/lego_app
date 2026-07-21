@@ -21,7 +21,11 @@ class DriftSetsRepository implements SetsRepository {
       innerJoin(db.temas, db.temas.id.equalsExp(db.setEntries.temaId)),
     ]);
     return query.watch().map(
-        (rows) => rows.map((r) => _toDomain(r.readTable(db.setEntries), r.readTable(db.temas).nome)).toList());
+            (rows) =>
+            rows.map((r) =>
+                _toDomain(r.readTable(db.setEntries), r
+                    .readTable(db.temas)
+                    .nome)).toList());
   }
 
   @override
@@ -32,7 +36,9 @@ class DriftSetsRepository implements SetsRepository {
       ..where(db.setEntries.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) return null;
-    return _toDomain(row.readTable(db.setEntries), row.readTable(db.temas).nome);
+    return _toDomain(row.readTable(db.setEntries), row
+        .readTable(db.temas)
+        .nome);
   }
 
   @override
@@ -47,29 +53,34 @@ class DriftSetsRepository implements SetsRepository {
       throw ArgumentError('Não é possível atualizar um LegoSet sem id');
     }
     final temaId = await _temaIdPorNome(set.tema);
-    await (db.update(db.setEntries)..where((t) => t.id.equals(set.id!)))
+    await (db.update(db.setEntries)
+      ..where((t) => t.id.equals(set.id!)))
         .write(_toCompanion(set, temaId));
   }
 
   @override
   Future<void> delete(int id) async {
-    await (db.delete(db.setEntries)..where((t) => t.id.equals(id))).go();
+    await (db.delete(db.setEntries)
+      ..where((t) => t.id.equals(id))).go();
   }
 
   // ---------------- Temas ----------------
 
   @override
   Stream<List<String>> watchTemas() {
-    return db.select(db.temas).watch().map((rows) => rows.map((t) => t.nome).toList());
+    return db.select(db.temas).watch().map((rows) =>
+        rows.map((t) => t.nome).toList());
   }
 
   @override
   Future<void> addTema(String nome) async {
-    await db.into(db.temas).insertOnConflictUpdate(TemasCompanion.insert(nome: nome));
+    await db.into(db.temas).insertOnConflictUpdate(
+        TemasCompanion.insert(nome: nome));
   }
 
   Future<int> _temaIdPorNome(String nome) async {
-    final existente = await (db.select(db.temas)..where((t) => t.nome.equals(nome))).getSingleOrNull();
+    final existente = await (db.select(db.temas)
+      ..where((t) => t.nome.equals(nome))).getSingleOrNull();
     if (existente != null) return existente.id;
     return db.into(db.temas).insert(TemasCompanion.insert(nome: nome));
   }
@@ -106,31 +117,46 @@ class DriftSetsRepository implements SetsRepository {
   @override
   Future<ImportResult> addAll(List<LegoSet> sets) async {
     var inseridos = 0;
-    var duplicados = 0;
+    var atualizados = 0;
     await db.transaction(() async {
       for (final set in sets) {
-        if (await _jaExiste(set)) {
-          duplicados++;
-          continue;
-        }
+        final existenteId = await _encontrarExistenteId(set);
         final temaId = await _temaIdPorNome(set.tema);
-        await db.into(db.setEntries).insert(_toCompanion(set, temaId));
-        inseridos++;
+
+        if (existenteId != null) {
+          await (db.update(db.setEntries)
+            ..where((t) => t.id.equals(existenteId)))
+              .write(_toCompanion(set, temaId));
+          atualizados++;
+        } else {
+          await db.into(db.setEntries).insert(_toCompanion(set, temaId));
+          inseridos++;
+        }
       }
     });
-    return ImportResult(inseridos: inseridos, duplicadosIgnorados: duplicados);
+    return ImportResult(inseridos: inseridos, atualizados: atualizados);
   }
 
-  /// Considera-se duplicado um set com o mesmo número, a mesma data de
-  /// compra e o mesmo valor pago. Isto permite reimportar o mesmo ficheiro
-  /// várias vezes sem duplicar linhas, mas continua a deixar registares o
-  /// mesmo set comprado de novo se o preço ou a data forem diferentes.
-  Future<bool> _jaExiste(LegoSet set) async {
+  /// Considera-se o mesmo set (para efeitos de import) um registo com o
+  /// mesmo número e a mesma data de compra — o valor pago NÃO entra no
+  /// critério de propósito, para permitir corrigir um preço errado no
+  /// Excel sem que isso crie um registo duplicado. Devolve o id do
+  /// registo existente, para poder ser atualizado em vez de duplicado.
+  ///
+  /// Nota: se comprares o mesmo set mais do que uma vez na mesma data,
+  /// este critério não os distingue e a segunda linha do import vai
+  /// atualizar (sobrepor-se a) a primeira em vez de criar uma segunda
+  /// entrada. Se isso for um cenário real para ti, diz-me e mudamos o
+  /// critério (ex: usar um id de linha do próprio ficheiro Excel).
+  Future<int?> _encontrarExistenteId(LegoSet set) async {
     final query = db.select(db.setEntries)
-      ..where((t) => t.numeroSet.equals(set.numeroSet) & t.valorComprado.equals(set.valorComprado));
+      ..where((t) => t.numeroSet.equals(set.numeroSet));
 
     final candidatos = await query.get();
-    return candidatos.any((c) => _mesmaData(c.dataCompra, set.dataCompra));
+    for (final c in candidatos) {
+      if (_mesmaData(c.dataCompra, set.dataCompra)) return c.id;
+    }
+    return null;
   }
 
   bool _mesmaData(DateTime? a, DateTime? b) {
@@ -138,9 +164,9 @@ class DriftSetsRepository implements SetsRepository {
     if (a == null || b == null) return false;
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
-  }
 
-  // ---------------- Conversões internas ----------------
+
+// ---------------- Conversões internas ----------------
 
   LegoSet _toDomain(SetEntry row, String temaNome) {
     return LegoSet(
@@ -176,4 +202,4 @@ class DriftSetsRepository implements SetsRepository {
       notas: Value(set.notas),
     );
   }
-
+}

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'data/providers.dart';
-import 'features/import/import_screen.dart';
-import 'features/lista/sets_list_screen.dart';
+import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
+import 'package:lego_app/ui/features/import/import_screen.dart';
+import 'package:lego_app/ui/features/lista/sets_list_screen.dart';
 
 void main() {
   // ProviderScope tem de envolver a app para os providers do Riverpod
@@ -22,48 +21,57 @@ class LegoApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const HomeShell(),
     );
   }
 }
 
-/// Ecrã inicial temporário — só para confirmar que a BD e os providers
-/// estão a funcionar. Vai ser substituído pelo dashboard.
-class HomePage extends ConsumerWidget {
-  const HomePage({super.key});
+/// Casca da app: alterna entre Dashboard, Lista de sets e Importar
+/// através de uma barra de navegação em baixo. Usa IndexedStack (em vez
+/// de trocar o widget diretamente) para que cada ecrã mantenha o seu
+/// estado (ex: scroll da lista) ao saltar entre abas.
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final totalCompras = ref.watch(totalComprasProvider);
-    final totalVendas = ref.watch(totalVendasProvider);
+  State<HomeShell> createState() => _HomeShellState();
+}
 
+class _HomeShellState extends State<HomeShell> {
+  int _indice = 0;
+
+  // "static final" em vez de "const": não obriga todos os ecrãs a terem
+  // construtor const (não sabemos ao certo se SetsListScreen já tem).
+  static final _ecrans = [
+    DashboardScreen(),
+    SetsListScreen(),
+    ImportScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lego App')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Total compras: ${totalCompras.value?.toStringAsFixed(2) ?? '...'} €'),
-            const SizedBox(height: 8),
-            Text('Total vendas: ${totalVendas.value?.toStringAsFixed(2) ?? '...'} €'),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ImportScreen()),
-              ),
-              icon: const Icon(Icons.upload_file),
-              label: const Text('Importar xlsx'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SetsListScreen()),
-              ),
-              icon: const Icon(Icons.list),
-              label: const Text('Ver os meus sets'),
-            ),
-          ],
-        ),
+      body: IndexedStack(index: _indice, children: _ecrans),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _indice,
+        onDestinationSelected: (i) => setState(() => _indice = i),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.list_outlined),
+            selectedIcon: Icon(Icons.list),
+            label: 'Sets',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.upload_file_outlined),
+            selectedIcon: Icon(Icons.upload_file),
+            label: 'Importar',
+          ),
+        ],
       ),
     );
   }
