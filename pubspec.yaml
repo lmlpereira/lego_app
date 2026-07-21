@@ -1,0 +1,47 @@
+name: lego_app
+description: App de gestão de coleção Lego (stock, compras, vendas, dashboard).
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Base de dados local (reativa, tipada)
+  drift: ^2.20.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # Gestão de estado (liga a UI aos streams do Drift)
+  flutter_riverpod: ^2.5.1
+
+  # Import / export de .xlsx
+  excel: ^4.0.6
+  file_selector: ^1.0.3
+  share_plus: ^10.0.2
+
+  # Gráficos do dashboard
+  fl_chart: ^0.69.0
+
+  # Datas
+  intl: ^0.19.0
+
+  # Ids únicos para os registos (independentes do autoincrement da BD local)
+  uuid: ^4.5.1
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Geração de código do Drift
+  build_runner: ^2.4.13
+  drift_dev: ^2.20.0
+
+flutter:
+  uses-material-design: true
