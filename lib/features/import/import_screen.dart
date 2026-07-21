@@ -20,7 +20,8 @@ class _Importando extends _ImportState {
 
 class _Sucesso extends _ImportState {
   final int quantidade;
-  const _Sucesso(this.quantidade);
+  final int duplicados;
+  const _Sucesso(this.quantidade, this.duplicados);
 }
 
 class _Erro extends _ImportState {
@@ -74,8 +75,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         return;
       }
 
-      final inseridos = await ref.read(setsRepositoryProvider).addAll(sets);
-      setState(() => _estado = _Sucesso(inseridos as int));
+      final resultado = await ref.read(setsRepositoryProvider).addAll(sets);
+      setState(() => _estado = _Sucesso(resultado.inseridos, resultado.duplicadosIgnorados));
     } catch (e) {
       setState(() => _estado = _Erro(e.toString()));
     }
@@ -125,12 +126,20 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           ],
         );
 
-      case _Sucesso(quantidade: final n):
+      case _Sucesso(quantidade: final n, duplicados: final d):
         return Column(
           children: [
             Icon(Icons.check_circle, color: Colors.green, size: 40),
             const SizedBox(height: 12),
             Text('$n sets importados com sucesso!'),
+            if (d > 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                '$d já existiam e foram ignorados (mesmo número, data e valor).',
+                style: TextStyle(color: Theme.of(context).colorScheme.outline),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => setState(() => _estado = const _Idle()),
