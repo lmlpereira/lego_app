@@ -52,10 +52,24 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
     _dataCompra = s?.dataCompra;
     _dataVenda = s?.dataVenda;
     _vendido = s?.vendido ?? false;
+
+    // Escutar mudanças nos valores para atualizar os cards em tempo real
+    if (_aEditar) {
+      _valorSetCtrl.addListener(_atualizarCalculos);
+      _valorCompradoCtrl.addListener(_atualizarCalculos);
+    }
+  }
+
+  void _atualizarCalculos() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    if (_aEditar) {
+      _valorSetCtrl.removeListener(_atualizarCalculos);
+      _valorCompradoCtrl.removeListener(_atualizarCalculos);
+    }
     _numeroSetCtrl.dispose();
     _descricaoCtrl.dispose();
     _anoCtrl.dispose();
@@ -114,7 +128,7 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
                     controller: _valorSetCtrl,
                     decoration: const InputDecoration(labelText: 'Valor de tabela (€)'),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? 'Inválido' : null,
+                    validator: (v) => (v == null || double.tryParse(v.replaceAll(',', '.')) == null) ? 'Inválido' : null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -123,11 +137,18 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
                     controller: _valorCompradoCtrl,
                     decoration: const InputDecoration(labelText: 'Valor pago (€)'),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? 'Inválido' : null,
+                    validator: (v) => (v == null || double.tryParse(v.replaceAll(',', '.')) == null) ? 'Inválido' : null,
                   ),
                 ),
               ],
             ),
+
+            // Exibir os dois cards apenas em modo de edição
+            if (_aEditar) ...[
+              const SizedBox(height: 12),
+              _buildCardsDiferenca(),
+            ],
+
             const SizedBox(height: 12),
 
             TextFormField(
@@ -159,7 +180,7 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (v) {
                   if (!_vendido) return null;
-                  return (v == null || double.tryParse(v) == null) ? 'Inválido' : null;
+                  return (v == null || double.tryParse(v.replaceAll(',', '.')) == null) ? 'Inválido' : null;
                 },
               ),
               const SizedBox(height: 12),
@@ -182,7 +203,7 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
               onPressed: _aGuardar ? null : _guardar,
               icon: _aGuardar
                   ? const SizedBox(
-                      width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.save),
               label: Text(_aEditar ? 'Guardar alterações' : 'Adicionar set'),
             ),
@@ -192,9 +213,78 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
     );
   }
 
+  /// Constrói os dois cards com as diferenças calculadas
+  Widget _buildCardsDiferenca() {
+    final valorSet = double.tryParse(_valorSetCtrl.text.replaceAll(',', '.')) ?? 0.0;
+    final valorComprado = double.tryParse(_valorCompradoCtrl.text.replaceAll(',', '.')) ?? 0.0;
+
+    // Cálculo da diferença em Euros (Valor Pago - Valor de Tabela )
+    final diferencaEuros =  valorComprado - valorSet;
+
+    // Cálculo da percentagem de diferença (com base no valor de tabela)
+    final diferencaPerc = diferencaEuros != 0 ? ((valorComprado * 100) / valorSet) - 100 : 0.0;
+
+    // Cores dinâmicas: verde se comprou abaixo do valor de tabela (poupou/lucrou), vermelho se pagou a mais
+    final color = diferencaEuros <= 0 ? Colors.green.shade700 : Colors.red.shade700;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Card(
+            elevation: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  const Text(
+                    'Diferença (€)',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${diferencaEuros >= 0 ? '+' : ''}${diferencaEuros.toStringAsFixed(2)} €',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Card(
+            elevation: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  const Text(
+                    'Diferença (%)',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${diferencaPerc >= 0 ? '' : ''}${diferencaPerc.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _temaField(List<String> temas) {
-    // Permite escolher um tema existente OU escrever um novo — não
-    // obriga a ir a outro ecrã só para criar um tema.
     return Autocomplete<String>(
       initialValue: TextEditingValue(text: _temaSelecionado ?? ''),
       optionsBuilder: (input) {
@@ -251,12 +341,12 @@ class _EditSetScreenState extends ConsumerState<EditSetScreen> {
       tema: (_temaSelecionado ?? '').trim().isEmpty ? 'Sem tema' : _temaSelecionado!.trim(),
       descricao: _descricaoCtrl.text.trim(),
       ano: int.tryParse(_anoCtrl.text),
-      valorSet: double.parse(_valorSetCtrl.text),
-      valorComprado: double.parse(_valorCompradoCtrl.text),
+      valorSet: double.parse(_valorSetCtrl.text.replaceAll(',', '.')),
+      valorComprado: double.parse(_valorCompradoCtrl.text.replaceAll(',', '.')),
       dataCompra: _dataCompra,
       quantidade: int.parse(_quantidadeCtrl.text),
       vendido: _vendido,
-      valorVenda: _vendido ? double.tryParse(_valorVendaCtrl.text) : null,
+      valorVenda: _vendido ? double.tryParse(_valorVendaCtrl.text.replaceAll(',', '.')) : null,
       dataVenda: _vendido ? _dataVenda : null,
       notas: _notasCtrl.text.trim().isEmpty ? null : _notasCtrl.text.trim(),
     );
