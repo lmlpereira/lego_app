@@ -52,27 +52,130 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _indice, children: _ecrans),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _indice,
-        onDestinationSelected: (i) => setState(() => _indice = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+      bottomNavigationBar: _BarraFlutuante(
+        indice: _indice,
+        onSelecionar: (i) => setState(() => _indice = i),
+      ),
+    );
+  }
+}
+
+/// Barra de navegação flutuante: um "pill" arredondado com sombra,
+/// afastado das margens e do fundo do ecrã (em vez de colado a toda a
+/// largura/altura como a NavigationBar padrão do Material).
+class _BarraFlutuante extends StatelessWidget {
+  final int indice;
+  final ValueChanged<int> onSelecionar;
+
+  const _BarraFlutuante({required this.indice, required this.onSelecionar});
+
+  static const _itens = [
+    _ItemNav(
+      icone: Icons.dashboard_outlined,
+      iconeAtivo: Icons.dashboard,
+      label: 'Dashboard',
+    ),
+    _ItemNav(
+      icone: Icons.list_outlined,
+      iconeAtivo: Icons.list,
+      label: 'Sets',
+    ),
+    _ItemNav(
+      icone: Icons.upload_file_outlined,
+      iconeAtivo: Icons.upload_file,
+      label: 'Importar',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final corAtiva = Theme.of(context).colorScheme.primary;
+    final corInativa = Theme.of(context).colorScheme.outline;
+
+    return SafeArea(
+      // Só a margem lateral/inferior conta para o SafeArea; o resto do
+      // espaçamento é feito no Padding abaixo.
+      minimum: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.list_outlined),
-            selectedIcon: Icon(Icons.list),
-            label: 'Sets',
+          child: Row(
+            children: [
+              for (var i = 0; i < _itens.length; i++)
+                Expanded(
+                  child: _BotaoNav(
+                    item: _itens[i],
+                    selecionado: i == indice,
+                    corAtiva: corAtiva,
+                    corInativa: corInativa,
+                    onTap: () => onSelecionar(i),
+                  ),
+                ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.upload_file_outlined),
-            selectedIcon: Icon(Icons.upload_file),
-            label: 'Importar',
+        ),
+      ),
+    );
+  }
+}
+
+class _BotaoNav extends StatelessWidget {
+  final _ItemNav item;
+  final bool selecionado;
+  final Color corAtiva;
+  final Color corInativa;
+  final VoidCallback onTap;
+
+  const _BotaoNav({
+    required this.item,
+    required this.selecionado,
+    required this.corAtiva,
+    required this.corInativa,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cor = selecionado ? corAtiva : corInativa;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(32),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(selecionado ? item.iconeAtivo : item.icone, color: cor, size: 24),
+          const SizedBox(height: 3),
+          Text(
+            item.label,
+            style: TextStyle(
+              fontSize: 11,
+              color: cor,
+              fontWeight: selecionado ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _ItemNav {
+  final IconData icone;
+  final IconData iconeAtivo;
+  final String label;
+
+  const _ItemNav({required this.icone, required this.iconeAtivo, required this.label});
 }

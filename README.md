@@ -72,3 +72,8 @@ lib/data/
    um `.xlsx` a partir de `todosOsSetsProvider`.
 6. Mais tarde: `FirebaseSetsRepository` implementando a mesma interface,
    trocada em `providers.dart`.
+7. Exportar modelo para preenchimento em xls
+8. Explorar outras possibilidadesdes de exportação / importação!
+9. Ligação via API ao BrickSet, para obter as imagens do set e outras informações!
+10. Criação de estrutura com Login para que possa ter varios users com diferentes sets
+11. Liagar a conta do bricksets do proprio user para ir buscar/atualizar a sua lista de legos!

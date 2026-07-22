@@ -101,16 +101,16 @@ double _lucro(double vendas, double comprasVendidos) => vendas - comprasVendidos
 double _lucroPercent(double vendas, double comprasVendidos) =>
     comprasVendidos > 0 ? (vendas - comprasVendidos) / comprasVendidos * 100 : 0;
 
-/// Abre o ecrã de lista com os sets de [todos] que passam em [filtro].
+/// Abre o ecrã de lista com os sets que passam em [filtro]. O ecrã
+/// observa a BD diretamente, por isso não precisamos de lhe passar uma
+/// lista já calculada aqui.
 void _abrirListaFiltrada(
     BuildContext context,
-    List<LegoSet> todos,
     bool Function(LegoSet) filtro,
     String titulo,
     ) {
-  final filtrados = todos.where(filtro).toList();
   Navigator.of(context).push(MaterialPageRoute(
-    builder: (_) => SetsFilteredListScreen(titulo: titulo, sets: filtrados),
+    builder: (_) => SetsFilteredListScreen(titulo: titulo, filtro: filtro),
   ));
 }
 
@@ -184,10 +184,7 @@ class _CartoesComparacao extends ConsumerWidget {
     final a = ref.watch(providerA);
     final b = ref.watch(providerB);
 
-    void abrirLista() {
-      final todos = ref.read(todosOsSetsProvider).valueOrNull ?? const [];
-      _abrirListaFiltrada(context, todos, filtro, tituloLista);
-    }
+    void abrirLista() => _abrirListaFiltrada(context, filtro, tituloLista);
 
     return Column(
       children: [
@@ -378,10 +375,8 @@ class _GraficoUltimosAnos extends ConsumerWidget {
         void aoTocarBarra(int index) {
           if (index < 0 || index >= dados.length) return;
           final ano = dados[index].ano;
-          final todos = ref.read(todosOsSetsProvider).valueOrNull ?? const [];
           _abrirListaFiltrada(
             context,
-            todos,
                 (s) => s.dataCompra?.year == ano,
             'Compras em $ano',
           );
@@ -491,16 +486,11 @@ class _TabelaTemas extends ConsumerWidget {
             rows: [
               for (final linha in dados)
                 DataRow(
-                  onSelectChanged: (_) {
-                    final todos =
-                        ref.read(todosOsSetsProvider).valueOrNull ?? const [];
-                    _abrirListaFiltrada(
-                      context,
-                      todos,
-                          (s) => s.tema == linha.tema,
-                      linha.tema,
-                    );
-                  },
+                  onSelectChanged: (_) => _abrirListaFiltrada(
+                    context,
+                        (s) => s.tema == linha.tema,
+                    linha.tema,
+                  ),
                   cells: [
                     DataCell(Text(linha.tema)),
                     DataCell(Text('${linha.quantidade}')),
@@ -543,16 +533,11 @@ class _TabelaAnos extends ConsumerWidget {
                 DataRow(
                   // Consistente com a tabela de temas e o gráfico: tocar
                   // num ano mostra os sets comprados nesse ano.
-                  onSelectChanged: (_) {
-                    final todos =
-                        ref.read(todosOsSetsProvider).valueOrNull ?? const [];
-                    _abrirListaFiltrada(
-                      context,
-                      todos,
-                          (s) => s.dataCompra?.year == linha.ano,
-                      'Compras em ${linha.ano}',
-                    );
-                  },
+                  onSelectChanged: (_) => _abrirListaFiltrada(
+                    context,
+                        (s) => s.dataCompra?.year == linha.ano,
+                    'Compras em ${linha.ano}',
+                  ),
                   cells: [
                     DataCell(Text('${linha.ano}')),
                     DataCell(Text('${linha.quantidade}')),
