@@ -82,9 +82,12 @@ abstract class SetsRepository {
   // ---- Dashboard: totais ----
   Stream<double> watchTotalCompras();
   Stream<double> watchTotalVendas();
+  Stream<double> watchTotalValorSet();
   Stream<List<TotalPorAno>> watchComprasPorAno();
   Stream<List<TotalPorAno>> watchVendasPorAno();
   Stream<List<TotalPorTema>> watchComprasPorTema();
+  Stream<List<TemaResumo>> watchContagemPorTema();
+  Stream<List<AnoCompraResumo>> watchResumoComprasPorAno();
 
   // ---- Dashboard: comparação de períodos ----
   Future<double> totalComprasEntre(DateTime inicio, DateTime fimExclusivo);

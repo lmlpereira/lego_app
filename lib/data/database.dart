@@ -164,6 +164,62 @@ class AppDatabase extends _$AppDatabase {
     final rows = await query.get();
     return rows.fold<double>(0, (acc, r) => acc + (r.read(setEntries.valorVenda) ?? 0));
   }
+
+  /// Total do valor de tabela (RRP) de todos os sets — soma de
+  /// valorSet * quantidade. Comparado com watchTotalCompras(), dá a
+  /// poupança total face ao preço de tabela.
+  Stream<double> watchTotalValorSet() {
+    final query = selectOnly(setEntries)
+      ..addColumns([setEntries.valorSet, setEntries.quantidade]);
+    return query.watch().map((rows) => rows.fold<double>(
+        0,
+            (acc, r) =>
+        acc + (r.read(setEntries.valorSet) ?? 0) * (r.read(setEntries.quantidade) ?? 1)));
+  }
+
+  /// Número de sets (soma de quantidade, não número de linhas) por tema
+  /// — alimenta a tabela "sets por tema".
+  Stream<List<TemaResumo>> watchContagemPorTema() {
+    final query = select(setEntries).join([
+      innerJoin(temas, temas.id.equalsExp(setEntries.temaId)),
+    ]);
+    // Agregamos do lado do Dart pela mesma razão que watchComprasPorTema:
+    // juntar select+join+groupBy tem limitações na API do Drift, e o
+    // volume de dados desta coleção torna isto perfeitamente rápido.
+    return query.watch().map((rows) {
+      final Map<String, int> acumulado = {};
+      for (final row in rows) {
+        final tema = row.readTable(temas).nome;
+        final s = row.readTable(setEntries);
+        acumulado[tema] = (acumulado[tema] ?? 0) + s.quantidade;
+      }
+      return acumulado.entries
+          .map((e) => TemaResumo(tema: e.key, quantidade: e.value))
+          .toList()
+        ..sort((a, b) => b.quantidade.compareTo(a.quantidade));
+    });
+  }
+
+  /// Resumo de compras por ano: número de sets comprados (soma de
+  /// quantidade) e valor total gasto — alimenta a tabela "compras por ano".
+  Stream<List<AnoCompraResumo>> watchResumoComprasPorAno() {
+    final ano = setEntries.dataCompra.year;
+    final quantidade = setEntries.quantidade.sum();
+    final total = (setEntries.valorComprado * setEntries.quantidade.cast<double>()).sum();
+
+    final query = selectOnly(setEntries)
+      ..addColumns([ano, quantidade, total])
+      ..groupBy([ano])
+      ..orderBy([OrderingTerm.desc(ano)]);
+
+    return query.watch().map((rows) => rows
+        .map((r) => AnoCompraResumo(
+      ano: r.read(ano) ?? 0,
+      quantidade: r.read(quantidade) ?? 0,
+      total: r.read(total) ?? 0,
+    ))
+        .toList());
+  }
 }
 
 /// Resultado auxiliar para gráficos "total por ano".
@@ -178,6 +234,23 @@ class TotalPorTema {
   final String tema;
   final double total;
   TotalPorTema({required this.tema, required this.total});
+}
+
+/// Resultado auxiliar para a tabela "sets por tema" — número de sets
+/// (não o valor gasto, ver TotalPorTema para isso).
+class TemaResumo {
+  final String tema;
+  final int quantidade;
+  TemaResumo({required this.tema, required this.quantidade});
+}
+
+/// Resultado auxiliar para a tabela "compras por ano" — número de sets
+/// comprados e valor total gasto nesse ano.
+class AnoCompraResumo {
+  final int ano;
+  final int quantidade;
+  final double total;
+  AnoCompraResumo({required this.ano, required this.quantidade, required this.total});
 }
 
 LazyDatabase _openConnection() {

@@ -102,6 +102,16 @@ class DriftSetsRepository implements SetsRepository {
   @override
   Stream<List<TotalPorTema>> watchComprasPorTema() => db.watchComprasPorTema();
 
+  @override
+  Stream<double> watchTotalValorSet() => db.watchTotalValorSet();
+
+  @override
+  Stream<List<TemaResumo>> watchContagemPorTema() => db.watchContagemPorTema();
+
+  @override
+  Stream<List<AnoCompraResumo>> watchResumoComprasPorAno() =>
+      db.watchResumoComprasPorAno();
+
   // ---------------- Comparação de períodos ----------------
 
   @override

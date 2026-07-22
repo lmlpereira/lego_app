@@ -36,6 +36,30 @@ final comprasPorTemaProvider = StreamProvider<List<TotalPorTema>>((ref) {
   return ref.watch(setsRepositoryProvider).watchComprasPorTema();
 });
 
+final totalValorSetProvider = StreamProvider<double>((ref) {
+  return ref.watch(setsRepositoryProvider).watchTotalValorSet();
+});
+
+final contagemPorTemaProvider = StreamProvider<List<TemaResumo>>((ref) {
+  return ref.watch(setsRepositoryProvider).watchContagemPorTema();
+});
+
+final resumoComprasPorAnoProvider = StreamProvider<List<AnoCompraResumo>>((ref) {
+  return ref.watch(setsRepositoryProvider).watchResumoComprasPorAno();
+});
+
+/// Valor total gasto apenas nos sets já vendidos — para comparar
+/// diretamente com o valor das vendas (lucro real), sem incluir sets
+/// ainda em stock por vender. Derivado de todosOsSetsProvider em vez de
+/// uma query nova na BD, porque é apenas um filtro sobre dados que já
+/// vamos buscar de qualquer forma.
+final totalComprasVendidosProvider = Provider<AsyncValue<double>>((ref) {
+  final sets = ref.watch(todosOsSetsProvider);
+  return sets.whenData((lista) => lista
+      .where((s) => s.vendido)
+      .fold<double>(0, (acc, s) => acc + s.valorComprado * s.quantidade));
+});
+
 final todosOsSetsProvider = StreamProvider<List<LegoSet>>((ref) {
   return ref.watch(setsRepositoryProvider).watchAll();
 });
