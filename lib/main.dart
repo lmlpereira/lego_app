@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
 import 'package:lego_app/ui/features/import/import_screen.dart';
 import 'package:lego_app/ui/features/lista/sets_list_screen.dart';
+import 'package:lego_app/ui/features/settings/settings_screen.dart';
+import 'package:lego_app/ui/features/splash/splash_screen.dart';
 
 void main() {
   // ProviderScope tem de envolver a app para os providers do Riverpod
@@ -15,14 +17,67 @@ class LegoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // Cores inspiradas na marca LEGO
+    const legoRed = Color(0xFFE3000B);
+    const legoYellow = Color(0xFFFFD500);
+    const legoDark = Color(0xFF1F1F1F);
+    const legoBackground = Color(0xFFF4F4F4);
+
     return MaterialApp(
       title: 'Lego App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        scaffoldBackgroundColor: legoBackground,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: legoRed,
+          primary: legoRed,
+          secondary: legoYellow,
+          surface: Colors.white,
+          onPrimary: Colors.white,
+          onSecondary: legoDark,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: legoRed,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: legoYellow,
+          foregroundColor: legoDark,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: legoRed, width: 2),
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       ),
-      home: const HomeShell(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -46,7 +101,7 @@ class _HomeShellState extends State<HomeShell> {
   static final _ecrans = [
     DashboardScreen(),
     SetsListScreen(),
-    ImportScreen(),
+    SettingsScreen(),
   ];
 
   @override
@@ -82,9 +137,9 @@ class _BarraFlutuante extends StatelessWidget {
       label: 'Sets',
     ),
     _ItemNav(
-      icone: Icons.upload_file_outlined,
-      iconeAtivo: Icons.upload_file,
-      label: 'Importar',
+      icone: Icons.settings_applications_outlined,
+      iconeAtivo: Icons.settings_applications,
+      label: 'Configurações',
     ),
   ];
 

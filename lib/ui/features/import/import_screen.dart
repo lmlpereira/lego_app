@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers.dart';
 import '../../../services/XlsxTemplateService.dart';
 import '../../../services/xlsx_import_service.dart';
+import '../utils/lego_brick_loading.dart';
 
 /// Estados possíveis do ecrã, para a UI saber o que mostrar.
 sealed class _ImportState {
@@ -141,13 +142,20 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         );
 
       case _Importando():
-        return Column(
+        /*return Column(
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 12),
             Text('A importar ${_ficheiroEscolhido ?? ''}...'),
           ],
-        );
+        );*/
+        return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+        const LegoBrickLoading(),
+        const SizedBox(height: 16),
+        Text('A importar ${_ficheiroEscolhido ?? ''}...'),
+        ],);
 
       case _Sucesso(quantidade: final n, atualizados: final d):
         return Column(
