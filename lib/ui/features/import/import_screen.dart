@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/providers.dart';
+import '../../../services/XlsxTemplateService.dart';
 import '../../../services/xlsx_import_service.dart';
 
 /// Estados possíveis do ecrã, para a UI saber o que mostrar.
@@ -82,6 +83,17 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     }
   }
 
+  Future<void> _descarregarModelo() async {
+    try {
+      await XlsxTemplateService().gerarEPartilhar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível gerar o modelo: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,10 +123,21 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   Widget _conteudoPorEstado() {
     switch (_estado) {
       case _Idle():
-        return FilledButton.icon(
-          onPressed: _escolherEImportar,
-          icon: const Icon(Icons.folder_open),
-          label: const Text('Escolher ficheiro'),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilledButton.icon(
+              onPressed: _escolherEImportar,
+              icon: const Icon(Icons.folder_open),
+              label: const Text('Escolher ficheiro'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _descarregarModelo,
+              icon: const Icon(Icons.download_outlined),
+              label: const Text('Descarregar modelo'),
+            ),
+          ],
         );
 
       case _Importando():
