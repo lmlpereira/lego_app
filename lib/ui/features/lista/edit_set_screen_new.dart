@@ -81,7 +81,17 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
   Widget build(BuildContext context) {
     final temasAsync = ref.watch(temasProvider);
 
-    return Scaffold(
+    return PopScope(
+        canPop: false, // Bloqueia o pop automático para podermos validar primeiro
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+
+          final querSair = await _confirmarSair();
+          if (querSair && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child:Scaffold(
       appBar: AppBar(
         title: Text(_aEditar ? 'Editar set' : 'Novo set'),
         actions: [
@@ -259,7 +269,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   /// Constrói os dois cards com as diferenças calculadas
@@ -331,6 +341,65 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
         ),
       ],
     );
+  }
+
+  Future<bool> _confirmarSair() async {
+    // Se não houver alterações, deixa sair diretamente
+    if (!_temAlteracoes) return true;
+
+    final Sair = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair sem guardar?'),
+        content: const Text('Tens alterações não guardadas. Tens a certeza que queres sair?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sair sem guardar'),
+          ),
+        ],
+      ),
+    );
+
+    return Sair ?? false;
+  }
+
+  /**
+   *  Valida se existiram alterações
+   *
+   */
+  bool get _temAlteracoes {
+    final s = widget.set;
+    if (!_aEditar) {
+      // Modo CRIAÇÃO: considera alterado se qualquer campo principal tiver conteúdo
+      return _numeroSetCtrl.text.isNotEmpty ||
+          _descricaoCtrl.text.isNotEmpty ||
+          _valorSetCtrl.text.isNotEmpty ||
+          _valorCompradoCtrl.text.isNotEmpty ||
+          _temaSelecionado != null;
+    }
+
+    // Modo EDIÇÃO: compara com os dados originais
+    return _numeroSetCtrl.text != (s?.numeroSet.toString() ?? '') ||
+        _descricaoCtrl.text != (s?.descricao ?? '') ||
+        _anoCtrl.text != (s?.ano?.toString() ?? '') ||
+        _valorSetCtrl.text != (s?.valorSet.toString() ?? '') ||
+        _valorCompradoCtrl.text != (s?.valorComprado.toString() ?? '') ||
+        _quantidadeCtrl.text != (s?.quantidade ?? 1).toString() ||
+        _valorVendaCtrl.text != (s?.valorVenda?.toString() ?? '') ||
+        _notasCtrl.text != (s?.notas ?? '') ||
+        _pecasCtrl.text != (s?.pecas?.toString() ?? '') ||
+        _temaSelecionado != s?.tema ||
+        _dataCompra != s?.dataCompra ||
+        _dataVenda != s?.dataVenda ||
+        _vendido != (s?.vendido ?? false);
   }
 
   Widget _temaField(List<String> temas) {

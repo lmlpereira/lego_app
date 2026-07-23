@@ -26,7 +26,10 @@ class _BricksetSearchSheet extends ConsumerStatefulWidget {
 class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   late final TextEditingController _queryCtrl;
   List<BricksetSet>? _resultados;
+  int _matches = 0;
+  int _pagina = 1;
   bool _aPesquisar = false;
+  bool _aCarregarMais = false;
   String? _erro;
 
   @override
@@ -46,35 +49,57 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   }
 
   Future<void> _pesquisar() async {
-    final service = await obterBricksetServiceQuandoPronto(ref);
+    final service = ref.read(bricksetServiceProvider);
     if (service == null) {
       setState(() => _erro =
       'Falta configurar a API key do Brickset (ícone de definições no ecrã anterior).');
       return;
     }
     final query = _queryCtrl.text.trim();
-    if (query.isEmpty) {
-      service.dispose();
-      return;
-    }
+    if (query.isEmpty) return;
 
     setState(() {
       _aPesquisar = true;
       _erro = null;
+      _pagina = 1;
     });
 
     try {
-      final resultados = await service.search(query);
+      final resultado = await service.search(query, pageNumber: 1);
       if (!mounted) return;
-      setState(() => _resultados = resultados);
+      setState(() {
+        _resultados = resultado.sets;
+        _matches = resultado.matches;
+      });
     } on BricksetException catch (e) {
       if (!mounted) return;
       setState(() => _erro = e.message);
     } finally {
-      // Criado ad-hoc (não vem de um provider gerido pelo Riverpod), por
-      // isso temos de o fechar nós, senão a ligação http fica aberta.
-      service.dispose();
       if (mounted) setState(() => _aPesquisar = false);
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    final service = ref.read(bricksetServiceProvider);
+    if (service == null) return;
+    final query = _queryCtrl.text.trim();
+    if (query.isEmpty) return;
+
+    setState(() => _aCarregarMais = true);
+    try {
+      final proximaPagina = _pagina + 1;
+      final resultado = await service.search(query, pageNumber: proximaPagina);
+      if (!mounted) return;
+      setState(() {
+        _resultados = [...?_resultados, ...resultado.sets];
+        _matches = resultado.matches;
+        _pagina = proximaPagina;
+      });
+    } on BricksetException catch (e) {
+      if (!mounted) return;
+      setState(() => _erro = e.message);
+    } finally {
+      if (mounted) setState(() => _aCarregarMais = false);
     }
   }
 
@@ -152,30 +177,57 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
     if (resultados.isEmpty) {
       return const Center(child: Text('Nenhum set encontrado.'));
     }
+
+    final temMais = resultados.length < _matches;
+
     return ListView.separated(
-      itemCount: resultados.length,
+      itemCount: resultados.length + 1, // +1 para o cabeçalho com o total
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, i) {
-        final s = resultados[i];
-        return ListTile(
-          leading: SizedBox(
-            width: 48,
-            height: 48,
-            child: s.thumbnailUrl != null
-                ? Image.network(
-              s.thumbnailUrl!,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
-            )
-                : const Icon(Icons.image_not_supported),
-          ),
-          title: Text('${s.numeroCompleto} — ${s.name}'),
-          subtitle: Text([
-            if (s.theme.isNotEmpty) s.theme,
-            if (s.year != null) '${s.year}',
-            if (s.pieces != null) '${s.pieces} peças',
-          ].join(' · ')),
-          onTap: () => Navigator.of(context).pop(s),
+        if (i == 0) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              '$_matches resultado${_matches == 1 ? '' : 's'}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          );
+        }
+        final s = resultados[i - 1];
+        final ultimoItem = i - 1 == resultados.length - 1;
+        return Column(
+          children: [
+            ListTile(
+              leading: SizedBox(
+                width: 48,
+                height: 48,
+                child: s.thumbnailUrl != null
+                    ? Image.network(
+                  s.thumbnailUrl!,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                )
+                    : const Icon(Icons.image_not_supported),
+              ),
+              title: Text('${s.numeroCompleto} — ${s.name}'),
+              subtitle: Text([
+                if (s.theme.isNotEmpty) s.theme,
+                if (s.year != null) '${s.year}',
+                if (s.pieces != null) '${s.pieces} peças',
+              ].join(' · ')),
+              onTap: () => Navigator.of(context).pop(s),
+            ),
+            if (ultimoItem && temMais)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: _aCarregarMais
+                    ? const CircularProgressIndicator()
+                    : OutlinedButton(
+                  onPressed: _carregarMais,
+                  child: const Text('Carregar mais'),
+                ),
+              ),
+          ],
         );
       },
     );

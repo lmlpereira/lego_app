@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lego_app/ui/features/login/login_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../import/import_screen.dart';
 import 'brickset_api_settings.dart';
@@ -138,12 +139,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             onTap: () {
-              /*ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('A funcionalidade de Perfil está em desenvolvimento.'),
-                  duration: Duration(seconds: 2),
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const LegoLoginScreen(),
                 ),
-              );*/
+              );
             },
           ),
 

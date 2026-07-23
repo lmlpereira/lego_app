@@ -1,7 +1,7 @@
 name: lego_app
 description: App de gestão de coleção Lego (stock, compras, vendas, dashboard).
 publish_to: 'none'
-version: 2.0.0+25
+version: 2.1.0+26
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
 
   package_info_plus: ^10.2.1
+  google_fonts: ^6.1.0 # Para a fonte Varela Round (parecida com a da LEGO)
 
   # Base de dados local (reativa, tipada)
   drift: ^2.20.0
@@ -58,3 +59,7 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/lego_minifig.png
+    - assets/lego.png
+    - assets/google.png

@@ -90,6 +90,16 @@ class BricksetSet {
   }
 }
 
+/// Resultado de uma pesquisa: os sets desta página + o total de
+/// correspondências na base de dados do Brickset (para saber se há mais
+/// páginas a ir buscar — compara com quantos já tens acumulados).
+class BricksetSearchResult {
+  final List<BricksetSet> sets;
+  final int matches;
+
+  const BricksetSearchResult({required this.sets, required this.matches});
+}
+
 /// Cliente simples para a API v3 do Brickset (https://brickset.com/api/v3.asmx).
 ///
 /// Precisa de uma API key pessoal, pedida aqui:
@@ -108,23 +118,24 @@ class BricksetService {
       : _client = client ?? http.Client();
 
   /// Pesquisa sets por texto livre (número, nome, tema ou subtema).
-  /// Devolve no máximo [pageSize] resultados.
-  Future<List<BricksetSet>> search(String query, {int pageSize = 20}) {
-    // pageSize tem de ir como número no JSON (não como string), senão o
-    // backend do Brickset rebenta com um 500 ao desserializar o JSON.
-    return _getSets({'query': query, 'pageSize': pageSize});
+  /// [pageNumber] começa em 1. Devolve no máximo [pageSize] resultados
+  /// dessa página, mais o total de correspondências (`matches`).
+  Future<BricksetSearchResult> search(String query, {int pageNumber = 1, int pageSize = 20}) {
+    // pageSize/pageNumber têm de ir como número no JSON (não como string),
+    // senão o backend do Brickset rebenta com um 500 ao desserializar o JSON.
+    return _getSets({'query': query, 'pageNumber': pageNumber, 'pageSize': pageSize});
   }
 
   /// Vai buscar um set por número exato, ex: "75894" ou "75894-1".
   /// Se não indicares a variante ("-1"), assume-se "-1" (o caso mais comum).
   Future<BricksetSet?> getBySetNumber(String setNumber) async {
     final numero = setNumber.contains('-') ? setNumber : '$setNumber-1';
-    final resultados = await _getSets({'setNumber': numero});
-    if (resultados.isEmpty) return null;
-    return resultados.first;
+    final resultado = await _getSets({'setNumber': numero});
+    if (resultado.sets.isEmpty) return null;
+    return resultado.sets.first;
   }
 
-  Future<List<BricksetSet>> _getSets(Map<String, dynamic> params) async {
+  Future<BricksetSearchResult> _getSets(Map<String, dynamic> params) async {
     if (apiKey.trim().isEmpty) {
       throw BricksetException(
           'Falta configurar a API key do Brickset (Definições > Brickset).');
@@ -176,9 +187,10 @@ class BricksetService {
     }
 
     final sets = (corpo['sets'] as List<dynamic>?) ?? const [];
-    return sets
-        .map((s) => BricksetSet.fromJson(s as Map<String, dynamic>))
-        .toList();
+    return BricksetSearchResult(
+      sets: sets.map((s) => BricksetSet.fromJson(s as Map<String, dynamic>)).toList(),
+      matches: corpo['matches'] as int? ?? sets.length,
+    );
   }
 
   /// Confirma se a API key é válida (usado no ecrã de definições, para dar

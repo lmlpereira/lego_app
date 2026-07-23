@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:lego_app/ui/features/login/login_screen.dart';
 
 // Importa o teu widget de animação do LEGO
 import '../../../main.dart';
