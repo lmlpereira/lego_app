@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
 import 'package:lego_app/ui/features/import/import_screen.dart';
 import 'package:lego_app/ui/features/lista/sets_list_screen.dart';
+import 'package:lego_app/ui/features/lista/sets_list_screen_new.dart';
 import 'package:lego_app/ui/features/settings/settings_screen.dart';
 import 'package:lego_app/ui/features/splash/splash_screen.dart';
 
@@ -100,7 +101,7 @@ class _HomeShellState extends State<HomeShell> {
   // construtor const (não sabemos ao certo se SetsListScreen já tem).
   static final _ecrans = [
     DashboardScreen(),
-    SetsListScreen(),
+    SetsListScreenNew(),
     SettingsScreen(),
   ];
 
@@ -132,9 +133,9 @@ class _BarraFlutuante extends StatelessWidget {
       label: 'Dashboard',
     ),
     _ItemNav(
-      icone: Icons.list_outlined,
-      iconeAtivo: Icons.list,
-      label: 'Sets',
+      icone: Icons.widgets_outlined,
+      iconeAtivo: Icons.widgets,
+      label: 'Meus Sets',
     ),
     _ItemNav(
       icone: Icons.settings_applications_outlined,

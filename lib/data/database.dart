@@ -43,6 +43,13 @@ class SetEntries extends Table {
 
   // Campos livres para expansão futura (ex: nº de peças, estado da caixa)
   TextColumn get notas => text().nullable()();
+
+  // URL da imagem do set (preenchido automaticamente a partir do Brickset,
+  // mas também pode ficar vazio se o set foi criado à mão).
+  TextColumn get imagemUrl => text().nullable()();
+
+  // Número de peças do set (preenchido automaticamente a partir do Brickset).
+  IntColumn get pecas => integer().nullable()();
 }
 
 // Nota: "desconto %" e "margem de venda" NÃO são colunas — são calculados
@@ -57,7 +64,22 @@ class AppDatabase extends _$AppDatabase {
   // Sobe este número sempre que alterares uma tabela; o Drift trata
   // das migrações a partir daqui (ver secção migration abaixo).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // v1 -> v2: adicionado imagemUrl (preenchido pela pesquisa ao Brickset).
+      if (from < 2) {
+        await m.addColumn(setEntries, setEntries.imagemUrl);
+      }
+      // v2 -> v3: adicionado pecas (número de peças, também vindo do Brickset).
+      if (from < 3) {
+        await m.addColumn(setEntries, setEntries.pecas);
+      }
+    },
+  );
 
   // ---------- Queries usadas pelo dashboard ----------
 

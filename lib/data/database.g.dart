@@ -274,6 +274,17 @@ class $SetEntriesTable extends SetEntries
   late final GeneratedColumn<String> notas = GeneratedColumn<String>(
       'notas', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imagemUrlMeta =
+      const VerificationMeta('imagemUrl');
+  @override
+  late final GeneratedColumn<String> imagemUrl = GeneratedColumn<String>(
+      'imagem_url', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pecasMeta = const VerificationMeta('pecas');
+  @override
+  late final GeneratedColumn<int> pecas = GeneratedColumn<int>(
+      'pecas', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -288,7 +299,9 @@ class $SetEntriesTable extends SetEntries
         vendido,
         valorVenda,
         dataVenda,
-        notas
+        notas,
+        imagemUrl,
+        pecas
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -369,6 +382,14 @@ class $SetEntriesTable extends SetEntries
       context.handle(
           _notasMeta, notas.isAcceptableOrUnknown(data['notas']!, _notasMeta));
     }
+    if (data.containsKey('imagem_url')) {
+      context.handle(_imagemUrlMeta,
+          imagemUrl.isAcceptableOrUnknown(data['imagem_url']!, _imagemUrlMeta));
+    }
+    if (data.containsKey('pecas')) {
+      context.handle(
+          _pecasMeta, pecas.isAcceptableOrUnknown(data['pecas']!, _pecasMeta));
+    }
     return context;
   }
 
@@ -404,6 +425,10 @@ class $SetEntriesTable extends SetEntries
           .read(DriftSqlType.dateTime, data['${effectivePrefix}data_venda']),
       notas: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notas']),
+      imagemUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}imagem_url']),
+      pecas: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pecas']),
     );
   }
 
@@ -427,6 +452,8 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
   final double? valorVenda;
   final DateTime? dataVenda;
   final String? notas;
+  final String? imagemUrl;
+  final int? pecas;
   const SetEntry(
       {required this.id,
       required this.numeroSet,
@@ -440,7 +467,9 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       required this.vendido,
       this.valorVenda,
       this.dataVenda,
-      this.notas});
+      this.notas,
+      this.imagemUrl,
+      this.pecas});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -467,6 +496,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
     if (!nullToAbsent || notas != null) {
       map['notas'] = Variable<String>(notas);
     }
+    if (!nullToAbsent || imagemUrl != null) {
+      map['imagem_url'] = Variable<String>(imagemUrl);
+    }
+    if (!nullToAbsent || pecas != null) {
+      map['pecas'] = Variable<int>(pecas);
+    }
     return map;
   }
 
@@ -492,6 +527,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           : Value(dataVenda),
       notas:
           notas == null && nullToAbsent ? const Value.absent() : Value(notas),
+      imagemUrl: imagemUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagemUrl),
+      pecas:
+          pecas == null && nullToAbsent ? const Value.absent() : Value(pecas),
     );
   }
 
@@ -512,6 +552,8 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       valorVenda: serializer.fromJson<double?>(json['valorVenda']),
       dataVenda: serializer.fromJson<DateTime?>(json['dataVenda']),
       notas: serializer.fromJson<String?>(json['notas']),
+      imagemUrl: serializer.fromJson<String?>(json['imagemUrl']),
+      pecas: serializer.fromJson<int?>(json['pecas']),
     );
   }
   @override
@@ -531,6 +573,8 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       'valorVenda': serializer.toJson<double?>(valorVenda),
       'dataVenda': serializer.toJson<DateTime?>(dataVenda),
       'notas': serializer.toJson<String?>(notas),
+      'imagemUrl': serializer.toJson<String?>(imagemUrl),
+      'pecas': serializer.toJson<int?>(pecas),
     };
   }
 
@@ -547,7 +591,9 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           bool? vendido,
           Value<double?> valorVenda = const Value.absent(),
           Value<DateTime?> dataVenda = const Value.absent(),
-          Value<String?> notas = const Value.absent()}) =>
+          Value<String?> notas = const Value.absent(),
+          Value<String?> imagemUrl = const Value.absent(),
+          Value<int?> pecas = const Value.absent()}) =>
       SetEntry(
         id: id ?? this.id,
         numeroSet: numeroSet ?? this.numeroSet,
@@ -562,6 +608,8 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
         valorVenda: valorVenda.present ? valorVenda.value : this.valorVenda,
         dataVenda: dataVenda.present ? dataVenda.value : this.dataVenda,
         notas: notas.present ? notas.value : this.notas,
+        imagemUrl: imagemUrl.present ? imagemUrl.value : this.imagemUrl,
+        pecas: pecas.present ? pecas.value : this.pecas,
       );
   SetEntry copyWithCompanion(SetEntriesCompanion data) {
     return SetEntry(
@@ -583,6 +631,8 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           data.valorVenda.present ? data.valorVenda.value : this.valorVenda,
       dataVenda: data.dataVenda.present ? data.dataVenda.value : this.dataVenda,
       notas: data.notas.present ? data.notas.value : this.notas,
+      imagemUrl: data.imagemUrl.present ? data.imagemUrl.value : this.imagemUrl,
+      pecas: data.pecas.present ? data.pecas.value : this.pecas,
     );
   }
 
@@ -601,7 +651,9 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           ..write('vendido: $vendido, ')
           ..write('valorVenda: $valorVenda, ')
           ..write('dataVenda: $dataVenda, ')
-          ..write('notas: $notas')
+          ..write('notas: $notas, ')
+          ..write('imagemUrl: $imagemUrl, ')
+          ..write('pecas: $pecas')
           ..write(')'))
         .toString();
   }
@@ -620,7 +672,9 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       vendido,
       valorVenda,
       dataVenda,
-      notas);
+      notas,
+      imagemUrl,
+      pecas);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -637,7 +691,9 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           other.vendido == this.vendido &&
           other.valorVenda == this.valorVenda &&
           other.dataVenda == this.dataVenda &&
-          other.notas == this.notas);
+          other.notas == this.notas &&
+          other.imagemUrl == this.imagemUrl &&
+          other.pecas == this.pecas);
 }
 
 class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
@@ -654,6 +710,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
   final Value<double?> valorVenda;
   final Value<DateTime?> dataVenda;
   final Value<String?> notas;
+  final Value<String?> imagemUrl;
+  final Value<int?> pecas;
   const SetEntriesCompanion({
     this.id = const Value.absent(),
     this.numeroSet = const Value.absent(),
@@ -668,6 +726,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     this.valorVenda = const Value.absent(),
     this.dataVenda = const Value.absent(),
     this.notas = const Value.absent(),
+    this.imagemUrl = const Value.absent(),
+    this.pecas = const Value.absent(),
   });
   SetEntriesCompanion.insert({
     this.id = const Value.absent(),
@@ -683,6 +743,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     this.valorVenda = const Value.absent(),
     this.dataVenda = const Value.absent(),
     this.notas = const Value.absent(),
+    this.imagemUrl = const Value.absent(),
+    this.pecas = const Value.absent(),
   })  : numeroSet = Value(numeroSet),
         temaId = Value(temaId),
         descricao = Value(descricao),
@@ -702,6 +764,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     Expression<double>? valorVenda,
     Expression<DateTime>? dataVenda,
     Expression<String>? notas,
+    Expression<String>? imagemUrl,
+    Expression<int>? pecas,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -717,6 +781,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       if (valorVenda != null) 'valor_venda': valorVenda,
       if (dataVenda != null) 'data_venda': dataVenda,
       if (notas != null) 'notas': notas,
+      if (imagemUrl != null) 'imagem_url': imagemUrl,
+      if (pecas != null) 'pecas': pecas,
     });
   }
 
@@ -733,7 +799,9 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       Value<bool>? vendido,
       Value<double?>? valorVenda,
       Value<DateTime?>? dataVenda,
-      Value<String?>? notas}) {
+      Value<String?>? notas,
+      Value<String?>? imagemUrl,
+      Value<int?>? pecas}) {
     return SetEntriesCompanion(
       id: id ?? this.id,
       numeroSet: numeroSet ?? this.numeroSet,
@@ -748,6 +816,8 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       valorVenda: valorVenda ?? this.valorVenda,
       dataVenda: dataVenda ?? this.dataVenda,
       notas: notas ?? this.notas,
+      imagemUrl: imagemUrl ?? this.imagemUrl,
+      pecas: pecas ?? this.pecas,
     );
   }
 
@@ -793,6 +863,12 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     if (notas.present) {
       map['notas'] = Variable<String>(notas.value);
     }
+    if (imagemUrl.present) {
+      map['imagem_url'] = Variable<String>(imagemUrl.value);
+    }
+    if (pecas.present) {
+      map['pecas'] = Variable<int>(pecas.value);
+    }
     return map;
   }
 
@@ -811,7 +887,9 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
           ..write('vendido: $vendido, ')
           ..write('valorVenda: $valorVenda, ')
           ..write('dataVenda: $dataVenda, ')
-          ..write('notas: $notas')
+          ..write('notas: $notas, ')
+          ..write('imagemUrl: $imagemUrl, ')
+          ..write('pecas: $pecas')
           ..write(')'))
         .toString();
   }
@@ -1040,6 +1118,8 @@ typedef $$SetEntriesTableCreateCompanionBuilder = SetEntriesCompanion Function({
   Value<double?> valorVenda,
   Value<DateTime?> dataVenda,
   Value<String?> notas,
+  Value<String?> imagemUrl,
+  Value<int?> pecas,
 });
 typedef $$SetEntriesTableUpdateCompanionBuilder = SetEntriesCompanion Function({
   Value<int> id,
@@ -1055,6 +1135,8 @@ typedef $$SetEntriesTableUpdateCompanionBuilder = SetEntriesCompanion Function({
   Value<double?> valorVenda,
   Value<DateTime?> dataVenda,
   Value<String?> notas,
+  Value<String?> imagemUrl,
+  Value<int?> pecas,
 });
 
 final class $$SetEntriesTableReferences
@@ -1120,6 +1202,12 @@ class $$SetEntriesTableFilterComposer
 
   ColumnFilters<String> get notas => $composableBuilder(
       column: $table.notas, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagemUrl => $composableBuilder(
+      column: $table.imagemUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pecas => $composableBuilder(
+      column: $table.pecas, builder: (column) => ColumnFilters(column));
 
   $$TemasTableFilterComposer get temaId {
     final $$TemasTableFilterComposer composer = $composerBuilder(
@@ -1188,6 +1276,12 @@ class $$SetEntriesTableOrderingComposer
   ColumnOrderings<String> get notas => $composableBuilder(
       column: $table.notas, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get imagemUrl => $composableBuilder(
+      column: $table.imagemUrl, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get pecas => $composableBuilder(
+      column: $table.pecas, builder: (column) => ColumnOrderings(column));
+
   $$TemasTableOrderingComposer get temaId {
     final $$TemasTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -1254,6 +1348,12 @@ class $$SetEntriesTableAnnotationComposer
   GeneratedColumn<String> get notas =>
       $composableBuilder(column: $table.notas, builder: (column) => column);
 
+  GeneratedColumn<String> get imagemUrl =>
+      $composableBuilder(column: $table.imagemUrl, builder: (column) => column);
+
+  GeneratedColumn<int> get pecas =>
+      $composableBuilder(column: $table.pecas, builder: (column) => column);
+
   $$TemasTableAnnotationComposer get temaId {
     final $$TemasTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -1311,6 +1411,8 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             Value<double?> valorVenda = const Value.absent(),
             Value<DateTime?> dataVenda = const Value.absent(),
             Value<String?> notas = const Value.absent(),
+            Value<String?> imagemUrl = const Value.absent(),
+            Value<int?> pecas = const Value.absent(),
           }) =>
               SetEntriesCompanion(
             id: id,
@@ -1326,6 +1428,8 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             valorVenda: valorVenda,
             dataVenda: dataVenda,
             notas: notas,
+            imagemUrl: imagemUrl,
+            pecas: pecas,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1341,6 +1445,8 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             Value<double?> valorVenda = const Value.absent(),
             Value<DateTime?> dataVenda = const Value.absent(),
             Value<String?> notas = const Value.absent(),
+            Value<String?> imagemUrl = const Value.absent(),
+            Value<int?> pecas = const Value.absent(),
           }) =>
               SetEntriesCompanion.insert(
             id: id,
@@ -1356,6 +1462,8 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             valorVenda: valorVenda,
             dataVenda: dataVenda,
             notas: notas,
+            imagemUrl: imagemUrl,
+            pecas: pecas,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

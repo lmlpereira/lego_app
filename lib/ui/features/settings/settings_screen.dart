@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
 import '../import/import_screen.dart';
+import 'brickset_api_settings.dart';
+
 
 
 class SettingsScreen extends StatefulWidget {
@@ -32,9 +33,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -65,6 +70,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const ImportScreen(),
+                ),
+              );
+            },
+          ),
+
+          const Divider(),
+
+          // --- SECÇÃO: CONTA ---
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Configurações da API',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.api_outlined),
+            title: const Text('API BrickSet'),
+            subtitle: const Text('Gerir API'),
+
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const BricksetApiSettingsScreen(),
                 ),
               );
             },

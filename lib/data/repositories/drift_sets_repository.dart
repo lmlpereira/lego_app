@@ -193,6 +193,8 @@ class DriftSetsRepository implements SetsRepository {
       valorVenda: row.valorVenda,
       dataVenda: row.dataVenda,
       notas: row.notas,
+      imagemUrl: row.imagemUrl,
+      pecas: row.pecas,
     );
   }
 
@@ -210,6 +212,8 @@ class DriftSetsRepository implements SetsRepository {
       valorVenda: Value(set.valorVenda),
       dataVenda: Value(set.dataVenda),
       notas: Value(set.notas),
+      imagemUrl: Value(set.imagemUrl),
+      pecas: Value(set.pecas),
     );
   }
 }

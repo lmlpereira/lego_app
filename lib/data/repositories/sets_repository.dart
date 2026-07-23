@@ -16,6 +16,8 @@ class LegoSet {
   final double? valorVenda;
   final DateTime? dataVenda;
   final String? notas;
+  final String? imagemUrl; // preenchido automaticamente a partir do Brickset
+  final int? pecas; // número de peças, também vindo do Brickset
 
   const LegoSet({
     this.id,
@@ -31,6 +33,8 @@ class LegoSet {
     this.valorVenda,
     this.dataVenda,
     this.notas,
+    this.imagemUrl,
+    this.pecas,
   });
 
   /// Desconto % sobre o valor de tabela. Calculado, nunca guardado.
@@ -61,6 +65,8 @@ class LegoSet {
     valorVenda: valorVenda,
     dataVenda: dataVenda,
     notas: notas,
+    imagemUrl: imagemUrl,
+    pecas: pecas,
   );
 }
 

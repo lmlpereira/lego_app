@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lego_app/ui/features/lista/edit_set_screen_new.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
-import 'edit_set_screen.dart';
+import 'edit_set_screen_new.dart';
 
-class SetsListScreen extends ConsumerStatefulWidget {
-  const SetsListScreen({super.key});
+class SetsListScreenNew extends ConsumerStatefulWidget {
+  const SetsListScreenNew({super.key});
 
   @override
-  ConsumerState<SetsListScreen> createState() => _SetsListScreenState();
+  ConsumerState<SetsListScreenNew> createState() => _SetsListScreenStateNew();
 }
 
-class _SetsListScreenState extends ConsumerState<SetsListScreen> {
+class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
   final _pesquisaCtrl = TextEditingController();
   String _pesquisa = '';
   // null = sem filtro de tema (mostra todos)
@@ -139,17 +138,30 @@ class _SetsListScreenState extends ConsumerState<SetsListScreen> {
                 confirmDismiss: (_) => _confirmarApagar(context, set),
                 onDismissed: (_) => ref.read(setsRepositoryProvider).delete(set.id!),
                 child: ListTile(
-                  leading: CircleAvatar(child: Text(set.tema.characters.first)),
+                  leading: set.imagemUrl != null
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      set.imagemUrl!,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          CircleAvatar(child: Text(set.tema.characters.first)),
+                    ),
+                  )
+                      : CircleAvatar(child: Text(set.tema.characters.first)),
                   title: Text('${set.numeroSet} — ${set.descricao}'),
                   subtitle: Text(
                     '${set.tema} · ${euro.format(set.valorComprado)}'
+                        '${set.pecas != null ? ' · ${set.pecas} peças' : ''}'
                         '${set.vendido ? ' · vendido' : ''}',
                   ),
                   trailing: set.vendido
                       ? Icon(Icons.sell, color: Theme.of(context).colorScheme.primary)
                       : null,
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => EditSetScreen(set: set)),
+                    MaterialPageRoute(builder: (_) => EditSetScreenNew(set: set)),
                   ),
                 ),
               );
@@ -159,7 +171,7 @@ class _SetsListScreenState extends ConsumerState<SetsListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const EditSetScreen()),
+          MaterialPageRoute(builder: (_) => const EditSetScreenNew()),
         ),
         child: const Icon(Icons.add),
       ),

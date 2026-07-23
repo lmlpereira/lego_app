@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lego_app/ui/features/lista/edit_set_screen_new.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
@@ -129,7 +130,7 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
                     return _LinhaSet(
                       set: set,
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => EditSetScreen(set: set)),
+                        MaterialPageRoute(builder: (_) => EditSetScreenNew(set: set)),
                       ),
                     );
                   },
