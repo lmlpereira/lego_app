@@ -216,4 +216,10 @@ class DriftSetsRepository implements SetsRepository {
       pecas: Value(set.pecas),
     );
   }
+
+  @override
+  Stream<double> watchTotalPecas() => db.watchTotalPecas();
+
+  @override
+  Stream<double> watchTotalSets() => db.watchTotalSets();
 }

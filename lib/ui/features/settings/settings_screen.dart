@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/login/login_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../../../data/auth_providers.dart';
 import '../import/import_screen.dart';
+import '../perfil/profile_screen.dart';
 import 'brickset_api_settings.dart';
 
 
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _appVersion = 'A carregar...';
   String _buildNumber = '';
 
@@ -36,6 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
 
+
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,6 +54,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const SizedBox(height: 12),
+
+          // --- SECÇÃO: CONTA ---
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Conta',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_outline),
+            title: const Text('Perfil'),
+            subtitle: Text(
+              ref.watch(utilizadorAtualProvider).value?.username ??
+                  ref.watch(utilizadorAtualProvider).value?.email ??
+                  'Sem sessão',
+            ),
+            onTap: () {
+              // 1. Obtém o estado atual do utilizador
+              final user = ref.read(utilizadorAtualProvider).value;
+
+              // 2. Decide para qual ecrã navegar
+              final Widget targetScreen = (user?.uid != '')
+                  ? const ProfileScreen() // Subtitui pelo nome do teu ecrã de perfil
+                  : const LegoLoginScreen();
+
+              // 3. Abre o ecrã correspondente
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => targetScreen,
+                ),
+              );
+            },
+          ),
+
+          /*ListTile(
+            leading: Icon(Icons.logout, color: theme.colorScheme.error),
+            title: Text('Terminar sessão', style: TextStyle(color: theme.colorScheme.error)),
+            onTap: () => _confirmarTerminarSessao(context, ref),
+          ),*/
+
+          const Divider(),
 
           // --- SECÇÃO: DADOS ---
           const Padding(
@@ -78,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
-          // --- SECÇÃO: CONTA ---
+          // --- SECÇÃO: API ---
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
@@ -106,48 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
-          // --- SECÇÃO: CONTA ---
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Conta',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.person_outline),
-            title: const Text('Perfil'),
-            subtitle: const Text('Gerir preferências do utilizador'),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.shade700),
-              ),
-              child: Text(
-                'Em desenvolvimento',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.amber.shade900,
-                ),
-              ),
-            ),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const LegoLoginScreen(),
-                ),
-              );
-            },
-          ),
 
-          const Divider(),
 
           // --- SECÇÃO: SOBRE A APP ---
           const Padding(

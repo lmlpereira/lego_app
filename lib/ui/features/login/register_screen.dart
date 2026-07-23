@@ -5,14 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../utils/lego_block_style.dart';
 import 'login_screen.dart';
 
-class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+class RegisterLegoScreen extends ConsumerStatefulWidget {
+  const RegisterLegoScreen({super.key});
 
   @override
-  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterLegoScreen> createState() => _RegisterLegoScreenState();
 }
 
-class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
   final _formKey = GlobalKey<FormState>();
 
   // Controladores para os 5 campos solicitados
@@ -59,9 +59,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: Stack(
         children: [
           // 1. Fundo de pinos LEGO (Ocupa a tela inteira)
-          const Positioned.fill(
+          /*const Positioned.fill(
             child: LegoFloorBackground(),
-          ),
+          ),*/
 
           // 2. Conteúdo em Scroll para telemóveis
           SafeArea(

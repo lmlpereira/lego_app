@@ -99,6 +99,11 @@ abstract class SetsRepository {
   Future<double> totalComprasEntre(DateTime inicio, DateTime fimExclusivo);
   Future<double> totalVendasEntre(DateTime inicio, DateTime fimExclusivo);
 
+  //-- Profile
+  Stream<double> watchTotalSets();
+  Stream<double> watchTotalPecas();
+
+
   // ---- Import / export ----
   /// Insere em bloco (usado pelo import do xlsx). Uma linha que já exista
   /// (mesmo número de set + mesma data de compra) não é duplicada — todos

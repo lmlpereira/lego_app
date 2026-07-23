@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lego_app/ui/features/login/register_screen.dart';
 
+import '../../../data/auth_providers.dart';
+import '../../../data/repositories/auth_repository.dart';
+import '../../../main.dart';
 import '../utils/lego_block_style.dart';
 
 class LegoLoginScreen extends ConsumerStatefulWidget {
@@ -18,6 +21,8 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
   final _passwordCtrl = TextEditingController();
 
   bool _loading = false;
+  bool _aEntrarGoogle = false;
+  String? _erro;
 
   @override
   void dispose() {
@@ -29,78 +34,117 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
   Future<void> _submeterLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
 
-    // TODO: Adicionar aqui a lógica de autenticação (ex: ref.read(authProvider)...)
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      await ref.read(authRepositoryProvider).entrarComEmail(
+        email: _emailCtrl.text,
+        password: _passwordCtrl.text,
+      );
 
-    if (mounted) {
-      setState(() => _loading = false);
+      if (mounted) {
+        _navegarParaHome();
+      }
+
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _erro = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _entrarComGoogle() async {
+    setState(() {
+      _aEntrarGoogle = true;
+      _erro = null;
+    });
+
+    try {
+      // Guarda o resultado do login
+      final resultado = await ref.read(authRepositoryProvider).entrarComGoogle();
+
+      // 🛑 SÓ NAVEGA SE O RESULTADO NÃO FOR NULO (ou seja, se realmente selecionou conta)
+      if (resultado != null && mounted) {
+        _navegarParaHome();
+      }
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _erro = e.message);
+    } catch (e) {
+      if (mounted) setState(() => _erro = 'Erro ao entrar com o Google.');
+    } finally {
+      if (mounted) setState(() => _aEntrarGoogle = false);
+    }
+  }
+
+  void _navegarParaHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const HomeShell()),
+          (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final tecladoAberto = MediaQuery.of(context).viewInsets.bottom > 0;
+
+
     return Scaffold(
       backgroundColor: LegoColors.blue,
+      //resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // 1. Fundo de pinos LEGO (Preenche sempre o ecrã todo)
-          const Positioned.fill(
-            child: LegoFloorBackground(),
-          ),
-
-          // 2. Conteúdo com CustomScrollView para preencher os 100% da altura
           SafeArea(
             child: CustomScrollView(
               slivers: [
                 SliverFillRemaining(
-                  hasScrollBody: false, // Garante que o conteúdo estica para ocupar a tela inteira
+                  hasScrollBody: false,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribui o conteúdo de topo a fundo
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Bloco Superior (Título + Formulário)
                         Column(
                           children: [
                             const SizedBox(height: 10),
                             const LegoTitleBlock(text: 'LOGIN'),
                             const SizedBox(height: 30),
-                            const _LegoLoginFormPanel(), // O teu formulário
+
+                            // Mensagem de Erro
+                            if (_erro != null) ...[
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: LegoColors.red,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _erro!,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.varelaRound(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+
+                            // Formulário com referências aos handlers e controladores
+                            _LegoLoginFormPanel(
+                              formKey: _formKey,
+                              emailCtrl: _emailCtrl,
+                              passwordCtrl: _passwordCtrl,
+                              isLoading: _loading,
+                              isGoogleLoading: _aEntrarGoogle,
+                              onLogin: _submeterLogin,
+                              onGoogleLogin: _entrarComGoogle,
+                            ),
                           ],
                         ),
-
-                        // Bloco Inferior (Links + Espaço para o Boneco)
-                        /*Column(
-                          children: [
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'Esqueceu-se da Palavra-Passe?',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.varelaRound(
-                                  color: LegoColors.yellow,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'Ainda não é um LEGO Insider? Registar-se!',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.varelaRound(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            // Espaço reserva no fundo para o boneco não tapar os botões
-                            const SizedBox(height: 130),
-                          ],
-                        ),*/
                       ],
                     ),
                   ),
@@ -109,7 +153,8 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
             ),
           ),
 
-          // 3. Boneco LEGO afixado no fundo do ecrã
+          // Boneco LEGO no fundo
+          if (!tecladoAberto)
           Positioned(
             left: 0,
             right: 0,
@@ -127,21 +172,26 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
       ),
     );
   }
-
-  Widget _buildFieldLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.varelaRound(
-        color: LegoColors.blueDark,
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-      ),
-    );
-  }
 }
 
 class _LegoLoginFormPanel extends StatelessWidget {
-  const _LegoLoginFormPanel();
+  final GlobalKey<FormState> formKey;
+  final TextEditingController emailCtrl;
+  final TextEditingController passwordCtrl;
+  final bool isLoading;
+  final bool isGoogleLoading;
+  final VoidCallback onLogin;
+  final VoidCallback onGoogleLogin;
+
+  const _LegoLoginFormPanel({
+    required this.formKey,
+    required this.emailCtrl,
+    required this.passwordCtrl,
+    required this.isLoading,
+    required this.isGoogleLoading,
+    required this.onLogin,
+    required this.onGoogleLogin,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -155,53 +205,66 @@ class _LegoLoginFormPanel extends StatelessWidget {
           BoxShadow(color: Colors.black26, offset: Offset(4, 4), blurRadius: 4),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Campo Utilizador
-          const _LegoInputFieldMobile(
-            label: 'NOME DE UTILIZADOR / EMAIL',
-            placeholder: 'Insira o seu nome ou email',
-            icon: Icons.person_outline,
-          ),
-          const SizedBox(height: 16),
+      child: Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Campo Utilizador/Email
+            _LegoInputFieldMobile(
+              controller: emailCtrl,
+              label: 'EMAIL',
+              placeholder: 'Insira o seu email',
+              icon: Icons.person_outline,
+              validator: (v) => v == null || v.trim().isEmpty ? 'Insira o email' : null,
+            ),
+            const SizedBox(height: 16),
 
-          // Campo Senha
-          const _LegoInputFieldMobile(
-            label: 'PALAVRA PASSE',
-            placeholder: '••••••••',
-            icon: Icons.key_outlined,
-            isPassword: true,
-          ),
-          const SizedBox(height: 24),
+            // Campo Senha
+            _LegoInputFieldMobile(
+              controller: passwordCtrl,
+              label: 'PALAVRA PASSE',
+              placeholder: '••••••••',
+              icon: Icons.key_outlined,
+              isPassword: true,
+              validator: (v) => v == null || v.isEmpty ? 'Insira a palavra-passe' : null,
+            ),
+            const SizedBox(height: 24),
 
-          // Botão Entrar
-          const _LegoSignInButtonMobile(),
-          const SizedBox(height: 24),
+            // Botão Entrar
+            _LegoSignInButtonMobile(
+              isLoading: isLoading,
+              onPressed: onLogin,
+            ),
+            const SizedBox(height: 16),
 
-          // Botão Google
-          const _LegoGoogleButtonMobile(),
-          const SizedBox(height: 24),
-
-          // Botão Registar
-          const _LegoRegisterButtonMobile(),
-        ],
+            // Botão Google
+            _LegoGoogleButtonMobile(
+              isLoading: isGoogleLoading,
+              onPressed: onGoogleLogin,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _LegoInputFieldMobile extends StatelessWidget {
+  final TextEditingController controller;
   final String label;
   final String placeholder;
   final IconData icon;
   final bool isPassword;
+  final String? Function(String?)? validator;
 
   const _LegoInputFieldMobile({
+    required this.controller,
     required this.label,
     required this.placeholder,
     required this.icon,
     this.isPassword = false,
+    this.validator,
   });
 
   @override
@@ -214,22 +277,24 @@ class _LegoInputFieldMobile extends StatelessWidget {
           style: GoogleFonts.varelaRound(
             color: LegoColors.blueDark,
             fontWeight: FontWeight.bold,
-            fontSize: 12, // Reduzido para telemóvel
+            fontSize: 12,
           ),
         ),
         const SizedBox(height: 6),
         LegoBlockDecorator(
           color: LegoColors.lightGrey,
           borderRadius: 6,
-          child: TextField(
+          child: TextFormField(
+            controller: controller,
             obscureText: isPassword,
+            validator: validator,
             style: GoogleFonts.varelaRound(fontSize: 14),
             decoration: InputDecoration(
               hintText: placeholder,
               hintStyle: GoogleFonts.varelaRound(color: Colors.grey, fontSize: 14),
               prefixIcon: Icon(icon, color: LegoColors.yellow, size: 20),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             ),
           ),
         ),
@@ -239,87 +304,51 @@ class _LegoInputFieldMobile extends StatelessWidget {
 }
 
 class _LegoSignInButtonMobile extends StatelessWidget {
-  const _LegoSignInButtonMobile();
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _LegoSignInButtonMobile({
+    required this.isLoading,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LegoBlockDecorator(
-      color: LegoColors.red,
+      color: LegoColors.green,
       borderRadius: 8,
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("A entrar...")));
-        },
+        onTap: isLoading ? null : onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo LEGO (precisa estar nos assets)
-              Image.asset(
-                'assets/lego.png',
-                height: 24,
-                errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'ENTRAR!',
-                style: GoogleFonts.varelaRound(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 1.0,
+              if (isLoading)
+                const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
+              else ...[
+                Image.asset(
+                  'assets/lego.png',
+                  height: 24,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LegoRegisterButtonMobile extends StatelessWidget {
-  const _LegoRegisterButtonMobile();
-
-  @override
-  Widget build(BuildContext context) {
-    return LegoBlockDecorator(
-      color: LegoColors.red,
-      borderRadius: 8,
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const RegisterScreen(), // <-- Substitui pelo teu ecrã inicial
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo LEGO (precisa estar nos assets)
-              Image.asset(
-                'assets/lego.png',
-                height: 24,
-                errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Registar!',
-                style: GoogleFonts.varelaRound(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 1.0,
+                const SizedBox(width: 12),
+                Text(
+                  'ENTRAR!',
+                  style: GoogleFonts.varelaRound(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    letterSpacing: 1.0,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+              ],
             ],
           ),
         ),
@@ -329,7 +358,13 @@ class _LegoRegisterButtonMobile extends StatelessWidget {
 }
 
 class _LegoGoogleButtonMobile extends StatelessWidget {
-  const _LegoGoogleButtonMobile();
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _LegoGoogleButtonMobile({
+    required this.isLoading,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -337,32 +372,34 @@ class _LegoGoogleButtonMobile extends StatelessWidget {
       color: LegoColors.mediumGrey,
       borderRadius: 8,
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("A entrar...")));
-        },
+        onTap: isLoading ? null : onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo LEGO (precisa estar nos assets)
-              Image.asset(
-                'assets/google.png',
-                height: 32,
-                errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
-              ),
-              const SizedBox(width: 12),
-              /*Text(
-                'Entrar com Google!',
-                style: GoogleFonts.varelaRound(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 1.0,
+              if (isLoading)
+                const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
+              else ...[
+                Image.asset(
+                  'assets/google.png',
+                  height: 24,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.send, color: Colors.white, size: 20),*/
+                const SizedBox(width: 12),
+                Text(
+                  'Entrar com Google',
+                  style: GoogleFonts.varelaRound(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -371,35 +408,6 @@ class _LegoGoogleButtonMobile extends StatelessWidget {
   }
 }
 
-class LegoFloorBackground extends StatelessWidget {
-  const LegoFloorBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = (constraints.maxWidth / 25.0).floor();
-        return GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-          ),
-          padding: EdgeInsets.zero,
-          itemBuilder: (context, index) => Container(
-            decoration: const BoxDecoration(
-              color: LegoColors.mediumGrey,
-              shape: BoxShape.circle,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Título dinâmico onde cada letra fica dentro de um bloco
 class LegoTitleBlock extends StatelessWidget {
   final String text;
   const LegoTitleBlock({super.key, required this.text});

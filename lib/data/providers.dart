@@ -67,3 +67,13 @@ final todosOsSetsProvider = StreamProvider<List<LegoSet>>((ref) {
 final temasProvider = StreamProvider<List<String>>((ref) {
   return ref.watch(setsRepositoryProvider).watchTemas();
 });
+
+final totalSetsProvider = StreamProvider<double>((ref) {
+  final repository = ref.watch(setsRepositoryProvider);
+  return repository.watchTotalSets();
+});
+
+final totalPecasProvider = StreamProvider<double>((ref) {
+  final repository = ref.watch(setsRepositoryProvider);
+  return repository.watchTotalPecas();
+});

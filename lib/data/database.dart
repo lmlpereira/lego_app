@@ -242,6 +242,43 @@ class AppDatabase extends _$AppDatabase {
     ))
         .toList());
   }
+
+  //Totais Perfil
+
+  Stream<double> watchTotalPecas() {
+    final query = selectOnly(setEntries)
+      ..addColumns([setEntries.pecas, setEntries.quantidade])
+      ..where(setEntries.vendido.equals(false));;
+
+    return query.watch().map((rows) => rows.fold<double>(
+      0.0,
+          (acc, r) {
+        final pecas = r.read(setEntries.pecas) ?? 0;
+        final qtd = r.read(setEntries.quantidade) ?? 1;
+        return acc + (pecas * qtd);
+      },
+    ));
+  }
+
+  /// Total de unidades/sets na coleção (soma de quantidade).
+  Stream<double> watchTotalSets() {
+    final query = selectOnly(setEntries)
+      ..addColumns([setEntries.quantidade])
+      ..where(setEntries.vendido.equals(false));;
+
+    return query.watch().map((rows) => rows.fold<double>(
+      0.0,
+          (acc, r) {
+        final qtd = r.read(setEntries.quantidade) ?? 1;
+        return acc + qtd.toDouble();
+      },
+    ));
+  }
+
+
+
+
+
 }
 
 /// Resultado auxiliar para gráficos "total por ano".

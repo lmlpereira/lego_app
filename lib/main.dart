@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
@@ -5,9 +6,17 @@ import 'package:lego_app/ui/features/lista/sets_list_screen_new.dart';
 import 'package:lego_app/ui/features/settings/settings_screen.dart';
 import 'package:lego_app/ui/features/splash/splash_screen.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+void main() async {
+  // WidgetsFlutterBinding tem de ser inicializado antes de qualquer
+  // chamada assíncrona antes do runApp (aqui, o Firebase.initializeApp).
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   // ProviderScope tem de envolver a app para os providers do Riverpod
-  // (setsRepositoryProvider, totalComprasProvider, etc.) funcionarem.
+  // (setsRepositoryProvider, totalComprasProvider, utilizadorAtualProvider,
+  // etc.) funcionarem.
   runApp(const ProviderScope(child: LegoApp()));
 }
 
