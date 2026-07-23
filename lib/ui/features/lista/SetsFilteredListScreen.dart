@@ -5,7 +5,6 @@ import 'package:lego_app/ui/features/lista/edit_set_screen_new.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
-import 'edit_set_screen.dart';
 
 final _moeda = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
 final _data = DateFormat('dd/MM/yyyy');

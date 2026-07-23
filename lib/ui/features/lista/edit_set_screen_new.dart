@@ -382,7 +382,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
   }
 
   Future<void> _pesquisarBrickset() async {
-    final service = ref.read(bricksetServiceProvider);
+    final service = await obterBricksetServiceQuandoPronto(ref);
     if (service == null) {
       final configurar = await showDialog<bool>(
         context: context,
@@ -425,8 +425,14 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
         }
       } finally {
+        // Este service é criado ad-hoc (não vem de um provider gerido
+        // pelo Riverpod), por isso temos de o fechar nós, senão a ligação
+        // http fica aberta.
+        service.dispose();
         if (mounted) setState(() => _aPesquisarBrickset = false);
       }
+    } else {
+      service.dispose();
     }
 
     if (!mounted) return;

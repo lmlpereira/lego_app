@@ -46,14 +46,17 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   }
 
   Future<void> _pesquisar() async {
-    final service = ref.read(bricksetServiceProvider);
+    final service = await obterBricksetServiceQuandoPronto(ref);
     if (service == null) {
       setState(() => _erro =
       'Falta configurar a API key do Brickset (ícone de definições no ecrã anterior).');
       return;
     }
     final query = _queryCtrl.text.trim();
-    if (query.isEmpty) return;
+    if (query.isEmpty) {
+      service.dispose();
+      return;
+    }
 
     setState(() {
       _aPesquisar = true;
@@ -68,6 +71,9 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
       if (!mounted) return;
       setState(() => _erro = e.message);
     } finally {
+      // Criado ad-hoc (não vem de um provider gerido pelo Riverpod), por
+      // isso temos de o fechar nós, senão a ligação http fica aberta.
+      service.dispose();
       if (mounted) setState(() => _aPesquisar = false);
     }
   }

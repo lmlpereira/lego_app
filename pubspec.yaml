@@ -1,7 +1,7 @@
 name: lego_app
 description: App de gestão de coleção Lego (stock, compras, vendas, dashboard).
 publish_to: 'none'
-version: 1.0.0
+version: 2.0.0+25
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   shared_preferences: ^2.5.5
+  firebase_core: ^4.12.1
 
 dev_dependencies:
   flutter_test:
