@@ -383,7 +383,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   /// Widget do Dropdown para Seleção de Sexo
   Widget _buildDropdownSexo() {
     return DropdownButtonFormField<String>(
-      value: _sexoSelecionado,
+      initialValue: _sexoSelecionado,
       icon: const Icon(Icons.arrow_drop_down, color: LegoColors.blueDark),
       decoration: InputDecoration(
         labelText: 'Sexo',

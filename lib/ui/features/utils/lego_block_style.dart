@@ -32,13 +32,13 @@ class LegoBlockDecorator extends StatelessWidget {
         boxShadow: [
           // Sombra escura no fundo/direita (Efeito 3D da base do bloco)
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             offset: const Offset(2, 4), // Deslocamento para baixo e para a direita
             blurRadius: 0, // 0 para manter o aspeto rígido de plástico LEGO
           ),
           // Brilho leve no topo/esquerda
           BoxShadow(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withValues(alpha: 0.4),
             offset: const Offset(-1, -1),
             blurRadius: 0,
           ),
