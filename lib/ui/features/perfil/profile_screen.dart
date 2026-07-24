@@ -8,6 +8,7 @@ import '../../../data/providers.dart';
 import '../login/login_screen.dart';
 import '../utils/lego_block_style.dart';
 import '../utils/lego_brick_loading.dart';
+import '../utils/lego_insiders_card.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -72,7 +73,7 @@ class ProfileScreen extends ConsumerWidget {
                         const SizedBox(height: 12),
 
                         // Card do Avatar e Identificação Dinâmico
-                        _buildUserCard(ref),
+                        _buildUserCard(context,ref),
 
                         const SizedBox(height: 16),
 
@@ -156,7 +157,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Card Principal com Avatar e Dados do Utilizador (Dinamizado via Riverpod)
-  Widget _buildUserCard(WidgetRef ref) {
+  Widget _buildUserCard(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(utilizadorAtualProvider);
 
     return Container(
@@ -171,8 +172,11 @@ class ProfileScreen extends ConsumerWidget {
       ),
       child: userAsync.when(
         data: (user) {
-          final username = user?.username ?? 'Mestre Construtor';
+          final username = user?.username ?? 'Sem username';
           final email = user?.email ?? 'Sem e-mail';
+          // Obtém o ID Insiders (garante que no teu modelo de dados existe o campo insidersId)
+          final insidersId = user?.idLegoInsiders;
+          final temInsidersId = insidersId != null && insidersId.trim().isNotEmpty;
 
           return Row(
             children: [
@@ -216,15 +220,39 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      username,
-                      style: GoogleFonts.varelaRound(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: LegoColors.blueDark,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            username,
+                            style: GoogleFonts.varelaRound(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: LegoColors.blueDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        // 🔹 Ícone do Cartão Insiders (só aparece se o ID estiver preenchido)
+                        if (temInsidersId)
+                          IconButton(
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.all(4),
+                            icon: const Icon(
+                              Icons.badge_outlined,
+                              color: LegoColors.blueDark,
+                              size: 24,
+                            ),
+                            tooltip: 'Ver Cartão Insiders',
+                            onPressed: () => showInsidersCardDialog(
+                              context,
+                              insidersId,
+                              user!.nome.toString(),
+                            ),
+                          ),
+                      ],
                     ),
                     Text(
                       email,
@@ -235,23 +263,61 @@ class ProfileScreen extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+
+                    /*const SizedBox(height: 6),
                     // Badge "Membro VIP / Insider"
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: LegoColors.green,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Mestre Construtor',
-                        style: GoogleFonts.varelaRound(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: LegoColors.green,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Mestre Construtor',
+                            style: GoogleFonts.varelaRound(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                       /* if (temInsidersId) ...[
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => showInsidersCardDialog(
+                              context,
+                              insidersId,
+                              username,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD500),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: LegoColors.blueDark, width: 1),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.card_membership, size: 12, color: LegoColors.blueDark),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Cartão',
+                                    style: GoogleFonts.varelaRound(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: LegoColors.blueDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],*/
+                      ],
+                    ),*/
                   ],
                 ),
               ),
@@ -273,6 +339,7 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+
 
   /// Estatísticas da Coleção de LEGOs
   Widget _buildStatsGrid(WidgetRef ref) {
@@ -392,6 +459,34 @@ class ProfileScreen extends ConsumerWidget {
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
+    );
+  }
+
+  //Dialog Insiders Card
+  void showInsidersCardDialog(BuildContext context, String insidersId, String userName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LegoInsidersCard(
+                insidersId: insidersId,
+                userName: userName,
+              ),
+              const SizedBox(height: 16),
+              // Botão para Fechar
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

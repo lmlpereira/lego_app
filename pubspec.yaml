@@ -22,6 +22,8 @@ dependencies:
   # Gestão de estado (liga a UI aos streams do Drift)
   flutter_riverpod: ^3.3.2
 
+  barcode_widget: ^2.0.4 #Para gerar o barcode do cartão da lego!
+
   # Import / export de .xlsx
   excel: ^4.0.6
   file_selector: ^1.0.3
@@ -67,3 +69,4 @@ flutter:
     - assets/lego.png
     - assets/google.png
     - assets/piece.png
+    - assets/insiders.png
