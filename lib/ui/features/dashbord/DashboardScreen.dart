@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:intl/intl.dart';
 
-import '../../../data/database.dart';
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
 import '../lista/SetsFilteredListScreen.dart';

@@ -81,7 +81,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
         );
       } else {
         // Perfil completo -> Vai para a Home
-        if (user != null && mounted) {
+        if (mounted) {
           _navegarParaHome();
         }
       }
@@ -94,28 +94,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
     }
   }
 
-  Future<void> _entrarComGoogleOld() async {
-    setState(() {
-      _aEntrarGoogle = true;
-      _erro = null;
-    });
 
-    try {
-      // Guarda o resultado do login
-      final resultado = await ref.read(authRepositoryProvider).entrarComGoogle();
-
-      // 🛑 SÓ NAVEGA SE O RESULTADO NÃO FOR NULO (ou seja, se realmente selecionou conta)
-      if (resultado != null && mounted) {
-        _navegarParaHome();
-      }
-    } on AuthException catch (e) {
-      if (mounted) setState(() => _erro = e.message);
-    } catch (e) {
-      if (mounted) setState(() => _erro = 'Erro ao entrar com o Google.');
-    } finally {
-      if (mounted) setState(() => _aEntrarGoogle = false);
-    }
-  }
 
   void _navegarParaHome() {
     Navigator.of(context).pushAndRemoveUntil(

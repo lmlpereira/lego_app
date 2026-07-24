@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../data/providers.dart';
 import 'brickset_api_key_dialog.dart';
 
 
@@ -19,7 +17,6 @@ class _BricksetApiSettingsState extends ConsumerState<BricksetApiSettingsScreen>
   @override
   Widget build(BuildContext context) {
 
-    final temasAsync = ref.watch(temasProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('API BrickSet')),
