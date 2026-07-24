@@ -49,10 +49,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           _usernameController.text = user.username ?? '';
           _emailController.text = user.email ?? '';
           // Caso a tua classe User tenha estes campos no futuro:
-          // _nomeController.text = user.nome ?? '';
-          // _legoInsidersController.text = user.legoInsidersId ?? '';
-          // _dataNascimento = user.dataNascimento;
-          // _sexoSelecionado = user.sexo;
+           _nomeController.text = user.nome ?? '';
+          _legoInsidersController.text = user.idLegoInsiders ?? '';
+          _dataNascimento = user.dataNascimento;
+          _sexoSelecionado = user.sexo;
         });
       }
     });
@@ -102,7 +102,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     try {
       // TODO: Adicionar o método de guardar no teu authRepository ou profileRepository
-      // await ref.read(authRepositoryProvider).atualizarPerfil(...);
+      //await ref.read(authRepositoryProvider).atualizarPerfil(...);
 
       await Future.delayed(const Duration(seconds: 1)); // Simulação de envio
 
@@ -194,8 +194,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       children: [
                         // Campo: Username*
                         _buildInputField(
+                          enabled: false,
                           controller: _usernameController,
-                          label: 'Username *',
+                          label: 'Username * (Não editável)',
                           icon: Icons.alternate_email,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {

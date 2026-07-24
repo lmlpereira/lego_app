@@ -1,7 +1,7 @@
 name: lego_app
 description: App de gestão de coleção Lego (stock, compras, vendas, dashboard).
 publish_to: 'none'
-version: 2.1.0+26
+version: 2.5.0+30
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

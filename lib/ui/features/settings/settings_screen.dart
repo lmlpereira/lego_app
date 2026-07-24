@@ -71,7 +71,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(Icons.person_outline),
             title: const Text('Perfil'),
             subtitle: Text(
-              ref.watch(utilizadorAtualProvider).value?.username ??
+                  ref.watch(utilizadorAtualProvider).value!.username ??
                   ref.watch(utilizadorAtualProvider).value?.email ??
                   'Sem sessão',
             ),

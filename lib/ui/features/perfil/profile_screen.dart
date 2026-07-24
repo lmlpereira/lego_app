@@ -86,6 +86,36 @@ class ProfileScreen extends ConsumerWidget {
 
                         const Spacer(),
 
+
+
+                        // Botão de Terminar Sessão (Sair)
+                        LegoBlockDecorator(
+                          color: LegoColors.red,
+                          borderRadius: 10,
+                          child: InkWell(
+                            onTap: () => _confirmarApagar(context, ref),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.delete_forever, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'APAGAR CONTA',
+                                    style: GoogleFonts.varelaRound(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
                         // Botão de Terminar Sessão (Sair)
                         LegoBlockDecorator(
                           color: LegoColors.red,
@@ -379,7 +409,7 @@ class ProfileScreen extends ConsumerWidget {
           style: GoogleFonts.coiny(color: LegoColors.red),
         ),
         content: Text(
-          'Developed by Dev4You\n\nEmail: devfouryou.solutions@gmail.com',
+          'Developed by Dev4You\n\nEmail: dev4you.solutions@gmail.com',
           style: GoogleFonts.varelaRound(),
         ),
         actions: [
@@ -394,6 +424,89 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Diálogo de Confirmação para Terminar Sessão
+  void _confirmarApagar(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool estaASair = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: LegoColors.blueDark, width: 3),
+              ),
+              title: Text(
+                'APAGAR CONTA',
+                style: GoogleFonts.coiny(color: LegoColors.red),
+              ),
+              content: estaASair
+                  ? const LegoBrickLoading()
+                  : Text(
+                'Tens a certeza que pretende apagar a conta?',
+                style: GoogleFonts.varelaRound(),
+              ),
+              actions: estaASair
+                  ? null
+                  : [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(
+                    'CANCELAR',
+                    style: GoogleFonts.varelaRound(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LegoColors.red,
+                  ),
+                  onPressed: () async {
+                    setState(() {
+                      estaASair = true;
+                    });
+
+                    try {
+                      //await ref.read(authRepositoryProvider).terminarSessao();
+                      if (ctx.mounted) {
+                        Navigator.of(ctx).pop();
+                      }
+                    } catch (e) {
+                      if (ctx.mounted) {
+                        setState(() {
+                          estaASair = false;
+                        });
+                      }
+                    } finally {
+                      if (ctx.mounted) {
+                        Navigator.of(ctx).pop();
+                      }
+                    }
+                  },
+                  child: Text(
+                    'SAIR',
+                    style: GoogleFonts.varelaRound(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+
+
   }
 
   /// Diálogo de Confirmação para Terminar Sessão
@@ -418,7 +531,7 @@ class ProfileScreen extends ConsumerWidget {
               content: estaASair
                   ? const LegoBrickLoading()
                   : Text(
-                'Tens a certeza que queres desligar a tua conta de Mestre Construtor?',
+                'Tens a certeza que queres desligar a tua conta ?',
                 style: GoogleFonts.varelaRound(),
               ),
               actions: estaASair
@@ -474,5 +587,8 @@ class ProfileScreen extends ConsumerWidget {
         );
       },
     );
+
+
+
   }
 }

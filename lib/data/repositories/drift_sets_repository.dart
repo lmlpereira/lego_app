@@ -134,10 +134,16 @@ class DriftSetsRepository implements SetsRepository {
         final temaId = await _temaIdPorNome(set.tema);
 
         if (existenteId != null) {
+
+          // DESATIVEI A FUNÇÃO DE ATUALIZAR A PARTIR DO XLS, POIS QUANDO ATUALIZO PELA API DO BRICKSET ELE TIRA OS CAMPOS QUE ELE COLOCOU
+          /*
           await (db.update(db.setEntries)
             ..where((t) => t.id.equals(existenteId)))
               .write(_toCompanion(set, temaId));
           atualizados++;
+
+          */
+
         } else {
           await db.into(db.setEntries).insert(_toCompanion(set, temaId));
           inseridos++;
