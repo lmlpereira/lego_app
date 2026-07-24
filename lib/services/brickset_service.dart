@@ -53,7 +53,8 @@ class BricksetSet {
 
   /// Descrição sugerida para preencher o campo "Descrição" da app:
   /// "<Tema> - <Nome>" (ou só o nome, se não houver tema).
-  String get descricaoSugerida => theme.isEmpty ? name : '$theme - $name';
+  //String get descricaoSugerida => theme.isEmpty ? name : '$theme - $name';
+  String get descricaoSugerida => theme.isEmpty ? name : '$name';
 
   /// Melhor preço disponível para pré-preencher "Valor de tabela (€)".
   /// Prioriza o preço DE (já em euros); só usa UK/US como aproximação se

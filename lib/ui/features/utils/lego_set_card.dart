@@ -26,6 +26,14 @@ class LegoSetCard extends StatelessWidget {
   String get _subtitleText {
     final parts = <String>[];
 
+    if (legoSet.tema.isNotEmpty) {
+      parts.add(legoSet.tema);
+    }
+
+    if (legoSet.ano != null) {
+      parts.add(legoSet.ano.toString());
+    }
+
     if (legoSet.pecas != null && legoSet.pecas! > 0) {
       final formattedPieces = legoSet.pecas.toString().replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -34,9 +42,9 @@ class LegoSetCard extends StatelessWidget {
       parts.add('$formattedPieces peças');
     }
 
-    if (legoSet.tema.isNotEmpty) {
-      parts.add(legoSet.tema);
-    }
+
+
+
 
     return parts.join(' • ');
   }
