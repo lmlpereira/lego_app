@@ -41,6 +41,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         username: _usernameCtrl.text.trim(),
         email: _emailCtrl.text,
         password: _passwordCtrl.text,
+        nome: _usernameCtrl.text.trim()
       );
       // O AuthGate trata da navegação assim que a sessão fica ativa.
       if (mounted) Navigator.of(context).pop();

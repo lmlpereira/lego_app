@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lego_app/ui/features/perfil/complete_profile_form.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../main.dart';
@@ -9,7 +10,9 @@ import 'login_screen.dart';
 /// Decide, de forma reativa, o que mostrar consoante o estado de sessão:
 /// - a carregar (primeiro frame, antes do Firebase responder) -> Splash
 /// - sem sessão -> LoginScreen
-/// - com sessão -> HomeShell
+/// - com sessão mas sem username (ex: primeiro login por Google) ->
+///   CompleteProfileScreen
+/// - com sessão e perfil completo -> HomeShell
 ///
 /// Nunca navegamos manualmente para a HomeShell depois de um login —
 /// isto observa o stream e troca sozinho assim que a sessão muda (login,
@@ -22,7 +25,11 @@ class AuthGate extends ConsumerWidget {
     final utilizadorAsync = ref.watch(utilizadorAtualProvider);
 
     return utilizadorAsync.when(
-      data: (user) => user == null ? const LegoLoginScreen() : const HomeShell(),
+      data: (user) {
+        if (user == null) return const LegoLoginScreen();
+        if (user.perfilIncompleto) return const CompleteProfileScreen();
+        return const HomeShell();
+      },
       loading: () => const SplashScreen(),
       // Em caso de erro a ler o estado de sessão, mostra o login em vez
       // de deixar a app presa no splash para sempre.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lego_app/ui/features/login/register_screen.dart';
+import 'package:lego_app/ui/features/perfil/complete_profile_form.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
@@ -57,6 +58,43 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
   }
 
   Future<void> _entrarComGoogle() async {
+    setState(() {
+      _aEntrarGoogle = true;
+      _erro = null;
+    });
+
+    try {
+      // 1. Obtém o utilizador autenticado
+      final user = await ref.read(authRepositoryProvider).entrarComGoogle();
+
+      if (!mounted) return;
+
+      // 2. Verifica se o utilizador precisa de completar o perfil
+      // Assumimos que se o username for nulo ou vazio, o perfil está incompleto
+      final perfilIncompleto = user.username == null || user.username!.trim().isEmpty;
+
+      if (perfilIncompleto) {
+        // Redireciona para o ecrã de completar perfil
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const CompleteProfileScreen()),
+              (route) => false,
+        );
+      } else {
+        // Perfil completo -> Vai para a Home
+        if (user != null && mounted) {
+          _navegarParaHome();
+        }
+      }
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _erro = e.message);
+    } catch (e) {
+      if (mounted) setState(() => _erro = 'Erro ao entrar com o Google: $e');
+    } finally {
+      if (mounted) setState(() => _aEntrarGoogle = false);
+    }
+  }
+
+  Future<void> _entrarComGoogleOld() async {
     setState(() {
       _aEntrarGoogle = true;
       _erro = null;
@@ -243,6 +281,8 @@ class _LegoLoginFormPanel extends StatelessWidget {
               isLoading: isGoogleLoading,
               onPressed: onGoogleLogin,
             ),
+
+
           ],
         ),
       ),

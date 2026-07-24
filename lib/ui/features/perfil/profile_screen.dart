@@ -8,6 +8,7 @@ import '../../../data/providers.dart';
 import '../login/login_screen.dart';
 import '../utils/lego_block_style.dart';
 import '../utils/lego_brick_loading.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -323,7 +324,13 @@ class ProfileScreen extends ConsumerWidget {
               _buildMenuItem(
                 icon: Icons.person_outline,
                 title: 'Editar Dados Pessoais',
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  );
+                },
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
               _buildMenuItem(

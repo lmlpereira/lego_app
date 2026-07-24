@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
 import 'package:lego_app/ui/features/lista/sets_list_screen_new.dart';
+import 'package:lego_app/ui/features/login/AuthGate.dart';
 import 'package:lego_app/ui/features/settings/settings_screen.dart';
 import 'package:lego_app/ui/features/splash/splash_screen.dart';
 
