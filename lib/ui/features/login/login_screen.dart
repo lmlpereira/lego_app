@@ -282,7 +282,11 @@ class _LegoLoginFormPanel extends StatelessWidget {
               onPressed: onGoogleLogin,
             ),
 
+            const SizedBox(height: 16),
 
+            _LegoRegistarButtonMobile(isLoading: false, onPressed: (){
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterLegoScreen()));
+            },)
           ],
         ),
       ),
@@ -396,6 +400,61 @@ class _LegoSignInButtonMobile extends StatelessWidget {
     );
   }
 }
+
+class _LegoRegistarButtonMobile extends StatelessWidget {
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _LegoRegistarButtonMobile({
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LegoBlockDecorator(
+      color: LegoColors.red,
+      borderRadius: 8,
+      child: InkWell(
+        onTap: isLoading ? null : onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isLoading)
+                const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
+              else ...[
+                Image.asset(
+                  'assets/lego.png',
+                  height: 24,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(width: 24),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Registar!',
+                  style: GoogleFonts.varelaRound(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class _LegoGoogleButtonMobile extends StatelessWidget {
   final bool isLoading;
