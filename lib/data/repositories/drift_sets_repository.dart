@@ -137,6 +137,12 @@ class DriftSetsRepository implements SetsRepository {
 
           // DESATIVEI A FUNÇÃO DE ATUALIZAR A PARTIR DO XLS, POIS QUANDO ATUALIZO PELA API DO BRICKSET ELE TIRA OS CAMPOS QUE ELE COLOCOU
           /*
+
+            MELHORAR O SISTEMA PARA APENAS ATUALIZAR ALGUNS CAMPOS COMO O VALOR DO SET, VALOR DE COMPRA  E ANO DE COMPRA, VENDIDO E DATA DA VENDA, VALOR DA VENDA
+
+           */
+
+          /*
           await (db.update(db.setEntries)
             ..where((t) => t.id.equals(existenteId)))
               .write(_toCompanion(set, temaId));
