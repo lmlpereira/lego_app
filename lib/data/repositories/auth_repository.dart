@@ -88,6 +88,13 @@ abstract class AuthRepository {
     String? sexo,
   });
 
+  Future<AppUser> atualizarPerfil({
+    required String nome,
+    DateTime? dataNascimento,
+    String? idLegoInsiders,
+    String? sexo,
+  });
+
   Future<void> repporPassword(String email);
 
   Future<void> terminarSessao();

@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'auth_repository.dart';
 
@@ -44,7 +45,31 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AppUser?> watchUser() {
-    return _auth.authStateChanges().asyncMap(_paraAppUser);
+    return _auth.authStateChanges().asyncExpand((fbUser) {
+      if (fbUser == null) {
+        // 🔹 Se não há login, emite um evento null imediatamente
+        return Stream.value(null);
+      }
+
+      // Se há login, escuta as alterações no documento do Firestore
+      return _db.collection('users').doc(fbUser.uid).snapshots().map((snapshot) {
+        if (!snapshot.exists) return AppUser(uid: fbUser.uid, email: fbUser.email);
+
+        final dados = snapshot.data();
+        final dataNascimento = dados?['dataNascimento'];
+
+        return AppUser(
+          uid: fbUser.uid,
+          email: fbUser.email,
+          username: dados?['username'] as String?,
+          nome: dados?['nome'] as String?,
+          dataNascimento: dataNascimento is Timestamp ? dataNascimento.toDate() : null,
+          idLegoInsiders: dados?['idLegoInsiders'] as String?,
+          sexo: dados?['sexo'] as String?,
+          photoUrl: fbUser.photoURL,
+        );
+      });
+    });
   }
 
   @override
@@ -237,6 +262,48 @@ class FirebaseAuthRepository implements AuthRepository {
     return _paraAppUser(user);
   }
 
+
+
+  @override
+  Future<AppUser> atualizarPerfil({
+    required String nome,
+    DateTime? dataNascimento,
+    String? idLegoInsiders,
+    String? sexo,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw AuthException('Sem sessão ativa.');
+
+    final batch = _db.batch();
+    final userDocRef = _db.collection('users').doc(user.uid);
+    final Map<String, dynamic> updatesFirestore = {};
+
+    // 1. Atualizar Display Name (no Firebase Auth e no Map do Firestore)
+    if (nome.trim().isNotEmpty) {
+      await user.updateDisplayName(nome.trim());
+      updatesFirestore['nome'] = nome.trim();
+    }
+
+    // 2. ID Insiders (_vazioParaNull converte "" em null para atualizar/limpar o campo)
+    updatesFirestore['idLegoInsiders'] = _vazioParaNull(idLegoInsiders);
+
+    // 3. Data de Nascimento (Converter explicitamente para Timestamp)
+    updatesFirestore['dataNascimento'] =
+    dataNascimento != null ? Timestamp.fromDate(dataNascimento) : null;
+
+    // 4. Sexo
+    updatesFirestore['sexo'] = sexo;
+
+    // 5. Data de atualização
+    updatesFirestore['updatedAt'] = FieldValue.serverTimestamp();
+
+    // Executar a escrita em batch
+    batch.set(userDocRef, updatesFirestore, SetOptions(merge: true));
+    await batch.commit();
+
+    return _paraAppUser(user);
+  }
+
   @override
   Future<void> repporPassword(String email) async {
     try {
@@ -335,4 +402,6 @@ class FirebaseAuthRepository implements AuthRepository {
         return 'Erro de autenticação ($codigo).';
     }
   }
+
+
 }

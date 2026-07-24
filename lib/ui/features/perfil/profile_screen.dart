@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/providers.dart';
@@ -463,31 +464,55 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   //Dialog Insiders Card
-  void showInsidersCardDialog(BuildContext context, String insidersId, String userName) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              LegoInsidersCard(
-                insidersId: insidersId,
-                userName: userName,
-              ),
-              const SizedBox(height: 16),
-              // Botão para Fechar
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> showInsidersCardDialog(
+      BuildContext context,
+      String insidersId,
+      String userName,
+      ) async {
+    double brightnessAnterior = 0.5; // Valor por defeito de reserva
+
+    // 1. Guarda o brilho atual e define o brilho do ecrã no máximo (1.0)
+    try {
+      brightnessAnterior = await ScreenBrightness().current;
+      await ScreenBrightness().setScreenBrightness(1.0);
+    } catch (e) {
+      debugPrint('Erro ao alterar o brilho do ecrã: $e');
+    }
+
+    // 2. Exibe o Dialog (O 'await' espera até que o dialog seja fechado)
+    if (context.mounted) {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LegoInsidersCard(
+                  insidersId: insidersId,
+                  userName: userName,
+                ),
+                const SizedBox(height: 16),
+                // Botão para Fechar
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    // 3. Restaura o brilho anterior assim que o dialog é fechado
+    try {
+      await ScreenBrightness().setScreenBrightness(brightnessAnterior);
+    } catch (e) {
+      debugPrint('Erro ao restaurar o brilho do ecrã: $e');
+    }
   }
 
   /// Diálogo de Suporte

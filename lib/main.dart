@@ -3,37 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
 import 'package:lego_app/ui/features/lista/sets_list_screen_new.dart';
+import 'package:lego_app/ui/features/login/login_screen.dart';
+import 'package:lego_app/ui/features/onboarding/welcome_screen.dart';
 import 'package:lego_app/ui/features/settings/settings_screen.dart';
 import 'package:lego_app/ui/features/splash/splash_screen.dart';
+import 'package:lego_app/ui/features/utils/lego_block_style.dart';
+import 'package:lego_app/ui/features/utils/lego_brick_clipper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 
 void main() async {
-  // WidgetsFlutterBinding tem de ser inicializado antes de qualquer
-  // chamada assíncrona antes do runApp (aqui, o Firebase.initializeApp).
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // ProviderScope tem de envolver a app para os providers do Riverpod
-  // (setsRepositoryProvider, totalComprasProvider, utilizadorAtualProvider,
-  // etc.) funcionarem.
-  runApp(const ProviderScope(child: LegoApp()));
+  final prefs = await SharedPreferences.getInstance();
+  final bool isFT = prefs.getBool('is_first_time') ?? true;
+
+  runApp(ProviderScope(child: LegoApp(isFirstTime: isFT)));
 }
 
 class LegoApp extends StatelessWidget {
-  const LegoApp({super.key});
+  final bool isFirstTime;
+
+  const LegoApp({super.key, required this.isFirstTime});
 
   @override
   Widget build(BuildContext context) {
-
-    // Cores inspiradas na marca LEGO
     const legoRed = Color(0xFFE3000B);
     const legoYellow = Color(0xFFFFD500);
     const legoDark = Color(0xFF1F1F1F);
     const legoBackground = Color(0xFFF4F4F4);
 
     return MaterialApp(
-      title: 'Lego App',
+      title: 'LEGO Collector',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -46,36 +49,27 @@ class LegoApp extends StatelessWidget {
           onPrimary: Colors.white,
           onSecondary: legoDark,
         ),
+        // Configuração global da AppBar arredondada nas pontas inferiores
         appBarTheme: const AppBarTheme(
           backgroundColor: legoRed,
           foregroundColor: Colors.white,
-          elevation: 2,
-          centerTitle: true,
+          elevation: 0,
+          centerTitle: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20),
+            ),
+          ),
           titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
             color: Colors.white,
+            letterSpacing: -0.4,
           ),
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: legoYellow,
           foregroundColor: legoDark,
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.grey),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: legoRed, width: 2),
-          ),
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
@@ -85,15 +79,28 @@ class LegoApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
+      home: isFirstTime
+          ? Builder(
+        builder: (navContext) {
+          return WelcomeScreen(
+            onLoginPressed: () {
+              Navigator.of(navContext).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LegoLoginScreen()),
+              );
+            },
+            onGuestPressed: () {
+              Navigator.of(navContext).pushReplacement(
+                MaterialPageRoute(builder: (context) => const HomeShell()),
+              );
+            },
+          );
+        },
+      )
+          : const SplashScreen(),
     );
   }
 }
 
-/// Casca da app: alterna entre Dashboard, Lista de sets e Importar
-/// através de uma barra de navegação em baixo. Usa IndexedStack (em vez
-/// de trocar o widget diretamente) para que cada ecrã mantenha o seu
-/// estado (ex: scroll da lista) ao saltar entre abas.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -104,8 +111,6 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _indice = 0;
 
-  // "static final" em vez de "const": não obriga todos os ecrãs a terem
-  // construtor const (não sabemos ao certo se SetsListScreen já tem).
   static final _ecrans = [
     DashboardScreen(),
     SetsListScreenNew(),
@@ -124,9 +129,7 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
-/// Barra de navegação flutuante: um "pill" arredondado com sombra,
-/// afastado das margens e do fundo do ecrã (em vez de colado a toda a
-/// largura/altura como a NavigationBar padrão do Material).
+/// Barra de navegação flutuante personalizada com botões estilo LEGO
 class _BarraFlutuante extends StatelessWidget {
   final int indice;
   final ValueChanged<int> onSelecionar;
@@ -135,38 +138,38 @@ class _BarraFlutuante extends StatelessWidget {
 
   static const _itens = [
     _ItemNav(
+      corAtiva: LegoColors.red,
       icone: Icons.dashboard_outlined,
       iconeAtivo: Icons.dashboard,
       label: 'Dashboard',
     ),
     _ItemNav(
+      corAtiva: LegoColors.blue,
       icone: Icons.widgets_outlined,
       iconeAtivo: Icons.widgets,
       label: 'Meus Sets',
     ),
     _ItemNav(
+      corAtiva: LegoColors.yellow,
       icone: Icons.settings_applications_outlined,
       iconeAtivo: Icons.settings_applications,
-      label: 'Configurações',
+      label: 'Outros',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final corAtiva = Theme.of(context).colorScheme.primary;
-    final corInativa = Theme.of(context).colorScheme.outline;
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return SafeArea(
-      // Só a margem lateral/inferior conta para o SafeArea; o resto do
-      // espaçamento é feito no Padding abaixo.
       minimum: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
         child: Container(
-          height: 64,
+          height: 68,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(34),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.18),
@@ -177,13 +180,13 @@ class _BarraFlutuante extends StatelessWidget {
           ),
           child: Row(
             children: [
+
               for (var i = 0; i < _itens.length; i++)
                 Expanded(
-                  child: _BotaoNav(
+                  child: _BotaoNavLego(
                     item: _itens[i],
                     selecionado: i == indice,
-                    corAtiva: corAtiva,
-                    corInativa: corInativa,
+                    corAtiva: _itens[i].corAtiva,
                     onTap: () => onSelecionar(i),
                   ),
                 ),
@@ -195,51 +198,97 @@ class _BarraFlutuante extends StatelessWidget {
   }
 }
 
-class _BotaoNav extends StatelessWidget {
+class _BotaoNavLego extends StatelessWidget {
   final _ItemNav item;
   final bool selecionado;
   final Color corAtiva;
-  final Color corInativa;
   final VoidCallback onTap;
 
-  const _BotaoNav({
+  const _BotaoNavLego({
     required this.item,
     required this.selecionado,
     required this.corAtiva,
-    required this.corInativa,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cor = selecionado ? corAtiva : corInativa;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(32),
+    return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(selecionado ? item.iconeAtivo : item.icone, color: cor, size: 24),
-          const SizedBox(height: 3),
-          Text(
-            item.label,
-            style: TextStyle(
-              fontSize: 11,
-              color: cor,
-              fontWeight: selecionado ? FontWeight.w600 : FontWeight.normal,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        alignment: Alignment.bottomCenter,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: selecionado
+            ? ClipPath(
+          clipper: LegoBrickClipper(),
+          child: Container(
+            width: double.infinity,
+            height: 64,
+            color: corAtiva,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  item.iconeAtivo,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
             ),
           ),
-        ],
+        )
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              item.icone,
+              color: Theme.of(context).colorScheme.outline,
+              size: 22,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.outline,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+
+
 class _ItemNav {
   final IconData icone;
   final IconData iconeAtivo;
   final String label;
+  final Color corAtiva;
 
-  const _ItemNav({required this.icone, required this.iconeAtivo, required this.label});
+  const _ItemNav({
+    required this.corAtiva,
+    required this.icone,
+    required this.iconeAtivo,
+    required this.label,
+  });
 }

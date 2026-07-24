@@ -7,8 +7,6 @@ import '../import/import_screen.dart';
 import '../perfil/profile_screen.dart';
 import 'brickset_api_settings.dart';
 
-
-
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -27,25 +25,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _carregarInformacaoNativa() async {
-    // Obtém as informações do APK/AppBundle/IPA nativo
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
-        _appVersion = info.version;     // Ex: "1.0.0"
-        _buildNumber = info.buildNumber; // Ex: "1" ou "100"
+        _appVersion = info.version;
+        _buildNumber = info.buildNumber;
       });
     }
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // 1. Obtém o estado assíncrono do utilizador com acesso seguro
+    final userAsync = ref.watch(utilizadorAtualProvider);
+    final user = userAsync.value;
 
+    // 2. Determina o texto do subtítulo de forma 100% segura sem usar '!'
+    final String subtitlePerfil = userAsync.when(
+      data: (u) {
+        if (u == null || u.uid.isEmpty) return 'Sem sessão (Visitante)';
+        return u.username ?? u.nome ?? u.email ?? 'Perfil Construtor';
+      },
+      loading: () => 'A carregar perfil...',
+      error: (_, __) => 'Sem sessão',
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -70,21 +75,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('Perfil'),
-            subtitle: Text(
-                  ref.watch(utilizadorAtualProvider).value!.username ??
-                  ref.watch(utilizadorAtualProvider).value?.email ??
-                  'Sem sessão',
-            ),
+            subtitle: Text(subtitlePerfil), // ✅ Subtítulo seguro
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // 1. Obtém o estado atual do utilizador
-              final user = ref.read(utilizadorAtualProvider).value;
+              // ✅ Verificação segura: só vai para o Perfil se houver utilizador ativo e com UID
+              final bool temSessaoAtiva = user != null && user.uid.isNotEmpty;
 
-              // 2. Decide para qual ecrã navegar
-              final Widget targetScreen = (user?.uid != '')
-                  ? const ProfileScreen() // Subtitui pelo nome do teu ecrã de perfil
+              final Widget targetScreen = temSessaoAtiva
+                  ? const ProfileScreen()
                   : const LegoLoginScreen();
 
-              // 3. Abre o ecrã correspondente
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => targetScreen,
@@ -92,12 +92,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               );
             },
           ),
-
-          /*ListTile(
-            leading: Icon(Icons.logout, color: theme.colorScheme.error),
-            title: Text('Terminar sessão', style: TextStyle(color: theme.colorScheme.error)),
-            onTap: () => _confirmarTerminarSessao(context, ref),
-          ),*/
 
           const Divider(),
 
@@ -115,8 +109,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.file_upload_outlined),
-            title: const Text('Importar / Exportar Excel'),
-            subtitle: const Text('Fazer cópia de segurança ou carregar dados'),
+            title: const Text('Importar Excel'),
+            subtitle: const Text('Carregar dados'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -145,7 +139,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(Icons.api_outlined),
             title: const Text('API BrickSet'),
             subtitle: const Text('Gerir API'),
-
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -156,8 +150,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const Divider(),
-
-
 
           // --- SECÇÃO: SOBRE A APP ---
           const Padding(
@@ -174,8 +166,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Versão da App'),
-            // Exibe a versão lida diretamente do sistema nativo
-            subtitle: Text('v$_appVersion${_buildNumber.isNotEmpty ? " (Build $_buildNumber)" : ""}'),
+            subtitle: Text(
+              'v$_appVersion${_buildNumber.isNotEmpty ? " (Build $_buildNumber)" : ""}',
+            ),
           ),
 
           const SizedBox(height: 32),

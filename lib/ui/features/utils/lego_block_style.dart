@@ -8,6 +8,8 @@ class LegoColors {
   static const Color green = Color(0xFF388E3C);
   static const Color lightGrey = Color(0xFFEEEEEE);
   static const Color mediumGrey = Color(0xFFE0E0E0);
+  static const Color darkGrey = Color(0xFF1E1E1E); // Preto/Cinza Escuro
+  static const Color lightGrey2 = Color(0xFFF4F4F5);//
 }
 
 class LegoBlockDecorator extends StatelessWidget {

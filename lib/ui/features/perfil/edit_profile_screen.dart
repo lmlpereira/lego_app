@@ -102,9 +102,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     try {
       // TODO: Adicionar o método de guardar no teu authRepository ou profileRepository
-      //await ref.read(authRepositoryProvider).atualizarPerfil(...);
+      await ref.read(authRepositoryProvider).atualizarPerfil(nome:_nomeController.text, dataNascimento: _dataNascimento, idLegoInsiders:  _legoInsidersController.text, sexo:  _sexoSelecionado);
 
-      await Future.delayed(const Duration(seconds: 1)); // Simulação de envio
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

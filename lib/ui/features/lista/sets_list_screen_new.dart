@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lego_app/ui/features/utils/lego_set_card.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
@@ -121,12 +122,33 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
             );
           }
 
-          return ListView.separated(
+          return ListView.builder(
             itemCount: sets.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            //separatorBuilder: (_, __) => const Divider(height: 0),
             itemBuilder: (context, i) {
               final set = sets[i];
+
               return Dismissible(
+                  key: ValueKey(set.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onErrorContainer),
+                  ),
+                  confirmDismiss: (_) => _confirmarApagar(context, set),
+                  onDismissed: (_) => ref.read(setsRepositoryProvider).delete(set.id!),
+                  child:LegoSetCard(
+                legoSet: set,
+                onTap: ()  {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => EditSetScreenNew(set: set)),
+                  );
+                },
+              ));
+              /*return Dismissible(
                 key: ValueKey(set.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
@@ -164,7 +186,7 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
                     MaterialPageRoute(builder: (_) => EditSetScreenNew(set: set)),
                   ),
                 ),
-              );
+              );*/
             },
           );
         },
