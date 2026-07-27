@@ -68,6 +68,13 @@ final temasProvider = StreamProvider<List<String>>((ref) {
   return ref.watch(setsRepositoryProvider).watchTemas();
 });
 
+/// Para o ecrã "Gerir temas" (Definições): todos os temas com a
+/// contagem de sets de cada um (0 incluído, ao contrário de
+/// contagemPorTemaProvider).
+final temasComContagemProvider = StreamProvider<List<TemaComContagem>>((ref) {
+  return ref.watch(setsRepositoryProvider).watchTemasComContagem();
+});
+
 final totalSetsProvider = StreamProvider<double>((ref) {
   final repository = ref.watch(setsRepositoryProvider);
   return repository.watchTotalSets();

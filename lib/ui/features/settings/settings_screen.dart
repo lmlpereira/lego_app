@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lego_app/ui/features/login/login_screen.dart';
+import 'package:lego_app/ui/features/settings/temas_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../data/auth_providers.dart';
 import '../../../data/sync_providers.dart';
@@ -118,6 +119,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const ImportScreen(),
+                ),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.category_outlined),
+            title: const Text('Gerir temas'),
+            subtitle: const Text('Ver contagem por tema e apagar os que estiverem vazios'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const TemasScreen(),
                 ),
               );
             },

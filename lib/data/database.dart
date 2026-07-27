@@ -472,7 +472,55 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  // ---------- Ecrã "Gerir temas" (Definições) ----------
+
+  /// Todos os temas, incluindo os que não têm nenhum set (ao contrário
+  /// de watchContagemPorTema, que só mostra temas com pelo menos um set
+  /// — aqui precisamos exatamente do contrário, para poderes encontrar
+  /// e apagar os que estão a zero). `quantidade` é a soma de
+  /// `quantidade` dos sets não apagados desse tema; um tema sem sets
+  /// aparece com `quantidade: 0`.
+  Stream<List<TemaComContagem>> watchTemasComContagem() {
+    final quantidade = setEntries.quantidade.sum();
+
+    final query = select(temas).join([
+      leftOuterJoin(
+        setEntries,
+        setEntries.temaId.equalsExp(temas.id) & setEntries.deletado.equals(false),
+      ),
+    ])
+      ..addColumns([quantidade])
+      ..groupBy([temas.id])
+      ..orderBy([OrderingTerm.asc(temas.nome)]);
+
+    return query.watch().map((rows) => rows.map((r) {
+      final tema = r.readTable(temas);
+      return TemaComContagem(
+        temaId: tema.id,
+        nome: tema.nome,
+        quantidade: r.read(quantidade) ?? 0,
+      );
+    }).toList());
+  }
+
+  /// Apaga um tema, mas só se não tiver nenhum set associado — a
+  /// verificação é feita aqui (não só na UI) para não haver uma
+  /// condição de corrida (ex: adicionaste um set com esse tema num
+  /// segundo aparelho mesmo quando tocaste em apagar). Devolve `false`
+  /// se o tema afinal já não estava vazio (nada é apagado nesse caso).
+  Future<bool> apagarTema(int temaId) async {
+    final emUso = await (select(setEntries)
+      ..where((t) => t.temaId.equals(temaId) & t.deletado.equals(false))
+      ..limit(1))
+        .getSingleOrNull();
+    if (emUso != null) return false;
+
+    await (delete(temas)..where((t) => t.id.equals(temaId))).go();
+    return true;
+  }
 }
+
+
 
 
 /// Resultado auxiliar para gráficos "total por ano".
@@ -505,6 +553,17 @@ class AnoCompraResumo {
   final double total;
   AnoCompraResumo({required this.ano, required this.quantidade, required this.total});
 }
+
+/// Resultado auxiliar para o ecrã "Gerir temas" — ao contrário de
+/// TemaResumo, inclui o `temaId` (para poder apagar) e aparece mesmo
+/// para temas sem nenhum set (quantidade fica a 0 nesse caso).
+class TemaComContagem {
+  final int temaId;
+  final String nome;
+  final int quantidade;
+  TemaComContagem({required this.temaId, required this.nome, required this.quantidade});
+}
+
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {

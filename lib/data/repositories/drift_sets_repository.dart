@@ -94,6 +94,12 @@ class DriftSetsRepository implements SetsRepository {
 
   Future<int> _temaIdPorNome(String nome) => db.temaIdPorNome(nome);
 
+  @override
+  Stream<List<TemaComContagem>> watchTemasComContagem() => db.watchTemasComContagem();
+
+  @override
+  Future<bool> apagarTema(int temaId) => db.apagarTema(temaId);
+
   // ---------------- Dashboard: totais ----------------
 
   @override

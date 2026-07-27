@@ -105,6 +105,14 @@ abstract class SetsRepository {
   Stream<List<String>> watchTemas();
   Future<void> addTema(String nome);
 
+  /// Para o ecrã "Gerir temas" (Definições): todos os temas com a
+  /// contagem de sets de cada um (0 incluído).
+  Stream<List<TemaComContagem>> watchTemasComContagem();
+
+  /// Apaga um tema — só é apagado de facto se não tiver nenhum set
+  /// associado. Devolve `false` se afinal já não estava vazio.
+  Future<bool> apagarTema(int temaId);
+
   // ---- Dashboard: totais ----
   Stream<double> watchTotalCompras();
   Stream<double> watchTotalVendas();
