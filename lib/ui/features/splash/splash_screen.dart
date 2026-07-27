@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 16),
 
               Text(
-                'LEGO Collector',
+                'LEGO COLLECTOR',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
