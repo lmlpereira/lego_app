@@ -142,11 +142,12 @@ class DriftSetsRepository implements SetsRepository {
         final existenteId = await _encontrarExistenteId(set);
         final temaId = await _temaIdPorNome(set.tema);
 
+        // retirei esta opção para não haver problema ao atualizar alguns campos
         if (existenteId != null) {
-          await (db.update(db.setEntries)
+          /*await (db.update(db.setEntries)
             ..where((t) => t.id.equals(existenteId)))
               .write(_toUpdateCompanion(set, temaId));
-          atualizados++;
+          atualizados++;*/
         } else {
           await db.into(db.setEntries).insert(_toInsertCompanion(set, temaId));
           inseridos++;
