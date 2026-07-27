@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lego_app/ui/features/utils/lego_set_card.dart';
 
 import '../../../data/providers.dart';
@@ -39,7 +38,7 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
   Widget build(BuildContext context) {
     final setsAsync = ref.watch(todosOsSetsProvider);
     final temasAsync = ref.watch(temasProvider);
-    final euro = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
+    //final euro = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
 
     return Scaffold(
       appBar: AppBar(

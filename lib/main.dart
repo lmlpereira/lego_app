@@ -163,7 +163,6 @@ class _BarraFlutuante extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return SafeArea(
       minimum: EdgeInsets.zero,

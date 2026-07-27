@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lego_app/ui/features/utils/lego_block_style.dart';
 
@@ -172,7 +171,7 @@ class LegoSetCard extends StatelessWidget {
   }
 
   /// Avatar de fallback com círculo e inicial do Tema
-  Widget _buildLetterAvatar() {
+  /*Widget _buildLetterAvatar() {
     final initialLetter = legoSet.tema.isNotEmpty
         ? legoSet.tema[0].toUpperCase()
         : 'L';
@@ -196,7 +195,7 @@ class LegoSetCard extends StatelessWidget {
         ),
       ),
     );
-  }
+  }*/
 
   /// Ícone de etiqueta/tag vermelha que representa o estado "Vendido"
   Widget _buildSoldTag() {

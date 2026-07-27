@@ -98,4 +98,29 @@ abstract class AuthRepository {
   Future<void> repporPassword(String email);
 
   Future<void> terminarSessao();
+
+  /// Métodos de sign-in usados na conta atual (ex: "password",
+  /// "google.com"). Vazio se não houver sessão. Usado pela UI para
+  /// decidir como pedir reautenticação antes de apagar a conta — um
+  /// utilizador Google não tem palavra-passe para confirmar.
+  List<String> get provedoresAtuais;
+
+  /// Reautentica com a palavra-passe atual. Necessário antes de
+  /// [apagarConta] se a conta usa email/palavra-passe e a sessão não for
+  /// "recente" — o Firebase recusa ações sensíveis nesse caso.
+  Future<void> reautenticarComPassword(String password);
+
+  /// Equivalente a [reautenticarComPassword], mas para contas Google —
+  /// reabre o seletor de conta Google para confirmar identidade.
+  Future<void> reautenticarComGoogle();
+
+  /// Apaga definitivamente a conta: perfil, reserva do username, e a
+  /// conta de autenticação em si. Não pode ser desfeito. A coleção
+  /// guardada localmente no dispositivo (SQLite) NÃO é apagada por isto.
+  ///
+  /// Se a sessão não for "recente", lança [AuthException] a pedir para
+  /// reautenticar primeiro (ver [reautenticarComPassword] /
+  /// [reautenticarComGoogle]) — a UI deve tratar isso antes de chamar
+  /// isto, não confiar só neste catch.
+  Future<void> apagarConta();
 }

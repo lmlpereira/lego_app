@@ -549,7 +549,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Diálogo de Confirmação para Terminar Sessão
-  void _confirmarApagar(BuildContext context, WidgetRef ref) {
+  /*void _confirmarApagar(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -629,7 +629,7 @@ class ProfileScreen extends ConsumerWidget {
 
 
 
-  }
+  }*/
 
   // Diálogo de Confirmação para Terminar Sessão
   void _confirmarLogout(BuildContext context, WidgetRef ref) {

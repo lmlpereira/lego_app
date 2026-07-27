@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Assumindo que LegoColors está definido aqui, mas vamos usar cores hardcoded
-// para garantir fidelidade à imagem de referência.
-import 'lego_block_style.dart';
+
 
 class LegoInsidersCard extends StatelessWidget {
   final String insidersId;
@@ -20,7 +18,6 @@ class LegoInsidersCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Definição da cor roxa oficial baseada na imagem fornecida
     const Color insidersPurple = Color(0xFF502379);
-    const Color legoRed = Color(0xFFE3000B);
 
     return Container(
       width: 320,
@@ -30,7 +27,7 @@ class LegoInsidersCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -108,7 +105,7 @@ class LegoInsidersCard extends StatelessWidget {
           // Linha divisória fina e subtil
           Container(
             height: 1,
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             margin: const EdgeInsets.symmetric(horizontal: 20),
           ),
 

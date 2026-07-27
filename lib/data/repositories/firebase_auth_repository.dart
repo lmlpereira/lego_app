@@ -3,7 +3,6 @@ import 'dart:io' show Platform;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'auth_repository.dart';
 
@@ -353,6 +352,84 @@ class FirebaseAuthRepository implements AuthRepository {
       tx.set(usernameRef, {'uid': uid});
       tx.set(perfilRef, dadosPerfil, SetOptions(merge: true));
     });
+  }
+
+  @override
+  List<String> get provedoresAtuais =>
+      _auth.currentUser?.providerData.map((p) => p.providerId).toList() ?? [];
+
+  @override
+  Future<void> reautenticarComPassword(String password) async {
+    final user = _auth.currentUser;
+    if (user == null || user.email == null) {
+      throw AuthException('Sem sessão ativa.');
+    }
+    try {
+      final credencial = fb.EmailAuthProvider.credential(email: user.email!, password: password);
+      await user.reauthenticateWithCredential(credencial);
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_mensagemErro(e.code));
+    }
+  }
+
+  @override
+  Future<void> reautenticarComGoogle() async {
+    final user = _auth.currentUser;
+    if (user == null) throw AuthException('Sem sessão ativa.');
+
+    await _garantirGoogleSignInInicializado();
+    try {
+      final conta = await _googleSignIn.authenticate();
+      final idToken = conta.authentication.idToken;
+      final autorizacao =
+      await conta.authorizationClient.authorizeScopes(['email', 'profile']);
+      final credencial = fb.GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: autorizacao.accessToken,
+      );
+      await user.reauthenticateWithCredential(credencial);
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw AuthException('Confirmação cancelada.');
+      }
+      throw AuthException(_mensagemErroGoogle(e));
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_mensagemErro(e.code));
+    }
+  }
+
+  @override
+  Future<void> apagarConta() async {
+    final user = _auth.currentUser;
+    if (user == null) throw AuthException('Sem sessão ativa.');
+    final uid = user.uid;
+
+    final perfil = await _db.collection('users').doc(uid).get();
+    final username = perfil.data()?['username'] as String?;
+
+    // Apaga o perfil e liberta a reserva do username ANTES de apagar a
+    // conta Auth em si — as regras do Firestore só permitem isto
+    // enquanto o uid ainda está autenticado (ver firestore.rules). Se
+    // fizéssemos ao contrário e o delete() da conta falhasse a meio,
+    // ficaríamos com Auth apagada mas perfil por apagar — pior do que
+    // ficar com perfil apagado mas Auth intacta (esse caso a pessoa
+    // simplesmente volta a passar por completarPerfil da próxima vez).
+    final batch = _db.batch();
+    batch.delete(_db.collection('users').doc(uid));
+    if (username != null && username.trim().isNotEmpty) {
+      batch.delete(_db.collection('usernames').doc(username.trim().toLowerCase()));
+    }
+    await batch.commit();
+
+    try {
+      await user.delete();
+    } on fb.FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw AuthException(
+            'Por segurança, confirma novamente a tua sessão antes de apagar a conta.');
+      }
+      throw AuthException(_mensagemErro(e.code));
+    }
   }
 
   String? _vazioParaNull(String? v) => (v == null || v.trim().isEmpty) ? null : v.trim();
