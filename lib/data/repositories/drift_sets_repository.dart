@@ -1,7 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../database.dart';
 import 'sets_repository.dart';
+
+const _uuidGen = Uuid();
 
 /// Implementação de hoje: tudo guardado localmente com Drift/SQLite.
 ///
@@ -19,7 +22,8 @@ class DriftSetsRepository implements SetsRepository {
   Stream<List<LegoSet>> watchAll() {
     final query = db.select(db.setEntries).join([
       innerJoin(db.temas, db.temas.id.equalsExp(db.setEntries.temaId)),
-    ]);
+    ])
+      ..where(db.setEntries.deletado.equals(false));
     return query.watch().map(
             (rows) =>
             rows.map((r) =>
@@ -33,7 +37,7 @@ class DriftSetsRepository implements SetsRepository {
     final query = db.select(db.setEntries).join([
       innerJoin(db.temas, db.temas.id.equalsExp(db.setEntries.temaId)),
     ])
-      ..where(db.setEntries.id.equals(id));
+      ..where(db.setEntries.id.equals(id) & db.setEntries.deletado.equals(false));
     final row = await query.getSingleOrNull();
     if (row == null) return null;
     return _toDomain(row.readTable(db.setEntries), row
@@ -44,7 +48,7 @@ class DriftSetsRepository implements SetsRepository {
   @override
   Future<int> add(LegoSet set) async {
     final temaId = await _temaIdPorNome(set.tema);
-    return db.into(db.setEntries).insert(_toCompanion(set, temaId));
+    return db.into(db.setEntries).insert(_toInsertCompanion(set, temaId));
   }
 
   @override
@@ -55,13 +59,23 @@ class DriftSetsRepository implements SetsRepository {
     final temaId = await _temaIdPorNome(set.tema);
     await (db.update(db.setEntries)
       ..where((t) => t.id.equals(set.id!)))
-        .write(_toCompanion(set, temaId));
+        .write(_toUpdateCompanion(set, temaId));
   }
 
   @override
   Future<void> delete(int id) async {
-    await (db.delete(db.setEntries)
-      ..where((t) => t.id.equals(id))).go();
+    // Soft delete: se apagássemos a linha de vez, a eliminação nunca
+    // chegava a propagar-se para o Firestore nem para outros
+    // dispositivos. Fica marcada como apagada e escondida da UI (ver
+    // watchAll/getById acima); o SyncService confirma a eliminação no
+    // Firestore e só depois é que a linha é removida de vez (ver
+    // AppDatabase.purgarApagadosSincronizados).
+    await (db.update(db.setEntries)..where((t) => t.id.equals(id))).write(
+      SetEntriesCompanion(
+        deletado: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   // ---------------- Temas ----------------
@@ -78,12 +92,7 @@ class DriftSetsRepository implements SetsRepository {
         TemasCompanion.insert(nome: nome));
   }
 
-  Future<int> _temaIdPorNome(String nome) async {
-    final existente = await (db.select(db.temas)
-      ..where((t) => t.nome.equals(nome))).getSingleOrNull();
-    if (existente != null) return existente.id;
-    return db.into(db.temas).insert(TemasCompanion.insert(nome: nome));
-  }
+  Future<int> _temaIdPorNome(String nome) => db.temaIdPorNome(nome);
 
   // ---------------- Dashboard: totais ----------------
 
@@ -134,24 +143,12 @@ class DriftSetsRepository implements SetsRepository {
         final temaId = await _temaIdPorNome(set.tema);
 
         if (existenteId != null) {
-
-          // DESATIVEI A FUNÇÃO DE ATUALIZAR A PARTIR DO XLS, POIS QUANDO ATUALIZO PELA API DO BRICKSET ELE TIRA OS CAMPOS QUE ELE COLOCOU
-          /*
-
-            MELHORAR O SISTEMA PARA APENAS ATUALIZAR ALGUNS CAMPOS COMO O VALOR DO SET, VALOR DE COMPRA  E ANO DE COMPRA, VENDIDO E DATA DA VENDA, VALOR DA VENDA
-
-           */
-
-          /*
           await (db.update(db.setEntries)
             ..where((t) => t.id.equals(existenteId)))
-              .write(_toCompanion(set, temaId));
+              .write(_toUpdateCompanion(set, temaId));
           atualizados++;
-
-          */
-
         } else {
-          await db.into(db.setEntries).insert(_toCompanion(set, temaId));
+          await db.into(db.setEntries).insert(_toInsertCompanion(set, temaId));
           inseridos++;
         }
       }
@@ -172,7 +169,7 @@ class DriftSetsRepository implements SetsRepository {
   /// critério (ex: usar um id de linha do próprio ficheiro Excel).
   Future<int?> _encontrarExistenteId(LegoSet set) async {
     final query = db.select(db.setEntries)
-      ..where((t) => t.numeroSet.equals(set.numeroSet));
+      ..where((t) => t.numeroSet.equals(set.numeroSet) & t.deletado.equals(false));
 
     final candidatos = await query.get();
     for (final c in candidatos) {
@@ -207,10 +204,19 @@ class DriftSetsRepository implements SetsRepository {
       notas: row.notas,
       imagemUrl: row.imagemUrl,
       pecas: row.pecas,
+      uuid: row.uuid,
+      updatedAt: row.updatedAt,
+      syncedAt: row.syncedAt,
+      deletado: row.deletado,
+      ownerUid: row.ownerUid,
     );
   }
 
-  SetEntriesCompanion _toCompanion(LegoSet set, int temaId) {
+  /// Campos partilhados entre inserção e atualização. Propositadamente
+  /// NÃO inclui uuid/ownerUid/syncedAt/deletado — ver [_toInsertCompanion]
+  /// e [_toUpdateCompanion] para saber porquê cada um trata esses campos
+  /// de forma diferente.
+  SetEntriesCompanion _camposComuns(LegoSet set, int temaId) {
     return SetEntriesCompanion(
       numeroSet: Value(set.numeroSet),
       temaId: Value(temaId),
@@ -226,7 +232,31 @@ class DriftSetsRepository implements SetsRepository {
       notas: Value(set.notas),
       imagemUrl: Value(set.imagemUrl),
       pecas: Value(set.pecas),
+      // Toda a escrita (criação ou edição) conta como "alteração agora" —
+      // é isto que marca a linha como pendente de envio na próxima
+      // sincronização (ver AppDatabase.linhasPendentesEnvio).
+      updatedAt: Value(DateTime.now()),
     );
+  }
+
+  /// Um set novo precisa de um uuid — gera um se ainda não vier com um
+  /// (ex: vindo de um import). ownerUid fica por preencher de propósito:
+  /// é o SyncService que o atribui ao utilizador atual no primeiro envio.
+  SetEntriesCompanion _toInsertCompanion(LegoSet set, int temaId) {
+    final uuid = (set.uuid != null && set.uuid!.isNotEmpty) ? set.uuid! : _uuidGen.v4();
+    return _camposComuns(set, temaId).copyWith(
+      uuid: Value(uuid),
+      ownerUid: set.ownerUid != null ? Value(set.ownerUid) : const Value.absent(),
+    );
+  }
+
+  /// Uma edição NUNCA deve tocar em uuid/ownerUid/syncedAt/deletado —
+  /// são deixados de fora do companion (Value.absent implícito) para que
+  /// o UPDATE preserve exatamente o que já lá estava. Se regenerássemos
+  /// o uuid aqui, cada edição "perdia" a ligação ao documento já
+  /// existente no Firestore e criava um duplicado lá.
+  SetEntriesCompanion _toUpdateCompanion(LegoSet set, int temaId) {
+    return _camposComuns(set, temaId);
   }
 
   @override

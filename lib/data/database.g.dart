@@ -285,6 +285,41 @@ class $SetEntriesTable extends SetEntries
   late final GeneratedColumn<int> pecas = GeneratedColumn<int>(
       'pecas', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+      'uuid', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _syncedAtMeta =
+      const VerificationMeta('syncedAt');
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+      'synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deletadoMeta =
+      const VerificationMeta('deletado');
+  @override
+  late final GeneratedColumn<bool> deletado = GeneratedColumn<bool>(
+      'deletado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("deletado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _ownerUidMeta =
+      const VerificationMeta('ownerUid');
+  @override
+  late final GeneratedColumn<String> ownerUid = GeneratedColumn<String>(
+      'owner_uid', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -301,7 +336,12 @@ class $SetEntriesTable extends SetEntries
         dataVenda,
         notas,
         imagemUrl,
-        pecas
+        pecas,
+        uuid,
+        updatedAt,
+        syncedAt,
+        deletado,
+        ownerUid
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -390,6 +430,26 @@ class $SetEntriesTable extends SetEntries
       context.handle(
           _pecasMeta, pecas.isAcceptableOrUnknown(data['pecas']!, _pecasMeta));
     }
+    if (data.containsKey('uuid')) {
+      context.handle(
+          _uuidMeta, uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(_syncedAtMeta,
+          syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta));
+    }
+    if (data.containsKey('deletado')) {
+      context.handle(_deletadoMeta,
+          deletado.isAcceptableOrUnknown(data['deletado']!, _deletadoMeta));
+    }
+    if (data.containsKey('owner_uid')) {
+      context.handle(_ownerUidMeta,
+          ownerUid.isAcceptableOrUnknown(data['owner_uid']!, _ownerUidMeta));
+    }
     return context;
   }
 
@@ -429,6 +489,16 @@ class $SetEntriesTable extends SetEntries
           .read(DriftSqlType.string, data['${effectivePrefix}imagem_url']),
       pecas: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}pecas']),
+      uuid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}uuid'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at']),
+      syncedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}synced_at']),
+      deletado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deletado'])!,
+      ownerUid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}owner_uid']),
     );
   }
 
@@ -454,6 +524,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
   final String? notas;
   final String? imagemUrl;
   final int? pecas;
+  final String uuid;
+  final DateTime? updatedAt;
+  final DateTime? syncedAt;
+  final bool deletado;
+  final String? ownerUid;
   const SetEntry(
       {required this.id,
       required this.numeroSet,
@@ -469,7 +544,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       this.dataVenda,
       this.notas,
       this.imagemUrl,
-      this.pecas});
+      this.pecas,
+      required this.uuid,
+      this.updatedAt,
+      this.syncedAt,
+      required this.deletado,
+      this.ownerUid});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -502,6 +582,17 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
     if (!nullToAbsent || pecas != null) {
       map['pecas'] = Variable<int>(pecas);
     }
+    map['uuid'] = Variable<String>(uuid);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    map['deletado'] = Variable<bool>(deletado);
+    if (!nullToAbsent || ownerUid != null) {
+      map['owner_uid'] = Variable<String>(ownerUid);
+    }
     return map;
   }
 
@@ -532,6 +623,17 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           : Value(imagemUrl),
       pecas:
           pecas == null && nullToAbsent ? const Value.absent() : Value(pecas),
+      uuid: Value(uuid),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      deletado: Value(deletado),
+      ownerUid: ownerUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerUid),
     );
   }
 
@@ -554,6 +656,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       notas: serializer.fromJson<String?>(json['notas']),
       imagemUrl: serializer.fromJson<String?>(json['imagemUrl']),
       pecas: serializer.fromJson<int?>(json['pecas']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      deletado: serializer.fromJson<bool>(json['deletado']),
+      ownerUid: serializer.fromJson<String?>(json['ownerUid']),
     );
   }
   @override
@@ -575,6 +682,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       'notas': serializer.toJson<String?>(notas),
       'imagemUrl': serializer.toJson<String?>(imagemUrl),
       'pecas': serializer.toJson<int?>(pecas),
+      'uuid': serializer.toJson<String>(uuid),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'deletado': serializer.toJson<bool>(deletado),
+      'ownerUid': serializer.toJson<String?>(ownerUid),
     };
   }
 
@@ -593,7 +705,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           Value<DateTime?> dataVenda = const Value.absent(),
           Value<String?> notas = const Value.absent(),
           Value<String?> imagemUrl = const Value.absent(),
-          Value<int?> pecas = const Value.absent()}) =>
+          Value<int?> pecas = const Value.absent(),
+          String? uuid,
+          Value<DateTime?> updatedAt = const Value.absent(),
+          Value<DateTime?> syncedAt = const Value.absent(),
+          bool? deletado,
+          Value<String?> ownerUid = const Value.absent()}) =>
       SetEntry(
         id: id ?? this.id,
         numeroSet: numeroSet ?? this.numeroSet,
@@ -610,6 +727,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
         notas: notas.present ? notas.value : this.notas,
         imagemUrl: imagemUrl.present ? imagemUrl.value : this.imagemUrl,
         pecas: pecas.present ? pecas.value : this.pecas,
+        uuid: uuid ?? this.uuid,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+        deletado: deletado ?? this.deletado,
+        ownerUid: ownerUid.present ? ownerUid.value : this.ownerUid,
       );
   SetEntry copyWithCompanion(SetEntriesCompanion data) {
     return SetEntry(
@@ -633,6 +755,11 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       notas: data.notas.present ? data.notas.value : this.notas,
       imagemUrl: data.imagemUrl.present ? data.imagemUrl.value : this.imagemUrl,
       pecas: data.pecas.present ? data.pecas.value : this.pecas,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      deletado: data.deletado.present ? data.deletado.value : this.deletado,
+      ownerUid: data.ownerUid.present ? data.ownerUid.value : this.ownerUid,
     );
   }
 
@@ -653,7 +780,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           ..write('dataVenda: $dataVenda, ')
           ..write('notas: $notas, ')
           ..write('imagemUrl: $imagemUrl, ')
-          ..write('pecas: $pecas')
+          ..write('pecas: $pecas, ')
+          ..write('uuid: $uuid, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('deletado: $deletado, ')
+          ..write('ownerUid: $ownerUid')
           ..write(')'))
         .toString();
   }
@@ -674,7 +806,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
       dataVenda,
       notas,
       imagemUrl,
-      pecas);
+      pecas,
+      uuid,
+      updatedAt,
+      syncedAt,
+      deletado,
+      ownerUid);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -693,7 +830,12 @@ class SetEntry extends DataClass implements Insertable<SetEntry> {
           other.dataVenda == this.dataVenda &&
           other.notas == this.notas &&
           other.imagemUrl == this.imagemUrl &&
-          other.pecas == this.pecas);
+          other.pecas == this.pecas &&
+          other.uuid == this.uuid &&
+          other.updatedAt == this.updatedAt &&
+          other.syncedAt == this.syncedAt &&
+          other.deletado == this.deletado &&
+          other.ownerUid == this.ownerUid);
 }
 
 class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
@@ -712,6 +854,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
   final Value<String?> notas;
   final Value<String?> imagemUrl;
   final Value<int?> pecas;
+  final Value<String> uuid;
+  final Value<DateTime?> updatedAt;
+  final Value<DateTime?> syncedAt;
+  final Value<bool> deletado;
+  final Value<String?> ownerUid;
   const SetEntriesCompanion({
     this.id = const Value.absent(),
     this.numeroSet = const Value.absent(),
@@ -728,6 +875,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     this.notas = const Value.absent(),
     this.imagemUrl = const Value.absent(),
     this.pecas = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.deletado = const Value.absent(),
+    this.ownerUid = const Value.absent(),
   });
   SetEntriesCompanion.insert({
     this.id = const Value.absent(),
@@ -745,6 +897,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     this.notas = const Value.absent(),
     this.imagemUrl = const Value.absent(),
     this.pecas = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.deletado = const Value.absent(),
+    this.ownerUid = const Value.absent(),
   })  : numeroSet = Value(numeroSet),
         temaId = Value(temaId),
         descricao = Value(descricao),
@@ -766,6 +923,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     Expression<String>? notas,
     Expression<String>? imagemUrl,
     Expression<int>? pecas,
+    Expression<String>? uuid,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? syncedAt,
+    Expression<bool>? deletado,
+    Expression<String>? ownerUid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -783,6 +945,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       if (notas != null) 'notas': notas,
       if (imagemUrl != null) 'imagem_url': imagemUrl,
       if (pecas != null) 'pecas': pecas,
+      if (uuid != null) 'uuid': uuid,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (deletado != null) 'deletado': deletado,
+      if (ownerUid != null) 'owner_uid': ownerUid,
     });
   }
 
@@ -801,7 +968,12 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       Value<DateTime?>? dataVenda,
       Value<String?>? notas,
       Value<String?>? imagemUrl,
-      Value<int?>? pecas}) {
+      Value<int?>? pecas,
+      Value<String>? uuid,
+      Value<DateTime?>? updatedAt,
+      Value<DateTime?>? syncedAt,
+      Value<bool>? deletado,
+      Value<String?>? ownerUid}) {
     return SetEntriesCompanion(
       id: id ?? this.id,
       numeroSet: numeroSet ?? this.numeroSet,
@@ -818,6 +990,11 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
       notas: notas ?? this.notas,
       imagemUrl: imagemUrl ?? this.imagemUrl,
       pecas: pecas ?? this.pecas,
+      uuid: uuid ?? this.uuid,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncedAt: syncedAt ?? this.syncedAt,
+      deletado: deletado ?? this.deletado,
+      ownerUid: ownerUid ?? this.ownerUid,
     );
   }
 
@@ -869,6 +1046,21 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
     if (pecas.present) {
       map['pecas'] = Variable<int>(pecas.value);
     }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (deletado.present) {
+      map['deletado'] = Variable<bool>(deletado.value);
+    }
+    if (ownerUid.present) {
+      map['owner_uid'] = Variable<String>(ownerUid.value);
+    }
     return map;
   }
 
@@ -889,7 +1081,12 @@ class SetEntriesCompanion extends UpdateCompanion<SetEntry> {
           ..write('dataVenda: $dataVenda, ')
           ..write('notas: $notas, ')
           ..write('imagemUrl: $imagemUrl, ')
-          ..write('pecas: $pecas')
+          ..write('pecas: $pecas, ')
+          ..write('uuid: $uuid, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('deletado: $deletado, ')
+          ..write('ownerUid: $ownerUid')
           ..write(')'))
         .toString();
   }
@@ -1120,6 +1317,11 @@ typedef $$SetEntriesTableCreateCompanionBuilder = SetEntriesCompanion Function({
   Value<String?> notas,
   Value<String?> imagemUrl,
   Value<int?> pecas,
+  Value<String> uuid,
+  Value<DateTime?> updatedAt,
+  Value<DateTime?> syncedAt,
+  Value<bool> deletado,
+  Value<String?> ownerUid,
 });
 typedef $$SetEntriesTableUpdateCompanionBuilder = SetEntriesCompanion Function({
   Value<int> id,
@@ -1137,6 +1339,11 @@ typedef $$SetEntriesTableUpdateCompanionBuilder = SetEntriesCompanion Function({
   Value<String?> notas,
   Value<String?> imagemUrl,
   Value<int?> pecas,
+  Value<String> uuid,
+  Value<DateTime?> updatedAt,
+  Value<DateTime?> syncedAt,
+  Value<bool> deletado,
+  Value<String?> ownerUid,
 });
 
 final class $$SetEntriesTableReferences
@@ -1208,6 +1415,21 @@ class $$SetEntriesTableFilterComposer
 
   ColumnFilters<int> get pecas => $composableBuilder(
       column: $table.pecas, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+      column: $table.uuid, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+      column: $table.syncedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deletado => $composableBuilder(
+      column: $table.deletado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ownerUid => $composableBuilder(
+      column: $table.ownerUid, builder: (column) => ColumnFilters(column));
 
   $$TemasTableFilterComposer get temaId {
     final $$TemasTableFilterComposer composer = $composerBuilder(
@@ -1282,6 +1504,21 @@ class $$SetEntriesTableOrderingComposer
   ColumnOrderings<int> get pecas => $composableBuilder(
       column: $table.pecas, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get uuid => $composableBuilder(
+      column: $table.uuid, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+      column: $table.syncedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get deletado => $composableBuilder(
+      column: $table.deletado, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ownerUid => $composableBuilder(
+      column: $table.ownerUid, builder: (column) => ColumnOrderings(column));
+
   $$TemasTableOrderingComposer get temaId {
     final $$TemasTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -1354,6 +1591,21 @@ class $$SetEntriesTableAnnotationComposer
   GeneratedColumn<int> get pecas =>
       $composableBuilder(column: $table.pecas, builder: (column) => column);
 
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deletado =>
+      $composableBuilder(column: $table.deletado, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerUid =>
+      $composableBuilder(column: $table.ownerUid, builder: (column) => column);
+
   $$TemasTableAnnotationComposer get temaId {
     final $$TemasTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -1413,6 +1665,11 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             Value<String?> notas = const Value.absent(),
             Value<String?> imagemUrl = const Value.absent(),
             Value<int?> pecas = const Value.absent(),
+            Value<String> uuid = const Value.absent(),
+            Value<DateTime?> updatedAt = const Value.absent(),
+            Value<DateTime?> syncedAt = const Value.absent(),
+            Value<bool> deletado = const Value.absent(),
+            Value<String?> ownerUid = const Value.absent(),
           }) =>
               SetEntriesCompanion(
             id: id,
@@ -1430,6 +1687,11 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             notas: notas,
             imagemUrl: imagemUrl,
             pecas: pecas,
+            uuid: uuid,
+            updatedAt: updatedAt,
+            syncedAt: syncedAt,
+            deletado: deletado,
+            ownerUid: ownerUid,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1447,6 +1709,11 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             Value<String?> notas = const Value.absent(),
             Value<String?> imagemUrl = const Value.absent(),
             Value<int?> pecas = const Value.absent(),
+            Value<String> uuid = const Value.absent(),
+            Value<DateTime?> updatedAt = const Value.absent(),
+            Value<DateTime?> syncedAt = const Value.absent(),
+            Value<bool> deletado = const Value.absent(),
+            Value<String?> ownerUid = const Value.absent(),
           }) =>
               SetEntriesCompanion.insert(
             id: id,
@@ -1464,6 +1731,11 @@ class $$SetEntriesTableTableManager extends RootTableManager<
             notas: notas,
             imagemUrl: imagemUrl,
             pecas: pecas,
+            uuid: uuid,
+            updatedAt: updatedAt,
+            syncedAt: syncedAt,
+            deletado: deletado,
+            ownerUid: ownerUid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

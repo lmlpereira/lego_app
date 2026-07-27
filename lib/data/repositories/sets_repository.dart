@@ -19,6 +19,16 @@ class LegoSet {
   final String? imagemUrl; // preenchido automaticamente a partir do Brickset
   final int? pecas; // número de peças, também vindo do Brickset
 
+  // ---- Campos de sincronização com o Firestore ----
+  // Não precisas de os preencher ao criar/editar um set no formulário —
+  // o DriftSetsRepository trata deles sozinho (gera uuid, marca
+  // updatedAt, etc). Só interessam ao SyncService.
+  final String? uuid; // identificador estável, igual em todos os dispositivos
+  final DateTime? updatedAt; // última alteração local
+  final DateTime? syncedAt; // última vez que esta versão foi confirmada no Firestore
+  final bool deletado; // apagado localmente mas ainda não confirmado no Firestore
+  final String? ownerUid; // uid do Firebase dono deste set
+
   const LegoSet({
     this.id,
     required this.numeroSet,
@@ -35,6 +45,11 @@ class LegoSet {
     this.notas,
     this.imagemUrl,
     this.pecas,
+    this.uuid,
+    this.updatedAt,
+    this.syncedAt,
+    this.deletado = false,
+    this.ownerUid,
   });
 
   /// Desconto % sobre o valor de tabela. Calculado, nunca guardado.
@@ -67,6 +82,11 @@ class LegoSet {
     notas: notas,
     imagemUrl: imagemUrl,
     pecas: pecas,
+    uuid: uuid,
+    updatedAt: updatedAt,
+    syncedAt: syncedAt,
+    deletado: deletado,
+    ownerUid: ownerUid,
   );
 }
 

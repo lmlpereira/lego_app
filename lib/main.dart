@@ -11,6 +11,7 @@ import 'package:lego_app/ui/features/utils/lego_block_style.dart';
 import 'package:lego_app/ui/features/utils/lego_brick_clipper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/sync_providers.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -101,14 +102,14 @@ class LegoApp extends StatelessWidget {
   }
 }
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> {
   int _indice = 0;
 
   static final _ecrans = [
@@ -119,6 +120,9 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+
+    ref.watch(syncControllerProvider);
+
     return Scaffold(
       body: IndexedStack(index: _indice, children: _ecrans),
       bottomNavigationBar: _BarraFlutuante(

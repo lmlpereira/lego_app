@@ -6,10 +6,12 @@ import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/providers.dart';
+import '../../../data/sync_providers.dart';
 import '../login/login_screen.dart';
 import '../utils/lego_block_style.dart';
 import '../utils/lego_brick_loading.dart';
 import '../utils/lego_insiders_card.dart';
+import 'delete_account.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -95,7 +97,7 @@ class ProfileScreen extends ConsumerWidget {
                           color: LegoColors.red,
                           borderRadius: 10,
                           child: InkWell(
-                            onTap: () => _confirmarApagar(context, ref),
+                            onTap: () => showDeleteAccountDialog(context, ref),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               child: Row(
@@ -629,8 +631,10 @@ class ProfileScreen extends ConsumerWidget {
 
   }
 
-  /// Diálogo de Confirmação para Terminar Sessão
+  // Diálogo de Confirmação para Terminar Sessão
   void _confirmarLogout(BuildContext context, WidgetRef ref) {
+    final pendentes = ref.read(pendenteSyncProvider).value ?? 0;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -650,9 +654,24 @@ class ProfileScreen extends ConsumerWidget {
               ),
               content: estaASair
                   ? const LegoBrickLoading()
-                  : Text(
-                'Tens a certeza que queres desligar a tua conta ?',
-                style: GoogleFonts.varelaRound(),
+                  : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Tens a certeza que queres desligar a tua conta de Mestre Construtor?',
+                    style: GoogleFonts.varelaRound(),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (pendentes > 0) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Tens $pendentes alteraç${pendentes == 1 ? 'ão' : 'ões'} por enviar. '
+                          'Vamos tentar sincronizá-las antes de sair.',
+                      style: GoogleFonts.varelaRound(fontSize: 12, color: Colors.orange[800]),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
               ),
               actions: estaASair
                   ? null
@@ -675,6 +694,29 @@ class ProfileScreen extends ConsumerWidget {
                     setState(() {
                       estaASair = true;
                     });
+
+                    // Tenta enviar o que ainda não foi sincronizado ANTES
+                    // de apagar os dados locais — sem isto, alterações
+                    // feitas offline neste dispositivo perdiam-se para
+                    // sempre. Se não houver rede, seguimos para fora na
+                    // mesma (o utilizador já foi avisado no diálogo).
+                    final uid = ref.read(utilizadorAtualProvider).value?.uid;
+                    if (uid != null && uid.isNotEmpty) {
+                      try {
+                        await ref.read(syncServiceProvider).sincronizar(uid);
+                      } catch (_) {
+                        // Ignorado de propósito — ver comentário acima.
+                      }
+                    }
+
+                    // Limpa a BD local para os dados desta conta não
+                    // ficarem visíveis se outra pessoa (ou outra conta)
+                    // usar este dispositivo a seguir.
+                    try {
+                      await ref.read(databaseProvider).limparTudo();
+                    } catch (_) {
+                      // Uma falha a limpar a BD não deve impedir o logout.
+                    }
 
                     try {
                       await ref.read(authRepositoryProvider).terminarSessao();
@@ -707,8 +749,5 @@ class ProfileScreen extends ConsumerWidget {
         );
       },
     );
-
-
-
   }
 }

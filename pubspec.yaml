@@ -40,7 +40,7 @@ dependencies:
   intl: ^0.20.3
 
   # Ids únicos para os registos
-  uuid: ^4.5.1
+  uuid: ^4.6.0
 
   cupertino_icons: ^1.0.8
 
@@ -49,6 +49,7 @@ dependencies:
   firebase_auth: ^6.5.6
   cloud_firestore: ^6.7.1
   google_sign_in: ^7.2.0
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
   flutter_test:

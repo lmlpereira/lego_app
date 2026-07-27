@@ -50,6 +50,32 @@ class SetEntries extends Table {
 
   // Número de peças do set (preenchido automaticamente a partir do Brickset).
   IntColumn get pecas => integer().nullable()();
+
+  // ---- Sincronização com o Firestore (ver SyncService) ----
+  // uuid identifica este set de forma estável entre dispositivos — NÃO
+  // é o mesmo que `id` (que é só a chave local, autoincrement, e pode
+  // ser diferente em cada telemóvel para o "mesmo" set). Não é marcado
+  // .unique() ao nível da BD de propósito (evita uma migração com SQL à
+  // mão para criar o índice); a app garante a unicidade ao gerá-lo
+  // sempre com o pacote uuid (v4 = praticamente impossível colidir).
+  TextColumn get uuid => text().withDefault(const Constant(''))();
+
+  // Última alteração local. syncedAt < updatedAt (ou syncedAt nulo)
+  // significa "ainda por enviar" — é assim que o SyncService decide o
+  // que enviar, sem precisar de uma flag "dirty" à parte.
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+
+  // "Apagado" localmente mas mantido na BD até a eliminação ser
+  // confirmada no Firestore (senão nunca se propagava a outros
+  // dispositivos). Ver AppDatabase.purgarApagadosSincronizados().
+  BoolColumn get deletado => boolean().withDefault(const Constant(false))();
+
+  // uid do Firebase a quem este set pertence. Fica nulo em sets criados
+  // antes desta funcionalidade existir — a primeira sincronização
+  // "reclama-os" automaticamente para o utilizador que tiver sessão
+  // iniciada nesse momento.
+  TextColumn get ownerUid => text().nullable()();
 }
 
 // Nota: "desconto %" e "margem de venda" NÃO são colunas — são calculados
@@ -64,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   // Sobe este número sempre que alterares uma tabela; o Drift trata
   // das migrações a partir daqui (ver secção migration abaixo).
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +104,28 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         await m.addColumn(setEntries, setEntries.pecas);
       }
+      // v3 -> v4: colunas para a sincronização com o Firestore.
+      if (from < 4) {
+        await m.addColumn(setEntries, setEntries.uuid);
+        await m.addColumn(setEntries, setEntries.updatedAt);
+        await m.addColumn(setEntries, setEntries.syncedAt);
+        await m.addColumn(setEntries, setEntries.deletado);
+        await m.addColumn(setEntries, setEntries.ownerUid);
+
+        // Backfill: os sets que já existiam antes desta versão não têm
+        // uuid nem updatedAt — sem isto, ficariam de fora da sincronização
+        // (uuid vazio não é um identificador válido para o Firestore).
+        // Gera um uuid aleatório para cada linha (lower(hex(randomblob(16)))
+        // é uma forma simples de gerar algo com colisão praticamente
+        // impossível diretamente em SQL) e marca-as como alteradas agora,
+        // para que a primeira sincronização as envie todas.
+        await m.database.customStatement('''
+          UPDATE set_entries
+          SET uuid = lower(hex(randomblob(16))),
+              updated_at = ${DateTime.now().millisecondsSinceEpoch ~/ 1000}
+          WHERE uuid IS NULL OR uuid = ''
+        ''');
+      }
     },
   );
 
@@ -86,7 +134,8 @@ class AppDatabase extends _$AppDatabase {
   /// Total gasto em compras (soma de valorComprado * quantidade).
   Stream<double> watchTotalCompras() {
     final query = selectOnly(setEntries)
-      ..addColumns([setEntries.valorComprado, setEntries.quantidade]);
+      ..addColumns([setEntries.valorComprado, setEntries.quantidade])
+      ..where(setEntries.deletado.equals(false));
     return query.watch().map((rows) => rows.fold<double>(
         0,
             (acc, r) =>
@@ -97,7 +146,7 @@ class AppDatabase extends _$AppDatabase {
   Stream<double> watchTotalVendas() {
     final query = selectOnly(setEntries)
       ..addColumns([setEntries.valorVenda])
-      ..where(setEntries.vendido.equals(true));
+      ..where(setEntries.vendido.equals(true) & setEntries.deletado.equals(false));
     return query.watch().map(
             (rows) => rows.fold<double>(0, (acc, r) => acc + (r.read(setEntries.valorVenda) ?? 0)));
   }
@@ -112,6 +161,7 @@ class AppDatabase extends _$AppDatabase {
 
     final query = selectOnly(setEntries)
       ..addColumns([ano, total])
+      ..where(setEntries.deletado.equals(false))
       ..groupBy([ano])
       ..orderBy([OrderingTerm.asc(ano)]);
 
@@ -130,7 +180,7 @@ class AppDatabase extends _$AppDatabase {
 
     final query = selectOnly(setEntries)
       ..addColumns([ano, total])
-      ..where(setEntries.vendido.equals(true))
+      ..where(setEntries.vendido.equals(true) & setEntries.deletado.equals(false))
       ..groupBy([ano])
       ..orderBy([OrderingTerm.asc(ano)]);
 
@@ -146,7 +196,8 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<TotalPorTema>> watchComprasPorTema() {
     final query = select(setEntries).join([
       innerJoin(temas, temas.id.equalsExp(setEntries.temaId)),
-    ]);
+    ])
+      ..where(setEntries.deletado.equals(false));
     // Agregamos do lado do Dart porque juntar select+join+groupBy tem
     // limitações na API do Drift; para o volume de dados desta coleção
     // (algumas centenas de sets) isto é perfeitamente rápido.
@@ -169,7 +220,8 @@ class AppDatabase extends _$AppDatabase {
   Future<double> totalComprasEntre(DateTime inicio, DateTime fimExclusivo) async {
     final query = selectOnly(setEntries)
       ..addColumns([setEntries.valorComprado, setEntries.quantidade])
-      ..where(setEntries.dataCompra.isBetweenValues(inicio, fimExclusivo));
+      ..where(setEntries.deletado.equals(false) &
+      setEntries.dataCompra.isBetweenValues(inicio, fimExclusivo));
     final rows = await query.get();
     return rows.fold<double>(
         0,
@@ -182,6 +234,7 @@ class AppDatabase extends _$AppDatabase {
     final query = selectOnly(setEntries)
       ..addColumns([setEntries.valorVenda])
       ..where(setEntries.vendido.equals(true) &
+      setEntries.deletado.equals(false) &
       setEntries.dataVenda.isBetweenValues(inicio, fimExclusivo));
     final rows = await query.get();
     return rows.fold<double>(0, (acc, r) => acc + (r.read(setEntries.valorVenda) ?? 0));
@@ -192,7 +245,8 @@ class AppDatabase extends _$AppDatabase {
   /// poupança total face ao preço de tabela.
   Stream<double> watchTotalValorSet() {
     final query = selectOnly(setEntries)
-      ..addColumns([setEntries.valorSet, setEntries.quantidade]);
+      ..addColumns([setEntries.valorSet, setEntries.quantidade])
+      ..where(setEntries.deletado.equals(false));
     return query.watch().map((rows) => rows.fold<double>(
         0,
             (acc, r) =>
@@ -204,7 +258,8 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<TemaResumo>> watchContagemPorTema() {
     final query = select(setEntries).join([
       innerJoin(temas, temas.id.equalsExp(setEntries.temaId)),
-    ]);
+    ])
+      ..where(setEntries.deletado.equals(false));
     // Agregamos do lado do Dart pela mesma razão que watchComprasPorTema:
     // juntar select+join+groupBy tem limitações na API do Drift, e o
     // volume de dados desta coleção torna isto perfeitamente rápido.
@@ -231,6 +286,7 @@ class AppDatabase extends _$AppDatabase {
 
     final query = selectOnly(setEntries)
       ..addColumns([ano, quantidade, total])
+      ..where(setEntries.deletado.equals(false))
       ..groupBy([ano])
       ..orderBy([OrderingTerm.desc(ano)]);
 
@@ -248,7 +304,7 @@ class AppDatabase extends _$AppDatabase {
   Stream<double> watchTotalPecas() {
     final query = selectOnly(setEntries)
       ..addColumns([setEntries.pecas, setEntries.quantidade])
-      ..where(setEntries.vendido.equals(false));;
+      ..where(setEntries.vendido.equals(false) & setEntries.deletado.equals(false));
 
     return query.watch().map((rows) => rows.fold<double>(
       0.0,
@@ -264,7 +320,7 @@ class AppDatabase extends _$AppDatabase {
   Stream<double> watchTotalSets() {
     final query = selectOnly(setEntries)
       ..addColumns([setEntries.quantidade])
-      ..where(setEntries.vendido.equals(false));;
+      ..where(setEntries.vendido.equals(false) & setEntries.deletado.equals(false));
 
     return query.watch().map((rows) => rows.fold<double>(
       0.0,
@@ -275,11 +331,149 @@ class AppDatabase extends _$AppDatabase {
     ));
   }
 
+  // ---------- Métodos de apoio à sincronização (ver SyncService) ----------
 
+  /// Linhas com alterações locais ainda não confirmadas no Firestore:
+  /// nunca sincronizadas (syncedAt nulo) ou modificadas depois da última
+  /// sincronização (updatedAt > syncedAt). Inclui linhas ainda sem dono
+  /// (ownerUid nulo — sets criados antes de existir login/sincronização)
+  /// para poderes "reclamá-las" para o utilizador atual ao enviá-las.
+  Future<List<SetEntry>> linhasPendentesEnvio(String uid) {
+    final query = select(setEntries)
+      ..where((t) =>
+      (t.ownerUid.equals(uid) | t.ownerUid.isNull()) &
+      (t.syncedAt.isNull() | t.updatedAt.isBiggerThan(t.syncedAt)));
+    return query.get();
+  }
 
+  /// Contagem reativa de linhas por enviar — alimenta o indicador
+  /// "alterações pendentes" nas Definições.
+  Stream<int> watchContagemPendenteEnvio(String uid) {
+    final query = select(setEntries)
+      ..where((t) =>
+      (t.ownerUid.equals(uid) | t.ownerUid.isNull()) &
+      (t.syncedAt.isNull() | t.updatedAt.isBiggerThan(t.syncedAt)));
+    return query.watch().map((rows) => rows.length);
+  }
 
+  /// Marca uma linha como confirmada no Firestore (chamado pelo
+  /// SyncService depois de um `set`/`batch.commit()` bem-sucedido) e, de
+  /// caminho, "reclama-a" para [ownerUid] se ainda não tivesse dono.
+  Future<void> marcarComoSincronizado(int id, DateTime syncedAt, {required String ownerUid}) {
+    return (update(setEntries)..where((t) => t.id.equals(id))).write(
+      SetEntriesCompanion(
+        syncedAt: Value(syncedAt),
+        ownerUid: Value(ownerUid),
+      ),
+    );
+  }
+
+  /// Resolve (ou cria) o id de um tema pelo nome — usado tanto pelo
+  /// DriftSetsRepository como pelo SyncService ao aplicar dados vindos
+  /// do Firestore (que só guardam o nome do tema, não o id local).
+  Future<int> temaIdPorNome(String nome) async {
+    final existente = await (select(temas)..where((t) => t.nome.equals(nome))).getSingleOrNull();
+    if (existente != null) return existente.id;
+    return into(temas).insert(TemasCompanion.insert(nome: nome));
+  }
+
+  /// Aplica um documento vindo do Firestore ao SQLite local: insere-o se
+  /// ainda não existir cá (por uuid), ou atualiza-o SE o remoto for mais
+  /// recente (last-write-wins por updatedAt) — nunca pisa uma alteração
+  /// local que ainda não tenha sido enviada. Devolve true se algo mudou
+  /// localmente (usado só para contar quantos foram "recebidos").
+  Future<bool> aplicarDadosRemotos({
+    required String uid,
+    required String uuidRemoto,
+    required DateTime updatedAtRemoto,
+    required String tema,
+    required int numeroSet,
+    required String descricao,
+    int? ano,
+    required double valorSet,
+    required double valorComprado,
+    DateTime? dataCompra,
+    required int quantidade,
+    required bool vendido,
+    double? valorVenda,
+    DateTime? dataVenda,
+    String? notas,
+    String? imagemUrl,
+    int? pecas,
+    required bool deletado,
+  }) async {
+    final existente =
+    await (select(setEntries)..where((t) => t.uuid.equals(uuidRemoto))).getSingleOrNull();
+
+    if (existente != null) {
+      // Há alterações locais ainda por enviar? Não pisamos — a próxima
+      // 'enviar' desta linha há de resolver o conflito com o Firestore.
+      final localPendente =
+          existente.syncedAt == null || existente.updatedAt!.isAfter(existente.syncedAt!);
+      if (localPendente) return false;
+      // Nada de novo no remoto face ao que já temos.
+      if (!updatedAtRemoto.isAfter(existente.updatedAt ?? DateTime(0))) return false;
+    }
+
+    final temaId = await temaIdPorNome(tema.isEmpty ? 'Sem tema' : tema);
+
+    final companion = SetEntriesCompanion(
+      uuid: Value(uuidRemoto),
+      ownerUid: Value(uid),
+      temaId: Value(temaId),
+      numeroSet: Value(numeroSet),
+      descricao: Value(descricao),
+      ano: Value(ano),
+      valorSet: Value(valorSet),
+      valorComprado: Value(valorComprado),
+      dataCompra: Value(dataCompra),
+      quantidade: Value(quantidade),
+      vendido: Value(vendido),
+      valorVenda: Value(valorVenda),
+      dataVenda: Value(dataVenda),
+      notas: Value(notas),
+      imagemUrl: Value(imagemUrl),
+      pecas: Value(pecas),
+      deletado: Value(deletado),
+      updatedAt: Value(updatedAtRemoto),
+      syncedAt: Value(updatedAtRemoto),
+    );
+
+    if (existente != null) {
+      await (update(setEntries)..where((t) => t.id.equals(existente.id))).write(companion);
+    } else {
+      await into(setEntries).insert(companion);
+    }
+    return true;
+  }
+
+  /// Remove definitivamente da BD local os sets apagados que já foram
+  /// confirmados no Firestore — mantém a tabela limpa em vez de
+  /// acumular "lápides" para sempre. Chamado no fim de cada sincronização.
+  Future<void> purgarApagadosSincronizados() {
+    return (delete(setEntries)
+      ..where((t) =>
+      t.deletado.equals(true) &
+      t.syncedAt.isNotNull() &
+      t.updatedAt.isSmallerOrEqual(t.syncedAt)))
+        .go();
+  }
+
+  /// Apaga TODOS os dados locais (sets + temas). Usado quando o
+  /// utilizador termina sessão — sem isto, os dados de uma conta ficavam
+  /// visíveis se outra pessoa (ou outra conta) usasse o mesmo
+  /// dispositivo a seguir. Chama-se DEPOIS de tentar sincronizar (ver
+  /// ProfileScreen._confirmarLogout), para não perder alterações feitas
+  /// offline que ainda não tinham chegado ao Firestore.
+  Future<void> limparTudo() async {
+    await transaction(() async {
+      await delete(setEntries).go();
+      await delete(temas).go();
+    });
+  }
 
 }
+
 
 /// Resultado auxiliar para gráficos "total por ano".
 class TotalPorAno {

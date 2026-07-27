@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lego_app/ui/features/login/login_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../data/auth_providers.dart';
+import '../../../data/sync_providers.dart';
 import '../import/import_screen.dart';
 import '../perfil/profile_screen.dart';
 import 'brickset_api_settings.dart';
@@ -121,7 +123,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
           ),
 
+          _secaoSincronizacao(context),
+
           const Divider(),
+
+
 
           // --- SECÇÃO: API ---
           const Padding(
@@ -211,6 +217,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  Widget _secaoSincronizacao(BuildContext context) {
+    final theme = Theme.of(context);
+    final uid = ref.watch(utilizadorAtualProvider).value?.uid;
+    final semSessao = uid == null || uid.isEmpty;
+
+    if (semSessao) {
+      return const ListTile(
+        leading: Icon(Icons.cloud_off_outlined),
+        title: Text('Sincronização'),
+        subtitle: Text('Inicia sessão para sincronizares a tua coleção com a cloud'),
+      );
+    }
+
+    final syncState = ref.watch(syncControllerProvider);
+    final pendentesAsync = ref.watch(pendenteSyncProvider);
+    final pendentes = pendentesAsync.value ?? 0;
+    final aSincronizar = syncState.status == SyncStatus.aSincronizar;
+
+    String subtitulo = "";
+    IconData icone = Icons.cloud_outlined;
+    Color? corIcone;
+
+    switch (syncState.status) {
+      case SyncStatus.aSincronizar:
+        subtitulo = 'A sincronizar...';
+        icone = Icons.sync;
+        corIcone = theme.colorScheme.primary;
+        break;
+      case SyncStatus.erro:
+        subtitulo = syncState.erro ?? 'Erro a sincronizar';
+        icone = Icons.sync_problem;
+        corIcone = theme.colorScheme.error;
+        break;
+      case SyncStatus.sucesso:
+      case SyncStatus.parado:
+        if (syncState.ultimaSincronizacao != null) {
+          subtitulo = 'Última sincronização às '
+              '${DateFormat('HH:mm, dd/MM').format(syncState.ultimaSincronizacao!)}'
+              '${pendentes > 0 ? ' · $pendentes por enviar' : ''}';
+        } else {
+          subtitulo = pendentes > 0
+              ? '$pendentes alteraç${pendentes == 1 ? 'ão' : 'ões'} por enviar'
+              : 'Ainda não sincronizado';
+        }
+        icone = pendentes > 0 ? Icons.cloud_upload_outlined : Icons.cloud_done_outlined;
+        corIcone = pendentes > 0 ? theme.colorScheme.tertiary : Colors.green;
+        break;
+    }
+
+    return ListTile(
+      leading: Icon(icone, color: corIcone),
+      title: const Text('Sincronizar com a cloud'),
+      subtitle: Text(subtitulo),
+      trailing: aSincronizar
+          ? const SizedBox(
+          width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : IconButton(
+        icon: const Icon(Icons.sync),
+        tooltip: 'Sincronizar agora',
+        onPressed: () => ref.read(syncControllerProvider.notifier).sincronizarAgora(),
       ),
     );
   }
