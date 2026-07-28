@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import 'profile_form_fields.dart';
 
@@ -84,9 +85,10 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final email = fb.FirebaseAuth.instance.currentUser?.email;
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Completa o teu perfil'), automaticallyImplyLeading: false),
+      appBar: AppBar(title: Text(t.titleCompleteProfile), automaticallyImplyLeading: false),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -96,8 +98,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Entraste com Google${email != null ? ' ($email)' : ''}. '
-                      'Só falta escolheres um nome de utilizador.',
+                  t.subtitleCompleteProfile(email != null ? ' ($email)' : ''),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
@@ -125,7 +126,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                   child: _aGuardar
                       ? const SizedBox(
                       height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Concluir'),
+                      : Text(t.concluir),
                 ),
               ],
             ),

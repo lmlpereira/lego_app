@@ -130,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
                         Column(
                           children: [
                             const SizedBox(height: 10),
-                            LegoTitleBlock(text: t.iniciarSessao),
+                            LegoTitleBlock(text: t.iniciarSessaotitle),
                             const SizedBox(height: 30),
 
                             // Mensagem de Erro

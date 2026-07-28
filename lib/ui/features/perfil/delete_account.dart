@@ -3,30 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Mostra o fluxo completo de apagar conta: aviso de irreversibilidade
 /// -> reautenticação (palavra-passe ou Google, consoante como a pessoa
 /// entrou) -> apagar. Chamável a partir de qualquer botão, em qualquer
 /// ecrã (Definições, Perfil, ...) — só precisa de context e ref.
 Future<void> showDeleteAccountDialog(BuildContext context, WidgetRef ref) async {
+  final t = AppLocalizations.of(context)!;
+
   final confirmado = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Apagar conta?'),
-      content: const Text(
-        'Isto apaga definitivamente a tua conta (login, perfil e nome de '
-            'utilizador). Não pode ser desfeito.\n\n'
-            'A tua coleção guardada neste aparelho não é apagada por isto.',
-      ),
+      title: Text(t.titleDeleteAccount),
+      content: Text(t.contentDeleteAccount),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancelar'),
+          child: Text(t.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
           style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-          child: const Text('Continuar'),
+          child: Text(t.commonContinuar),
         ),
       ],
     ),
@@ -41,7 +40,7 @@ Future<void> showDeleteAccountDialog(BuildContext context, WidgetRef ref) async 
 
   if (apagou == true && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Conta apagada.')),
+      SnackBar(content: Text(t.resultDeleteAccount)),
     );
   }
 }
@@ -97,16 +96,18 @@ class _ConfirmarEApagarDialogState extends ConsumerState<_ConfirmarEApagarDialog
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: const Text('Confirma que és tu'),
+      title: Text(t.confirmIsYou),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _usaPassword
-                ? 'Por segurança, escreve a tua palavra-passe para apagares a conta.'
-                : 'Por segurança, confirma a tua conta Google para apagares a conta.',
+                ? t.secPass
+                : t.secGoogle,
           ),
           if (_usaPassword) ...[
             const SizedBox(height: 12),
@@ -114,7 +115,7 @@ class _ConfirmarEApagarDialogState extends ConsumerState<_ConfirmarEApagarDialog
               controller: _passwordCtrl,
               obscureText: true,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Palavra-passe'),
+              decoration: InputDecoration(labelText: t.passwordLabel),
               onSubmitted: (_) => _confirmarEApagar(),
             ),
           ],
@@ -127,7 +128,7 @@ class _ConfirmarEApagarDialogState extends ConsumerState<_ConfirmarEApagarDialog
       actions: [
         TextButton(
           onPressed: _aProcessar ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancelar'),
+          child: Text(t.commonCancel),
         ),
         FilledButton(
           onPressed: _aProcessar ? null : _confirmarEApagar,
@@ -137,7 +138,7 @@ class _ConfirmarEApagarDialogState extends ConsumerState<_ConfirmarEApagarDialog
               height: 16,
               width: 16,
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text(_usaPassword ? 'Apagar conta' : 'Confirmar com Google e apagar'),
+              : Text(_usaPassword ? t.cPass : t.cGoogle),
         ),
       ],
     );

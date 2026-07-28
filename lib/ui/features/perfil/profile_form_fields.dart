@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 /// Campos de perfil partilhados entre o registo por email e o ecrã de
 /// completar perfil (usado depois de um primeiro login por Google, que
 /// não dá username nenhum). Mantido à parte para não duplicar a mesma
@@ -28,23 +30,24 @@ class ProfileFormFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
+    final t = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextFormField(
           controller: usernameCtrl,
-          decoration: const InputDecoration(
-            labelText: 'Nome de utilizador',
+          decoration: InputDecoration(
+            labelText: t.usernameLabel,
             prefixIcon: Icon(Icons.alternate_email),
-            helperText: 'Único — é o teu identificador na app',
+            helperText: t.helperUsername,
           ),
           validator: (v) {
             final texto = v?.trim() ?? '';
-            if (texto.length < 3) return 'Mínimo 3 caracteres';
-            if (texto.length > 20) return 'Máximo 20 caracteres';
+            if (texto.length < 3) return t.usernameError1;
+            if (texto.length > 20) return t.usernameError2;
             if (!RegExp(r'^[a-zA-Z0-9_.]+$').hasMatch(texto)) {
-              return 'Só letras, números, "_" e "."';
+              return t.usernameError3;
             }
             return null;
           },
@@ -52,11 +55,11 @@ class ProfileFormFields extends StatelessWidget {
         const SizedBox(height: 12),
         TextFormField(
           controller: nomeCtrl,
-          decoration: const InputDecoration(
-            labelText: 'Nome',
+          decoration: InputDecoration(
+            labelText: t.nomeLabel,
             prefixIcon: Icon(Icons.badge_outlined),
           ),
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+          validator: (v) => (v == null || v.trim().isEmpty) ? t.obrigatorioError : null,
         ),
         const SizedBox(height: 12),
         InkWell(
@@ -71,28 +74,28 @@ class ProfileFormFields extends StatelessWidget {
             if (escolhida != null) onDataNascimentoChanged(escolhida);
           },
           child: InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Data de nascimento (opcional)',
+            decoration: InputDecoration(
+              labelText: t.dataNascimentoLabel,
               prefixIcon: Icon(Icons.cake_outlined),
             ),
             child: Text(
-              dataNascimento == null ? 'Toca para escolher' : dateFormat.format(dataNascimento!),
+              dataNascimento == null ? t.dataNascimentoHint : dateFormat.format(dataNascimento!),
             ),
           ),
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: idLegoInsidersCtrl,
-          decoration: const InputDecoration(
-            labelText: 'ID Lego Insiders (opcional)',
+          decoration: InputDecoration(
+            labelText: t.legoInsidersLabel,
             prefixIcon: Icon(Icons.card_membership_outlined),
           ),
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: sexo,
-          decoration: const InputDecoration(
-            labelText: 'Sexo (opcional)',
+          decoration: InputDecoration(
+            labelText: t.sexoLabel,
             prefixIcon: Icon(Icons.wc_outlined),
           ),
           items: const [

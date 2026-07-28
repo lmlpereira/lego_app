@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../utils/lego_block_style.dart';
 import 'login_screen.dart';
@@ -107,6 +108,9 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: LegoColors.blue,
       body: Stack(
@@ -125,7 +129,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                         Column(
                           children: [
                             const SizedBox(height: 10),
-                            const LegoTitleBlock(text: 'REGISTO'),
+                            LegoTitleBlock(text: t.registotitle),
                             const SizedBox(height: 24),
 
                             // Mensagem de Erro
@@ -169,45 +173,45 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     // 1. Nome Completo (OBRIGATÓRIO)
-                                    _buildLabel('NOME COMPLETO', isRequired: true),
+                                    _buildLabel(t.nomeLabel, isRequired: true),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _nomeCtrl,
-                                      hint: 'Ex: João Silva',
+                                      hint: t.nomeHint,
                                       icon: Icons.badge_outlined,
                                       validator: (v) => (v == null || v.trim().isEmpty)
-                                          ? 'Por favor, insira o seu nome'
+                                          ? t.nomeError
                                           : null,
                                     ),
                                     const SizedBox(height: 12),
 
                                     // 2. Nome de Utilizador (OBRIGATÓRIO)
-                                    _buildLabel('NOME DE UTILIZADOR', isRequired: true),
+                                    _buildLabel(t.usernameLabel, isRequired: true),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _usernameCtrl,
-                                      hint: 'Ex: joaosilva99',
+                                      hint: t.usernameHint,
                                       icon: Icons.person_outline,
                                       validator: (v) => (v == null || v.trim().isEmpty)
-                                          ? 'Por favor, escolha um username'
+                                          ? t.usernameError
                                           : null,
                                     ),
                                     const SizedBox(height: 12),
 
                                     // 3. Email (OBRIGATÓRIO)
-                                    _buildLabel('EMAIL', isRequired: true),
+                                    _buildLabel(t.emailLabel, isRequired: true),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _emailCtrl,
-                                      hint: 'exemplo@email.com',
+                                      hint: t.emailHint,
                                       icon: Icons.email_outlined,
                                       keyboardType: TextInputType.emailAddress,
                                       validator: (v) {
                                         if (v == null || v.trim().isEmpty) {
-                                          return 'Por favor, insira o seu email';
+                                          return t.emailError;
                                         }
                                         if (!v.contains('@') || !v.contains('.')) {
-                                          return 'Email inválido';
+                                          return t.emailError2;
                                         }
                                         return null;
                                       },
@@ -215,11 +219,11 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                     const SizedBox(height: 12),
 
                                     // 4. Password (OBRIGATÓRIO)
-                                    _buildLabel('PALAVRA-PASSE', isRequired: true),
+                                    _buildLabel(t.passwordLabel, isRequired: true),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _passwordCtrl,
-                                      hint: '••••••••',
+                                      hint: t.passwordHint,
                                       icon: Icons.lock_outline,
                                       isPassword: _obscurePassword,
                                       suffixIcon: IconButton(
@@ -236,10 +240,10 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                       ),
                                       validator: (v) {
                                         if (v == null || v.isEmpty) {
-                                          return 'Por favor, insira a palavra-passe';
+                                          return t.passwordError;
                                         }
                                         if (v.length < 6) {
-                                          return 'Mínimo de 6 caracteres';
+                                          return t.passwordError2;
                                         }
                                         return null;
                                       },
@@ -247,11 +251,11 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                     const SizedBox(height: 12),
 
                                     // 5. Confirmação de Password (OBRIGATÓRIO)
-                                    _buildLabel('CONFIRMAR PALAVRA-PASSE', isRequired: true),
+                                    _buildLabel(t.passwordLabel2, isRequired: true),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _confirmarCtrl,
-                                      hint: '••••••••',
+                                      hint: t.passwordHint2,
                                       icon: Icons.lock_reset_outlined,
                                       isPassword: _obscureConfirmPassword,
                                       suffixIcon: IconButton(
@@ -269,10 +273,10 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                       ),
                                       validator: (v) {
                                         if (v == null || v.isEmpty) {
-                                          return 'Por favor, confirme a palavra-passe';
+                                          return t.passwordError3;
                                         }
                                         if (v != _passwordCtrl.text) {
-                                          return 'As palavras-passe não coincidem';
+                                          return t.passwordError4;
                                         }
                                         return null;
                                       },
@@ -283,17 +287,17 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                     const SizedBox(height: 8),
 
                                     // 6. ID LEGO Insiders (OPCIONAL)
-                                    _buildLabel('ID LEGO INSIDERS (OPCIONAL)'),
+                                    _buildLabel(t.legoInsidersLabel),
                                     const SizedBox(height: 4),
                                     _buildInputField(
                                       controller: _idLegoInsidersCtrl,
-                                      hint: 'Ex: 1234567890',
+                                      hint: t.legoInsidersHint,
                                       icon: Icons.card_membership_outlined,
                                     ),
                                     const SizedBox(height: 12),
 
                                     // 7. Data de Nascimento (OPCIONAL)
-                                    _buildLabel('DATA DE NASCIMENTO (OPCIONAL)'),
+                                    _buildLabel(t.dataNascimentoLabel),
                                     const SizedBox(height: 4),
                                     LegoBlockDecorator(
                                       color: LegoColors.lightGrey,
@@ -310,7 +314,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                               const SizedBox(width: 8),
                                               Text(
                                                 _dataNascimento == null
-                                                    ? 'Selecionar data'
+                                                    ? t.dataNascimentoHint
                                                     : '${_dataNascimento!.day.toString().padLeft(2, '0')}/${_dataNascimento!.month.toString().padLeft(2, '0')}/${_dataNascimento!.year}',
                                                 style: GoogleFonts.varelaRound(
                                                   fontSize: 13,
@@ -327,7 +331,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                     const SizedBox(height: 12),
 
                                     // 8. Sexo (OPCIONAL)
-                                    _buildLabel('SEXO (OPCIONAL)'),
+                                    _buildLabel(t.sexoLabel),
                                     const SizedBox(height: 4),
                                     LegoBlockDecorator(
                                       color: LegoColors.lightGrey,
@@ -338,7 +342,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                           child: DropdownButton<String>(
                                             value: _sexo,
                                             hint: Text(
-                                              'Selecionar opção',
+                                              t.sexoHint,
                                               style: GoogleFonts.varelaRound(
                                                   color: Colors.grey, fontSize: 13),
                                             ),
@@ -385,7 +389,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Text(
-                                                'CRIAR CONTA!',
+                                                t.criarConta,
                                                 style: GoogleFonts.varelaRound(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.bold,
@@ -414,7 +418,7 @@ class _RegisterLegoScreenState extends ConsumerState<RegisterLegoScreen> {
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               child: Text(
-                                'Já tens conta? Fazer Login',
+                                t.alredyConta,
                                 style: GoogleFonts.varelaRound(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

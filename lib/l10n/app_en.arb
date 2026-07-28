@@ -7,6 +7,9 @@
   "commonSave": "Save",
   "@commonSave": {"description": "Generic save button"},
 
+  "commonContinuar": "Continue",
+  "@commonContinuar": {"description": "Generic continue button"},
+
   "commonDelete": "Delete",
   "@commonDelete": {"description": "Generic delete button"},
 
@@ -163,6 +166,7 @@
   "withoutSession" : "Continue without an account",
 
   "@_COMENT_LOGIN": " --- LOGIN SECREEN ---",
+  "iniciarSessaotitle" : "LOGIN",
   "emailLable" : "EMAIL",
   "emailPlaceholder" : "Insert your email",
   "emailValidator" : "Insert an email",
@@ -176,7 +180,59 @@
 
   "@_COMENT_SPLASH": " --- SPLASH SECREEN ---",
   "splashScreenSubtitle" : "Collection management",
-  "loadingColection" : "Loading your collection ..."
+  "loadingColection" : "Loading your collection ...",
 
+  "@_COMENT_CPROFILE": " --- COMPLETE PROFILE SECREEN ---",
+  "titleCompleteProfile" : "Complete your profile",
+  "subtitleCompleteProfile" : "You've signed in with google using \"{email}\". All you need to do now is choose a username.",
+  "concluir" : "Finish",
+  "helperUsername" : "Unique — this is your ID in the app",
+  "usernameError1" : "Minimum 3 characters",
+  "usernameError2" : "Maximum 20 characters",
+  "usernameError3" : "Letters and numbers only, \"_\" e \".\"",
+  "obrigatorioError" : "Mandatory",
+
+  "@_COMENT_DELETEACOUNT": " --- DELETE ACCOUNT SECREEN ---",
+  "titleDeleteAccount" : "Delete account?",
+  "contentDeleteAccount" : "This will permanently delete your account (login, profile and username). This action cannot be undone.\\n\\n Your collection saved on this device will not be deleted as a result.",
+  "resultDeleteAccount" : "Account deleted",
+  "writePassword" : "Write your password.",
+  "confirmIsYou" : "Confirm that it’s you",
+  "secPass" : "Just to be on the safe side, write down your password so you can delete your account",
+  "secGoogle" : "For security reasons, please verify your Google account before deleting it",
+  "cGoogle" : "Confirm with Google and delete",
+  "cPass" : "Delete account",
+
+
+  "@_COMENT_REGISTO": " --- REGISTO SECREEN ---",
+
+  "registotitle" : "REGISTER",
+  "nomeLabel" : "FULL NAME",
+  "nomeHint" : "Eg: João Silva",
+  "nomeError" : "Please insert your full name!",
+  "usernameLabel" : "USERNAME",
+  "usernameHint" : "Eg: joaosilva99",
+  "usernameError" : "Please choose a username",
+  "emailLabel" : "EMAIL",
+  "emailHint" : "exemplo@email.com",
+  "emailError" : "Please insert your email",
+  "emailError2" : "Invalid email!",
+  "passwordLabel" : "PASSWORD",
+  "passwordHint" : "......",
+  "passwordError" : "Please insert your password",
+  "passwordError2" : "Minimum of 6 characters",
+  "passwordLabel2" : "CONFIRM PASSWORD",
+  "passwordHint2" : "......",
+  "passwordError3" : "Please confirm your password",
+  "passwordError4" : "The passwords do not match",
+  "legoInsidersLabel" : "LEGO INSIDERS ID (OPTIONAL)",
+  "legoInsidersHint" : "Eg: 1234567890",
+  "dataNascimentoLabel" : "DATE OF BIRTH (OPTIONAL)",
+  "dataNascimentoHint" : "Select the date",
+  "sexoLabel" : "GENDER (OPTIONAL)",
+  "sexoHint" : "Chose an option",
+  "criarConta" : "CREATE ACCOUNT!",
+  "alredyConta" : "Do you already have an account? Log in",
+  "error_create_account" : "An error occurred whilst creating the account."
 
 }
