@@ -6,6 +6,7 @@ import 'package:lego_app/ui/features/settings/temas_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../data/auth_providers.dart';
 import '../../../data/sync_providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../import/import_screen.dart';
 import '../perfil/profile_screen.dart';
 import 'brickset_api_settings.dart';
@@ -40,6 +41,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
 
     // 1. Obtém o estado assíncrono do utilizador com acesso seguro
     final userAsync = ref.watch(utilizadorAtualProvider);
@@ -48,26 +50,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // 2. Determina o texto do subtítulo de forma 100% segura sem usar '!'
     final String subtitlePerfil = userAsync.when(
       data: (u) {
-        if (u == null || u.uid.isEmpty) return 'Sem sessão (Visitante)';
-        return u.username ?? u.nome ?? u.email ?? 'Perfil Construtor';
+        if (u == null || u.uid.isEmpty) return t.profileNoSession;
+        return u.username ?? u.nome ?? u.email ?? '';
       },
-      loading: () => 'A carregar perfil...',
-      error: (_, __) => 'Sem sessão',
+      loading: () => t.profileLoading,
+      error: (_, __) => t.settingsNoSession,
     );
+
+
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configurações Gerais'),
+        title: Text(t.settingsAppBarTitle),
       ),
       body: ListView(
         children: [
           const SizedBox(height: 12),
 
           // --- SECÇÃO: CONTA ---
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Conta',
+              t.settingsSectionAccount,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -77,7 +81,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text('Perfil'),
+            title:  Text(t.settingsProfile),
             subtitle: Text(subtitlePerfil), // ✅ Subtítulo seguro
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
@@ -99,10 +103,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Divider(),
 
           // --- SECÇÃO: DADOS ---
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Gestão de Dados',
+              t.settingsSectionData,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -112,8 +116,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.file_upload_outlined),
-            title: const Text('Importar Excel'),
-            subtitle: const Text('Carregar dados'),
+            title: Text(t.settingsImportExport),
+            subtitle: Text(t.settingsImportExportSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -126,8 +130,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           ListTile(
             leading: const Icon(Icons.category_outlined),
-            title: const Text('Gerir temas'),
-            subtitle: const Text('Ver contagem por tema e apagar os que estiverem vazios'),
+            title:  Text(t.settingsManageThemes),
+            subtitle: Text(t.settingsManageThemesSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -145,10 +149,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
 
           // --- SECÇÃO: API ---
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Configurações da API',
+              t.settingsSectionApi,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -158,8 +162,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.api_outlined),
-            title: const Text('API BrickSet'),
-            subtitle: const Text('Gerir API'),
+            title: Text(t.settingsApiBrickset),
+            subtitle: Text(t.settingsApiManage),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -173,10 +177,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Divider(),
 
           // --- SECÇÃO: SOBRE A APP ---
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Sobre',
+              t.settingsSectionAbout,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -186,7 +190,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('Versão da App'),
+            title:  Text(t.settingsAppVersion),
             subtitle: Text(
               'v$_appVersion${_buildNumber.isNotEmpty ? " (Build $_buildNumber)" : ""}',
             ),
@@ -210,8 +214,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'DEVELOPED BY',
+                Text(
+                  t.settingsDevelopedBy,
                   style: TextStyle(
                     fontSize: 11,
                     letterSpacing: 1.2,
@@ -220,8 +224,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Dev4You - Luis Pereira',
+                Text(
+                  t.companyDeveloped,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -241,11 +245,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final uid = ref.watch(utilizadorAtualProvider).value?.uid;
     final semSessao = uid == null || uid.isEmpty;
 
+    final t = AppLocalizations.of(context)!;
+
     if (semSessao) {
-      return const ListTile(
+      return ListTile(
         leading: Icon(Icons.cloud_off_outlined),
-        title: Text('Sincronização'),
-        subtitle: Text('Inicia sessão para sincronizares a tua coleção com a cloud'),
+        title: Text(t.settingsSyncCloudTitle),
+        subtitle: Text(t.settingsSyncNoSessionSubtitle),
       );
     }
 
@@ -260,25 +266,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     switch (syncState.status) {
       case SyncStatus.aSincronizar:
-        subtitulo = 'A sincronizar...';
+        subtitulo = t.settingsSyncing;
         icone = Icons.sync;
         corIcone = theme.colorScheme.primary;
         break;
       case SyncStatus.erro:
-        subtitulo = syncState.erro ?? 'Erro a sincronizar';
+        subtitulo =  syncState.erro ?? t.settingsSyncErrorFallback;
         icone = Icons.sync_problem;
         corIcone = theme.colorScheme.error;
         break;
       case SyncStatus.sucesso:
       case SyncStatus.parado:
         if (syncState.ultimaSincronizacao != null) {
-          subtitulo = 'Última sincronização às '
-              '${DateFormat('HH:mm, dd/MM').format(syncState.ultimaSincronizacao!)}'
-              '${pendentes > 0 ? ' · $pendentes por enviar' : ''}';
+          subtitulo =  t.settingsSyncLastSyncAt(
+              DateFormat('HH:mm, dd/MM').format(syncState.ultimaSincronizacao!)) +
+              (pendentes > 0 ? t.settingsSyncPendingSuffix(pendentes) : '');
         } else {
           subtitulo = pendentes > 0
-              ? '$pendentes alteraç${pendentes == 1 ? 'ão' : 'ões'} por enviar'
-              : 'Ainda não sincronizado';
+              ? t.settingsSyncPendingOnly(pendentes)
+              : t.settingsSyncNeverSynced;
         }
         icone = pendentes > 0 ? Icons.cloud_upload_outlined : Icons.cloud_done_outlined;
         corIcone = pendentes > 0 ? theme.colorScheme.tertiary : Colors.green;
@@ -287,14 +293,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return ListTile(
       leading: Icon(icone, color: corIcone),
-      title: const Text('Sincronizar com a cloud'),
+      title: Text(t.settingsSyncCloudTitle),
       subtitle: Text(subtitulo),
       trailing: aSincronizar
           ? const SizedBox(
           width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
           : IconButton(
         icon: const Icon(Icons.sync),
-        tooltip: 'Sincronizar agora',
+        tooltip: t.settingsSyncNowTooltip,
         onPressed: () => ref.read(syncControllerProvider.notifier).sincronizarAgora(),
       ),
     );

@@ -1,0 +1,188 @@
+{
+  "@@locale": "en",
+
+  "commonCancel": "Cancel",
+  "@commonCancel": {"description": "Generic cancel button"},
+
+  "commonSave": "Save",
+  "@commonSave": {"description": "Generic save button"},
+
+  "commonDelete": "Delete",
+  "@commonDelete": {"description": "Generic delete button"},
+
+  "commonRemove": "Remove",
+  "@commonRemove": {"description": "Generic remove button (e.g. remove a saved API key)"},
+
+  "commonVerify": "Verify",
+  "@commonVerify": {"description": "Generic verify button"},
+
+  "commonConfigure": "Configure",
+  "@commonConfigure": {"description": "Generic configure button"},
+
+  "commonNotNow": "Not now",
+  "@commonNotNow": {"description": "Dismiss a suggestion without acting on it"},
+
+  "commonTryAgain": "Try again",
+  "@commonTryAgain": {"description": "Generic retry button"},
+
+  "commonAll": "All",
+  "@commonAll": {"description": "Filter chip meaning \"no filter applied\""},
+
+  "commonTheme": "Theme",
+  "@commonTheme": {"description": "Label for a Lego set's theme field"},
+
+  "commonYear": "Year",
+  "@commonYear": {"description": "Label for a release year field"},
+
+  "commonLoading": "Loading...",
+  "@commonLoading": {"description": "Generic loading placeholder"},
+
+  "navDashboard": "Dashboard",
+  "@navDashboard": {"description": "Bottom nav bar label"},
+
+  "navMySets": "My Sets",
+  "@navMySets": {"description": "Bottom nav bar label"},
+
+  "navSettings": "Settings",
+  "@navSettings": {"description": "Bottom nav bar label"},
+
+  "settingsAppBarTitle": "General Settings",
+  "@settingsAppBarTitle": {"description": "Settings screen app bar title"},
+
+  "settingsSectionAccount": "Account",
+  "@settingsSectionAccount": {"description": "Settings section header"},
+
+  "settingsProfile": "Profile",
+  "@settingsProfile": {"description": "Settings: profile row title"},
+
+  "settingsNoSession": "No session",
+  "@settingsNoSession": {"description": "Shown as profile subtitle when nobody is signed in"},
+
+  "settingsSectionData": "Data Management",
+  "@settingsSectionData": {"description": "Settings section header"},
+
+  "settingsImportExport": "Import / Export Excel",
+  "@settingsImportExport": {"description": "Settings row title"},
+
+  "settingsImportExportSubtitle": "Back up or load data",
+  "@settingsImportExportSubtitle": {"description": "Settings row subtitle"},
+
+  "settingsManageThemes": "Manage themes",
+  "@settingsManageThemes": {"description": "Settings row title, also used as the Manage Themes screen app bar title"},
+
+  "settingsManageThemesSubtitle": "See the count per theme and delete the empty ones",
+  "@settingsManageThemesSubtitle": {"description": "Settings row subtitle"},
+
+  "settingsSectionSync": "Sync",
+  "@settingsSectionSync": {"description": "Settings section header"},
+
+  "settingsSyncNoSessionSubtitle": "Sign in to sync your collection with the cloud",
+  "@settingsSyncNoSessionSubtitle": {"description": "Shown when nobody is signed in"},
+
+  "settingsSyncCloudTitle": "Sync with the cloud",
+  "@settingsSyncCloudTitle": {"description": "Sync row title"},
+
+  "settingsSyncing": "Syncing...",
+  "@settingsSyncing": {"description": "Sync row subtitle while a sync is in progress"},
+
+  "settingsSyncErrorFallback": "Error syncing",
+  "@settingsSyncErrorFallback": {"description": "Fallback message when a sync fails without a specific error"},
+
+  "settingsSyncLastSyncAt": "Last synced at {time}",
+  "@settingsSyncLastSyncAt": {
+    "description": "Sync row subtitle showing the last successful sync time",
+    "placeholders": {"time": {"type": "String"}}
+  },
+
+  "settingsSyncPendingSuffix": " · {count} to send",
+  "@settingsSyncPendingSuffix": {
+    "description": "Appended after settingsSyncLastSyncAt when there are pending changes",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "settingsSyncNeverSynced": "Never synced yet",
+  "@settingsSyncNeverSynced": {"description": "Sync row subtitle before the first sync ever happens"},
+
+  "settingsSyncPendingOnly": "{count, plural, one{{count} change to send} other{{count} changes to send}}",
+  "@settingsSyncPendingOnly": {
+    "description": "Sync row subtitle when there's no last-sync time yet but there are pending changes",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "settingsSyncNowTooltip": "Sync now",
+  "@settingsSyncNowTooltip": {"description": "Tooltip for the manual sync icon button"},
+
+  "settingsSectionApi": "API Settings",
+  "@settingsSectionApi": {"description": "Settings section header"},
+
+  "settingsApiBrickset": "Brickset API",
+  "@settingsApiBrickset": {"description": "Settings row title"},
+
+  "settingsApiManage": "Manage API",
+  "@settingsApiManage": {"description": "Settings row subtitle"},
+
+  "settingsSectionAbout": "About",
+  "@settingsSectionAbout": {"description": "Settings section header"},
+
+  "settingsAppVersion": "App Version",
+  "@settingsAppVersion": {"description": "Settings row title"},
+
+  "settingsDevelopedBy": "DEVELOPED BY",
+  "@settingsDevelopedBy": {"description": "Small credits footer label"},
+
+  "themesEmpty": "You don't have any themes yet.",
+  "@themesEmpty": {"description": "Manage Themes screen: empty state"},
+
+  "themesErrorLoading": "Error loading themes: {error}",
+  "@themesErrorLoading": {
+    "description": "Manage Themes screen: error state",
+    "placeholders": {"error": {"type": "String"}}
+  },
+
+  "themesNoSets": "No sets",
+  "@themesNoSets": {"description": "Shown for a theme with zero sets"},
+
+  "themesSetCount": "{count, plural, one{{count} set} other{{count} sets}}",
+  "@themesSetCount": {
+    "description": "Number of sets belonging to a theme",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "themesDeleteTooltip": "Delete theme",
+  "@themesDeleteTooltip": {"description": "Tooltip on the delete icon when the theme is empty"},
+
+  "themesDeleteDisabledTooltip": "Can't delete: still has sets associated",
+  "@themesDeleteDisabledTooltip": {"description": "Tooltip on the delete icon when the theme still has sets"},
+
+  "themesDeleteBlockedMessage": "The theme \"{nome}\" has {count, plural, one{1 set} other{{count} sets}} — change their theme before deleting it.",
+  "@themesDeleteBlockedMessage": {
+    "description": "Snackbar shown when trying to delete a non-empty theme",
+    "placeholders": {
+      "nome": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+
+  "themesConfirmDeleteTitle": "Delete theme?",
+  "@themesConfirmDeleteTitle": {"description": "Confirmation dialog title"},
+
+  "themesConfirmDeleteBody": "You are about to delete the theme \"{nome}\". This can't be undone.",
+  "@themesConfirmDeleteBody": {
+    "description": "Confirmation dialog body",
+    "placeholders": {"nome": {"type": "String"}}
+  },
+
+  "themesDeletedMessage": "Theme \"{nome}\" deleted.",
+  "@themesDeletedMessage": {
+    "description": "Snackbar after a successful delete",
+    "placeholders": {"nome": {"type": "String"}}
+  },
+
+  "themesDeleteRaceMessage": "Couldn't delete — the theme is no longer empty.",
+  "@themesDeleteRaceMessage": {"description": "Snackbar when the theme stopped being empty between tap and confirm"},
+
+
+  "profileNoSession" : "Without session (Guest)",
+  "profileLoading" : "Loading profile ...",
+  "companyDeveloped" : "Dev4You - Luis Pereira"
+}

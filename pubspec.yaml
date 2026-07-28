@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations: # <-- ADICIONA ISTO
+    sdk: flutter              # <-- E ISTO
+
+
   package_info_plus: ^10.2.1
   google_fonts: ^6.1.0 # Para a fonte Varela Round (parecida com a da LEGO)
 
@@ -37,7 +41,7 @@ dependencies:
   fl_chart: ^1.2.0
 
   # Datas
-  intl: ^0.20.3
+  intl: ^0.20.2
 
   # Ids únicos para os registos
   uuid: ^4.6.0
@@ -50,6 +54,8 @@ dependencies:
   cloud_firestore: ^6.7.1
   google_sign_in: ^7.2.0
   connectivity_plus: ^7.3.1
+
+
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +75,7 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/lego_minifig.png
     - assets/lego.png
