@@ -6,6 +6,7 @@ import 'package:lego_app/ui/features/perfil/complete_profile_form.dart';
 
 import '../../../data/auth_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../utils/lego_block_style.dart';
 
@@ -58,6 +59,8 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
   }
 
   Future<void> _entrarComGoogle() async {
+    final t = AppLocalizations.of(context)!;
+
     setState(() {
       _aEntrarGoogle = true;
       _erro = null;
@@ -88,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
     } on AuthException catch (e) {
       if (mounted) setState(() => _erro = e.message);
     } catch (e) {
-      if (mounted) setState(() => _erro = 'Erro ao entrar com o Google: $e');
+      if (mounted) setState(() => _erro = t.googleError(e.toString()));
     } finally {
       if (mounted) setState(() => _aEntrarGoogle = false);
     }
@@ -106,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final tecladoAberto = MediaQuery.of(context).viewInsets.bottom > 0;
-
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: LegoColors.blue,
@@ -127,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LegoLoginScreen> {
                         Column(
                           children: [
                             const SizedBox(height: 10),
-                            const LegoTitleBlock(text: 'LOGIN'),
+                            LegoTitleBlock(text: t.iniciarSessao),
                             const SizedBox(height: 30),
 
                             // Mensagem de Erro
@@ -212,6 +215,9 @@ class _LegoLoginFormPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -230,21 +236,21 @@ class _LegoLoginFormPanel extends StatelessWidget {
             // Campo Utilizador/Email
             _LegoInputFieldMobile(
               controller: emailCtrl,
-              label: 'EMAIL',
-              placeholder: 'Insira o seu email',
+              label: t.emailLable,
+              placeholder: t.emailPlaceholder,
               icon: Icons.person_outline,
-              validator: (v) => v == null || v.trim().isEmpty ? 'Insira o email' : null,
+              validator: (v) => v == null || v.trim().isEmpty ? t.emailValidator : null,
             ),
             const SizedBox(height: 16),
 
             // Campo Senha
             _LegoInputFieldMobile(
               controller: passwordCtrl,
-              label: 'PALAVRA PASSE',
-              placeholder: '••••••••',
+              label: t.pwpLable,
+              placeholder: t.pwpPlaceholder,
               icon: Icons.key_outlined,
               isPassword: true,
-              validator: (v) => v == null || v.isEmpty ? 'Insira a palavra-passe' : null,
+              validator: (v) => v == null || v.isEmpty ? t.pwpValidator : null,
             ),
             const SizedBox(height: 24),
 
@@ -337,6 +343,9 @@ class _LegoSignInButtonMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return LegoBlockDecorator(
       color: LegoColors.green,
       borderRadius: 8,
@@ -361,7 +370,7 @@ class _LegoSignInButtonMobile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'ENTRAR!',
+                  t.singIn,
                   style: GoogleFonts.varelaRound(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -391,6 +400,9 @@ class _LegoRegistarButtonMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return LegoBlockDecorator(
       color: LegoColors.red,
       borderRadius: 8,
@@ -415,7 +427,7 @@ class _LegoRegistarButtonMobile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Registar!',
+                  t.registar,
                   style: GoogleFonts.varelaRound(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -446,6 +458,9 @@ class _LegoGoogleButtonMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return LegoBlockDecorator(
       color: LegoColors.mediumGrey,
       borderRadius: 8,
@@ -470,7 +485,7 @@ class _LegoGoogleButtonMobile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Entrar com Google',
+                  t.googleSingIN,
                   style: GoogleFonts.varelaRound(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,

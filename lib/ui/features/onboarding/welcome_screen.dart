@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../utils/lego_block_style.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -21,6 +22,9 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: LegoColors.lightGrey,
       body: SafeArea(
@@ -64,7 +68,7 @@ class WelcomeScreen extends StatelessWidget {
 
               // TÍTULO DA APP
               Text(
-                'LEGO Collector',
+                t.titleWelcomeScreen,
                 style: GoogleFonts.varelaRound(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -76,7 +80,7 @@ class WelcomeScreen extends StatelessWidget {
 
               // SUBTÍTULO DESCRITIVO
               Text(
-                'Gere os teus sets, acompanha a tua wishlist e explora a tua coleção num só lugar.',
+                t.subtitleWelcomeScreen,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.varelaRound(
                   fontSize: 15,
@@ -105,7 +109,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.login_rounded, color: Colors.white),
                   label: Text(
-                    'Iniciar Sessão',
+                    t.iniciarSessao,
                     style: GoogleFonts.varelaRound(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -135,7 +139,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   icon:  Icon(Icons.arrow_forward_rounded, color: LegoColors.darkGrey),
                   label: Text(
-                    'Continuar sem Conta',
+                    t.withoutSession,
                     style: GoogleFonts.varelaRound(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

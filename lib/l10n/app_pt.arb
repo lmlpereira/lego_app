@@ -14,21 +14,21 @@
   "commonYear": "Ano",
   "commonLoading": "A carregar...",
 
+  "@_COMENT_NBAR": " --- NAVBAR OPTIONS ---",
   "navDashboard": "Dashboard",
   "navMySets": "Meus Sets",
-  "navSettings": "Configurações",
+  "navSettings": "Outros",
 
+  "@_COMENT_SETTING": " --- SETTINGS SECREEN ---",
   "profileNoSession" : "Sem sessão (Visitante)",
   "profileLoading" : "A carregar perfil ...",
-
-
   "settingsAppBarTitle": "Configurações Gerais",
   "settingsSectionAccount": "Conta",
   "settingsProfile": "Perfil",
   "settingsNoSession": "Sem sessão",
   "settingsSectionData": "Gestão de Dados",
-  "settingsImportExport": "Importar / Exportar Excel",
-  "settingsImportExportSubtitle": "Fazer cópia de segurança ou carregar dados",
+  "settingsImportExport": "Importar Excel",
+  "settingsImportExportSubtitle": "Carregar dados via Excel",
   "settingsManageThemes": "Gerir temas",
   "settingsManageThemesSubtitle": "Ver contagem por tema e apagar os que estiverem vazios",
   "settingsSectionSync": "Sincronização",
@@ -47,7 +47,9 @@
   "settingsSectionAbout": "Sobre",
   "settingsAppVersion": "Versão da App",
   "settingsDevelopedBy": "DESENVOLVIDO POR",
+  "companyDeveloped" : "Dev4You - Luis Pereira",
 
+  "@_COMENT_THEMES": " --- TEMAS SECREEN ---",
   "themesEmpty": "Ainda não tens nenhum tema criado.",
   "themesErrorLoading": "Erro a carregar temas: {error}",
   "themesNoSets": "Nenhum set",
@@ -60,5 +62,33 @@
   "themesDeletedMessage": "Tema \"{nome}\" apagado.",
   "themesDeleteRaceMessage": "Não foi possível apagar — o tema deixou de estar vazio entretanto.",
 
-  "companyDeveloped" : "Dev4You - Luis Pereira"
+
+
+  "@_COMENT_WELCOME": " --- WELCOME SECREEN ---",
+  "titleWelcomeScreen" : "LEGO COLLECTOR",
+  "subtitleWelcomeScreen" : "Gere os teus sets, acompanha a tua wishlist e explora a tua coleção num só lugar.",
+  "iniciarSessao" : "Iniciar Sessão",
+  "withoutSession" : "Continuar sem conta",
+
+
+  "@_COMENT_LOGIN": " --- LOGIN SECREEN ---",
+  "emailLable" : "EMAIL",
+  "emailPlaceholder" : "Insira o seu email",
+  "emailValidator" : "Insira o email",
+  "pwpLable" : "PALAVRA PASSE",
+  "pwpPlaceholder" : "......",
+  "pwpValidator" : "Insira a palavra passe",
+  "singIn" : "ENTRAR!",
+  "registar" : "REGISTAR!",
+  "googleSingIN" : "Entrar com Google",
+  "googleError": "Erro ao entrar com o Google: \"{error}\"",
+
+  "@_COMENT_SPLASH": " --- SPLASH SECREEN ---",
+  "splashScreenSubtitle" : "Gestão de Coleção",
+  "loadingColection" : "A carregar a coleção..."
+
+
+
+
+
 }

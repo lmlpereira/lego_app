@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/dashbord/DashboardScreen.dart';
 import 'package:lego_app/ui/features/lista/sets_list_screen_new.dart';
@@ -13,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/sync_providers.dart';
 import 'firebase_options.dart';
+import 'l10n/generated/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,9 +38,23 @@ class LegoApp extends StatelessWidget {
     const legoDark = Color(0xFF1F1F1F);
     const legoBackground = Color(0xFFF4F4F4);
 
+    //final t = AppLocalizations.of(context)!;
+
     return MaterialApp(
-      title: 'LEGO Collector',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.titleWelcomeScreen,
       debugShowCheckedModeBanner: false,
+      // Português e inglês, por agora. locale: null (omitido) = segue o
+      // idioma do telemóvel automaticamente; se não for nenhum dos dois
+      // suportados, cai no primeiro de supportedLocales (pt) — ver
+      // localeResolutionCallback abaixo para o caso de querer ser mais
+      // explícito no futuro (ex: um seletor de idioma nas Definições).
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: legoBackground,
@@ -138,31 +154,40 @@ class _BarraFlutuante extends StatelessWidget {
   final int indice;
   final ValueChanged<int> onSelecionar;
 
+
+
   const _BarraFlutuante({required this.indice, required this.onSelecionar});
 
-  static const _itens = [
-    _ItemNav(
-      corAtiva: LegoColors.red,
-      icone: Icons.dashboard_outlined,
-      iconeAtivo: Icons.dashboard,
-      label: 'Dashboard',
-    ),
-    _ItemNav(
-      corAtiva: LegoColors.blue,
-      icone: Icons.widgets_outlined,
-      iconeAtivo: Icons.widgets,
-      label: 'Meus Sets',
-    ),
-    _ItemNav(
-      corAtiva: LegoColors.yellow,
-      icone: Icons.settings_applications_outlined,
-      iconeAtivo: Icons.settings_applications,
-      label: 'Outros',
-    ),
-  ];
+
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
+    // Não é "static const" como antes: os labels agora vêm traduzidos
+    // (precisam do BuildContext), por isso a lista é construída a cada
+    // build — o custo é insignificante (3 items).
+    final _itens = [
+      _ItemNav(
+        corAtiva: LegoColors.red,
+        icone: Icons.dashboard_outlined,
+        iconeAtivo: Icons.dashboard,
+        label: t.navDashboard,
+      ),
+      _ItemNav(
+        corAtiva: LegoColors.blue,
+        icone: Icons.widgets_outlined,
+        iconeAtivo: Icons.widgets,
+        label: t.navMySets,
+      ),
+      _ItemNav(
+        corAtiva: LegoColors.yellow,
+        icone: Icons.settings_applications_outlined,
+        iconeAtivo: Icons.settings_applications,
+        label: t.navSettings,
+      ),
+    ];
 
     return SafeArea(
       minimum: EdgeInsets.zero,

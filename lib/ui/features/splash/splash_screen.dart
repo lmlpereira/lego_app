@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Importa o teu widget de animação do LEGO
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../utils/lego_brick_loading.dart';
 
@@ -46,6 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -93,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 16),
 
               Text(
-                'LEGO COLLECTOR',
+                t.titleWelcomeScreen,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -101,8 +103,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   letterSpacing: 2,
                 ),
               ),
-              const Text(
-                'Gestão de Coleção',
+              Text(
+                t.splashScreenSubtitle,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -117,8 +119,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 height: 140,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'A carregar a coleção...',
+              Text(
+                t.loadingColection,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -129,8 +131,8 @@ class _SplashScreenState extends State<SplashScreen> {
               const Spacer(),
 
               // Crédito no rodapé do Splash
-              const Text(
-                'Dev4You - Luis Pereira',
+              Text(
+                t.companyDeveloped,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
