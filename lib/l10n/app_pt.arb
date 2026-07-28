@@ -1,6 +1,8 @@
 {
   "@@locale": "pt",
 
+  "commonOk": "OK",
+  "commonSair": "Sair",
   "commonCancel": "Cancelar",
   "commonSave": "Guardar",
   "commonContinuar": "Continuar",
@@ -63,8 +65,6 @@
   "themesDeletedMessage": "Tema \"{nome}\" apagado.",
   "themesDeleteRaceMessage": "Não foi possível apagar — o tema deixou de estar vazio entretanto.",
 
-
-
   "@_COMENT_WELCOME": " --- WELCOME SECREEN ---",
 
   "titleWelcomeScreen" : "LEGO COLLECTOR",
@@ -116,7 +116,7 @@
 
   "@_COMENT_DELETEACOUNT": " --- DELETE ACCOUNT SECREEN ---",
   "titleDeleteAccount" : "Apagar conta?",
-  "contentDeleteAccount" :  "'Isto apaga definitivamente a tua conta (login, perfil e nome de utilizador). Não pode ser desfeito.\\n\\n A tua coleção guardada neste aparelho não é apagada por isto.'",
+  "contentDeleteAccount" :  "'Isto apaga definitivamente a tua conta (login, perfil e nome de utilizador). Não pode ser desfeito.\n\nA tua coleção guardada neste aparelho não é apagada por isto.'",
   "resultDeleteAccount" : "Conta apagada",
   "writePassword" : "Escreve a tua palavra-passe.",
   "confirmIsYou" : "Confirma que és tu",
@@ -125,9 +125,81 @@
   "cGoogle" : "Confirmar com Google e apagar",
   "cPass" : "Apagar conta",
 
+  "@_COMENT_EDITPROFILE": " --- EDIT PROFILE SECREEN ---",
+  "profileSaveSucess" : "Perfil atualizado com sucesso!",
+  "profileSaveError" : "Erro ao atualizar perfil: \"{error}\"",
+  "editProfileTitle" : "Editar Perfil",
+  "usernamePerfilLabel" : "Nome de Utilizador * (Não editável)",
+  "usernameValidator" : "O nome de utilizador é um campo obrigatório!",
+  "usernameValidatorLenght" : "O nome de utilizador deve conter pelo menos 3 caracteres!",
+  "nomePerfilLabel" : "Nome *",
+  "nomeValidator" : "O campo nome é obrigatório!",
+  "emailPerfilLabel" : "E-mail * (Não editável)",
+  "idlegoinsidersLabel" : "ID LEGO Insiders",
+  "datanacimentoPerfil" : "Data de Nascimento",
+  "datanacimentoHint" : "Selecione uma data",
+  "sexoPerfilLabel" : "Sexo",
+
+  "@_COMENT_PROFILE": " --- PROFILE SECREEN ---",
+  "profileTitle" : "PERFIL",
+  "apagarConta" : "APAGAR CONTA",
+  "sairConta" : "SAIR DA CONTA",
+  "semEmail" : "sem email",
+  "semUsername" : "sem nome de utilizador",
+  "cartaoInsiders" : "Ver Cartão Insiders",
+  "loadProfileError" : "Erro ao carregar perfil",
+  "setsLabel" : "SETS",
+  "pecasLabel" : "PEÇAS",
+  "editarPerfilLabel" : "Editar Dados Pessoais",
+  "ajudaesuporte" : "Ajuda e Suporte",
+  "ajudaesuporteContent" : "Developed by Dev4You\n\nEmail: dev4you.solutions@gmail.com",
+  "sairContent" : "Tens a certeza que queres sair da tua conta?",
+  "alertDialogPendentes" : "'Tens \"{pendentes}\" {pendentes, plural, one{1 alteração} other{{pendentes} alterações}} por enviar.\nVamos tentar sincronizá-las antes de sair.",
+
+  "@_COMENT_LEGOINSIDERSCARD": " --- LEGO INSIDERS CARD ---",
+  "insidersCardTitle" : "O seu LEGO® Insiders Card",
+  "insidersCardError" : "Erro ao gerar código",
+
+
+  "@_COMENT_DASHBOARD": " --- DASHBOARD SECREEN ---",
+  "dashboardTitle" : "DashBoard",
+  "titleAAll" : "Valor compras",
+  "titleBAll" : "Valor sets",
+  "labelDiferencaAllSets" : "Poupança face ao valor de tabela",
+  "titleAllSets" : "Todos os sets",
+  "titleAVendidos" : "Valor vendas",
+  "titleBVendidos" : "Valor compras (vendidos)",
+  "labelDiferencaVendidos" : "Lucro",
+  "titleVendidos" : "Sets vendidos",
+  "titleLast5Years" : "Compras — últimos 5 anos",
+  "titleSetsTema" : "Sets por tema",
+  "titleComprasAno" : "Compras por ano",
+  "labelCompras" : "Compras em \"{ano}\"",
+  "labelTheme" : "Tema",
+  "labelSets" : "Nº sets",
+  "labelAno" : "Ano",
+  "labelValorTotal" : "Valor Total",
+  "semDados" : "Ainda sem dados para mostrar.",
+  "loadErrorDashboard" : "Erro a carregar dados: \"{error}\"",
+
+
+  "@_COMENT_IMPORT": " --- IMPORT SECREEN ---",
+  "errorNoDataImport" : "Não encontrei nenhuma linha válida na folha Lista Sets.\n'Confirma que o ficheiro tem essa folha e que a primeira coluna (Número) está preenchida.",
+  "errorGenerateModel" : "Não foi possível gerar o modelo: \"{error}\"",
+  "importTitle" : "Importar via (xlsx)",
+  "importContent" : "Escolhe o teu ficheiro Lista Legos (STOCK).xlsx.\nVou ler a folha Lista Sets e adicionar os dados à base de dados local.",
+  "chooseFile" : "Escolher ficheiro",
+  "downloadModel" : "Descarregar modelo",
+  "importLoad" : "A importar: \"{file}\" ...",
+  "importSuccess" : "\"{number}\" sets importados com sucesso!",
+  "importWarning" : "\"{number}\" já existiam (mesmo número e data de compra) e foram atualizados com os dados do ficheiro.",
+  "importOtherFile" : "Importar outro ficheiro",
+  "importTry" : "Tentar novamente",
+
+
+
 
   "@_COMENT_LOGIN": " --- LOGIN SECREEN ---",
-
   "iniciarSessaotitle" : "LOGIN",
   "emailLable" : "EMAIL",
   "emailPlaceholder" : "Insira o seu email",

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/XlsxTemplateService.dart';
 import '../../../services/xlsx_import_service.dart';
 import '../utils/lego_brick_loading.dart';
@@ -43,6 +44,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   String? _ficheiroEscolhido;
 
   Future<void> _escolherEImportar() async {
+    final t = AppLocalizations.of(context)!;
+
+
     final xTypeGroup = XTypeGroup(
       label: 'xlsx',
       extensions: ['xlsx'],
@@ -71,9 +75,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       final sets = await XlsxImportService().importFromFile(path);
 
       if (sets.isEmpty) {
-        setState(() => _estado = const _Erro(
-            'Não encontrei nenhuma linha válida na folha "Lista Sets". '
-                'Confirma que o ficheiro tem essa folha e que a primeira coluna (Número) está preenchida.'));
+        setState(() => _estado =  _Erro(t.errorNoDataImport));
         return;
       }
 
@@ -85,20 +87,25 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   }
 
   Future<void> _descarregarModelo() async {
+    final t = AppLocalizations.of(context)!;
+
     try {
       await XlsxTemplateService().gerarEPartilhar();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não foi possível gerar o modelo: $e')),
+        SnackBar(content: Text(t.errorGenerateModel(e))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Importar xlsx')),
+      appBar: AppBar(title: Text(t.importTitle)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Center(
@@ -107,9 +114,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             children: [
               Icon(Icons.upload_file, size: 64, color: Theme.of(context).colorScheme.primary),
               const SizedBox(height: 16),
-              const Text(
-                'Escolhe o teu ficheiro "Lista Legos (STOCK).xlsx".\n'
-                    'Vou ler a folha "Lista Sets" e adicionar os dados à base de dados local.',
+              Text(t.importContent,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -122,6 +127,8 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   }
 
   Widget _conteudoPorEstado() {
+    final t = AppLocalizations.of(context)!;
+
     switch (_estado) {
       case _Idle():
         return Column(
@@ -130,13 +137,13 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             FilledButton.icon(
               onPressed: _escolherEImportar,
               icon: const Icon(Icons.folder_open),
-              label: const Text('Escolher ficheiro'),
+              label: Text(t.chooseFile),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _descarregarModelo,
               icon: const Icon(Icons.download_outlined),
-              label: const Text('Descarregar modelo'),
+              label: Text(t.downloadModel),
             ),
           ],
         );
@@ -154,7 +161,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         children: [
         const LegoBrickLoading(),
         const SizedBox(height: 16),
-        Text('A importar ${_ficheiroEscolhido ?? ''}...'),
+        Text(t.importLoad({_ficheiroEscolhido ?? ''})),
         ],);
 
       case _Sucesso(quantidade: final n, atualizados: final d):
@@ -162,11 +169,11 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.green, size: 40),
             const SizedBox(height: 12),
-            Text('$n sets importados com sucesso!'),
+            Text(t.importSuccess(n)),
             if (d > 0) ...[
               const SizedBox(height: 4),
               Text(
-                '$d já existiam (mesmo número e data de compra) e foram atualizados com os dados do ficheiro.',
+                t.importWarning(d),
                 style: TextStyle(color: Theme.of(context).colorScheme.outline),
                 textAlign: TextAlign.center,
               ),
@@ -175,7 +182,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             OutlinedButton.icon(
               onPressed: () => setState(() => _estado = const _Idle()),
               icon: const Icon(Icons.refresh),
-              label: const Text('Importar outro ficheiro'),
+              label: Text(t.importOtherFile),
             ),
           ],
         );
@@ -190,7 +197,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             OutlinedButton.icon(
               onPressed: () => setState(() => _estado = const _Idle()),
               icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
+              label: Text(t.importTry),
             ),
           ],
         );

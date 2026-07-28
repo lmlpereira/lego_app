@@ -7,6 +7,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import '../../../data/auth_providers.dart';
 import '../../../data/providers.dart';
 import '../../../data/sync_providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../login/login_screen.dart';
 import '../utils/lego_block_style.dart';
 import '../utils/lego_brick_loading.dart';
@@ -19,6 +20,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: LegoColors.blue,
       body: Stack(
@@ -55,7 +59,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  title: const LegoTitleBlock(text: 'PERFIL'),
+                  title:  LegoTitleBlock(text: t.profileTitle),
 
 
 
@@ -81,7 +85,7 @@ class ProfileScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
 
                         // Grelha de Estatísticas do Colecionador
-                        _buildStatsGrid(ref),
+                        _buildStatsGrid(ref, context),
 
                         const SizedBox(height: 16),
 
@@ -106,7 +110,7 @@ class ProfileScreen extends ConsumerWidget {
                                   const Icon(Icons.delete_forever, color: Colors.white, size: 20),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'APAGAR CONTA',
+                                    t.apagarConta,
                                     style: GoogleFonts.varelaRound(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -134,7 +138,7 @@ class ProfileScreen extends ConsumerWidget {
                                   const Icon(Icons.logout, color: Colors.white, size: 20),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'SAIR DA CONTA',
+                                    t.sairConta,
                                     style: GoogleFonts.varelaRound(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -161,6 +165,8 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Card Principal com Avatar e Dados do Utilizador (Dinamizado via Riverpod)
   Widget _buildUserCard(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+
     final userAsync = ref.watch(utilizadorAtualProvider);
 
     return Container(
@@ -175,8 +181,8 @@ class ProfileScreen extends ConsumerWidget {
       ),
       child: userAsync.when(
         data: (user) {
-          final username = user?.username ?? 'Sem username';
-          final email = user?.email ?? 'Sem e-mail';
+          final username = user?.username ?? t.semUsername;
+          final email = user?.email ?? t.semEmail;
           // Obtém o ID Insiders (garante que no teu modelo de dados existe o campo insidersId)
           final insidersId = user?.idLegoInsiders;
           final temInsidersId = insidersId != null && insidersId.trim().isNotEmpty;
@@ -248,7 +254,7 @@ class ProfileScreen extends ConsumerWidget {
                               color: LegoColors.blueDark,
                               size: 24,
                             ),
-                            tooltip: 'Ver Cartão Insiders',
+                            tooltip: t.cartaoInsiders,
                             onPressed: () => showInsidersCardDialog(
                               context,
                               insidersId,
@@ -335,7 +341,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         error: (err, stack) => Center(
           child: Text(
-            'Erro ao carregar perfil',
+            t.loadProfileError,
             style: GoogleFonts.varelaRound(color: LegoColors.red),
           ),
         ),
@@ -345,7 +351,9 @@ class ProfileScreen extends ConsumerWidget {
 
 
   /// Estatísticas da Coleção de LEGOs
-  Widget _buildStatsGrid(WidgetRef ref) {
+  Widget _buildStatsGrid(WidgetRef ref, BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     final formatter = NumberFormat('#,##0', 'pt_PT');
 
     final totalSetsAsync = ref.watch(totalSetsProvider);
@@ -366,11 +374,11 @@ class ProfileScreen extends ConsumerWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildStatItem('SETS', totalSetsTexto, LegoColors.yellow, Icons.category),
+          child: _buildStatItem(t.setsLabel, totalSetsTexto, LegoColors.yellow, Icons.category),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: _buildStatItem('PEÇAS', totalPecasTexto, LegoColors.green, Icons.extension),
+          child: _buildStatItem(t.pecasLabel, totalPecasTexto, LegoColors.green, Icons.extension),
         ),
       ],
     );
@@ -409,6 +417,8 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Lista de Definições / Opções do Perfil
   Widget _buildSettingsMenu(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -423,7 +433,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               _buildMenuItem(
                 icon: Icons.person_outline,
-                title: 'Editar Dados Pessoais',
+                title: t.editarPerfilLabel,
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -435,7 +445,7 @@ class ProfileScreen extends ConsumerWidget {
               const Divider(height: 1, indent: 16, endIndent: 16),
               _buildMenuItem(
                 icon: Icons.help_outline,
-                title: 'Ajuda e Suporte',
+                title: t.ajudaesuporte,
                 onTap: () => _dialogSuporte(context),
               ),
             ],
@@ -519,6 +529,8 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Diálogo de Suporte
   void _dialogSuporte(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -527,11 +539,11 @@ class ProfileScreen extends ConsumerWidget {
           side: const BorderSide(color: LegoColors.blueDark, width: 3),
         ),
         title: Text(
-          'Ajuda e Suporte',
+          t.ajudaesuporte,
           style: GoogleFonts.coiny(color: LegoColors.red),
         ),
         content: Text(
-          'Developed by Dev4You\n\nEmail: dev4you.solutions@gmail.com',
+          t.ajudaesuporteContent,
           style: GoogleFonts.varelaRound(),
         ),
         actions: [
@@ -539,7 +551,7 @@ class ProfileScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(backgroundColor: LegoColors.red),
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
-              'OK',
+              t.commonOk,
               style: GoogleFonts.varelaRound(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
@@ -634,6 +646,7 @@ class ProfileScreen extends ConsumerWidget {
   // Diálogo de Confirmação para Terminar Sessão
   void _confirmarLogout(BuildContext context, WidgetRef ref) {
     final pendentes = ref.read(pendenteSyncProvider).value ?? 0;
+    final t = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -649,7 +662,7 @@ class ProfileScreen extends ConsumerWidget {
                 side: const BorderSide(color: LegoColors.blueDark, width: 3),
               ),
               title: Text(
-                'SAIR DA CONTA',
+                t.sairConta,
                 style: GoogleFonts.coiny(color: LegoColors.red),
               ),
               content: estaASair
@@ -658,15 +671,14 @@ class ProfileScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Tens a certeza que queres desligar a tua conta de Mestre Construtor?',
+                    t.sairContent,
                     style: GoogleFonts.varelaRound(),
                     textAlign: TextAlign.center,
                   ),
                   if (pendentes > 0) ...[
                     const SizedBox(height: 12),
                     Text(
-                      'Tens $pendentes alteraç${pendentes == 1 ? 'ão' : 'ões'} por enviar. '
-                          'Vamos tentar sincronizá-las antes de sair.',
+                      t.alertDialogPendentes(pendentes),
                       style: GoogleFonts.varelaRound(fontSize: 12, color: Colors.orange[800]),
                       textAlign: TextAlign.center,
                     ),
@@ -679,7 +691,7 @@ class ProfileScreen extends ConsumerWidget {
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
                   child: Text(
-                    'CANCELAR',
+                    t.commonCancel,
                     style: GoogleFonts.varelaRound(
                       color: Colors.grey,
                       fontWeight: FontWeight.bold,
@@ -736,7 +748,7 @@ class ProfileScreen extends ConsumerWidget {
                     }
                   },
                   child: Text(
-                    'SAIR',
+                    t.commonSair,
                     style: GoogleFonts.varelaRound(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

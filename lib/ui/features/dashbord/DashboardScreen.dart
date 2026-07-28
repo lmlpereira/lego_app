@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../lista/SetsFilteredListScreen.dart';
 
 final _moeda = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
@@ -16,6 +17,9 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: RefreshIndicator(
@@ -39,49 +43,49 @@ class DashboardScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             _CartoesComparacao(
-              tituloA: 'Valor compras',
+              tituloA: t.titleAAll,
               providerA: totalComprasProvider,
               iconeA: Icons.shopping_cart_outlined,
               corA: Colors.blue,
-              tituloB: 'Valor sets',
+              tituloB: t.titleBAll,
               providerB: totalValorSetProvider,
               iconeB: Icons.local_offer_outlined,
               corB: Colors.deepPurple,
-              labelDiferenca: 'Poupança face ao valor de tabela',
+              labelDiferenca: t.labelDiferencaAllSets,
               diferenca: _poupanca,
               percentagem: _poupancaPercent,
-              tituloLista: 'Todos os sets',
+              tituloLista: t.titleAllSets,
               filtro: (s) => true,
             ),
             const SizedBox(height: 12),
             _CartoesComparacao(
-              tituloA: 'Valor vendas',
+              tituloA: t.titleAVendidos,
               providerA: totalVendasProvider,
               iconeA: Icons.sell_outlined,
               corA: Colors.green,
-              tituloB: 'Valor compras (vendidos)',
+              tituloB: t.titleBVendidos,
               providerB: totalComprasVendidosProvider,
               iconeB: Icons.shopping_cart_outlined,
               corB: Colors.blue,
-              labelDiferenca: 'Lucro',
+              labelDiferenca: t.labelDiferencaVendidos,
               diferenca: _lucro,
               percentagem: _lucroPercent,
-              tituloLista: 'Sets vendidos',
+              tituloLista: t.titleVendidos,
               filtro: (s) => s.vendido,
             ),
             const SizedBox(height: 24),
             _SeccaoCartao(
-              titulo: 'Compras — últimos 5 anos',
+              titulo: t.titleLast5Years,
               child: SizedBox(height: 220, child: _GraficoUltimosAnos()),
             ),
             const SizedBox(height: 24),
             _SeccaoCartao(
-              titulo: 'Sets por tema',
+              titulo: t.titleSetsTema,
               child: _TabelaTemas(),
             ),
             const SizedBox(height: 24),
             _SeccaoCartao(
-              titulo: 'Compras por ano',
+              titulo: t.titleComprasAno,
               child: _TabelaAnos(),
             ),
           ],
@@ -357,6 +361,7 @@ class _GraficoUltimosAnos extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dadosAsync = ref.watch(comprasPorAnoProvider);
+    final t = AppLocalizations.of(context)!;
 
     return dadosAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -378,7 +383,7 @@ class _GraficoUltimosAnos extends ConsumerWidget {
           _abrirListaFiltrada(
             context,
                 (s) => s.dataCompra?.year == ano,
-            'Compras em $ano',
+            t.labelCompras(ano),
           );
         }
 
@@ -466,6 +471,7 @@ class _TabelaTemas extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dadosAsync = ref.watch(contagemPorTemaProvider);
+    final t = AppLocalizations.of(context)!;
 
     return dadosAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -479,9 +485,9 @@ class _TabelaTemas extends ConsumerWidget {
             // Sem coluna de checkbox — as linhas continuam clicáveis
             // através de onSelectChanged, só sem o quadradinho visual.
             showCheckboxColumn: false,
-            columns: const [
-              DataColumn(label: Text('Tema')),
-              DataColumn(label: Text('Nº sets'), numeric: true),
+            columns: [
+              DataColumn(label: Text(t.labelTheme)),
+              DataColumn(label: Text(t.labelSets), numeric: true),
             ],
             rows: [
               for (final linha in dados)
@@ -512,6 +518,7 @@ class _TabelaAnos extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dadosAsync = ref.watch(resumoComprasPorAnoProvider);
+    final t = AppLocalizations.of(context)!;
 
     return dadosAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -523,10 +530,10 @@ class _TabelaAnos extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: DataTable(
             showCheckboxColumn: false,
-            columns: const [
-              DataColumn(label: Text('Ano')),
-              DataColumn(label: Text('Nº sets'), numeric: true),
-              DataColumn(label: Text('Valor total'), numeric: true),
+            columns: [
+              DataColumn(label: Text(t.labelAno)),
+              DataColumn(label: Text(t.labelSets), numeric: true),
+              DataColumn(label: Text(t.labelValorTotal), numeric: true),
             ],
             rows: [
               for (final linha in dados)
@@ -536,7 +543,7 @@ class _TabelaAnos extends ConsumerWidget {
                   onSelectChanged: (_) => _abrirListaFiltrada(
                     context,
                         (s) => s.dataCompra?.year == linha.ano,
-                    'Compras em ${linha.ano}',
+                    t.labelCompras(linha.ano),
                   ),
                   cells: [
                     DataCell(Text('${linha.ano}')),
@@ -559,11 +566,13 @@ class _SemDados extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Text(
-          'Ainda sem dados para mostrar.',
+          t.semDados,
           style: TextStyle(color: Theme.of(context).colorScheme.outline),
         ),
       ),
@@ -578,11 +587,13 @@ class _ErroSeccao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Text(
-          'Erro a carregar dados: $erro',
+          t.loadErrorDashboard(erro),
           style: TextStyle(color: Theme.of(context).colorScheme.error),
           textAlign: TextAlign.center,
         ),

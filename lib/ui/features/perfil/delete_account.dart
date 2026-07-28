@@ -68,9 +68,10 @@ class _ConfirmarEApagarDialogState extends ConsumerState<_ConfirmarEApagarDialog
 
   Future<void> _confirmarEApagar() async {
     final repo = ref.read(authRepositoryProvider);
+    final t = AppLocalizations.of(context)!;
 
     if (_usaPassword && _passwordCtrl.text.isEmpty) {
-      setState(() => _erro = 'Escreve a tua palavra-passe.');
+      setState(() => _erro = t.writePassword);
       return;
     }
 

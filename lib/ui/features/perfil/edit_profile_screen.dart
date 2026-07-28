@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../data/auth_providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../utils/lego_block_style.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -96,12 +97,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   /// Guardar as alterações
   Future<void> _guardarPerfil() async {
+    final t = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isCarregando = true);
 
     try {
-      // TODO: Adicionar o método de guardar no teu authRepository ou profileRepository
       await ref.read(authRepositoryProvider).atualizarPerfil(nome:_nomeController.text, dataNascimento: _dataNascimento, idLegoInsiders:  _legoInsidersController.text, sexo:  _sexoSelecionado);
 
 
@@ -109,7 +111,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Perfil atualizado com sucesso!',
+              t.profileSaveSucess,
               style: GoogleFonts.varelaRound(fontWeight: FontWeight.bold),
             ),
             backgroundColor: LegoColors.green,
@@ -122,7 +124,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Erro ao atualizar perfil: $e',
+              t.profileSaveError(e.toString()),
               style: GoogleFonts.varelaRound(fontWeight: FontWeight.bold),
             ),
             backgroundColor: LegoColors.red,
@@ -136,6 +138,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: LegoColors.blue,
       body: SafeArea(
@@ -163,7 +167,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
               ),
               title: Text(
-                'EDITAR PERFIL',
+                t.editProfileTitle,
                 style: GoogleFonts.coiny(
                   color: Colors.white,
                   fontSize: 22,
@@ -195,14 +199,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         _buildInputField(
                           enabled: false,
                           controller: _usernameController,
-                          label: 'Username * (Não editável)',
+                          label: t.usernamePerfilLabel,
                           icon: Icons.alternate_email,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'O username é obrigatório';
+                              return t.usernameValidator;
                             }
                             if (value.trim().length < 3) {
-                              return 'O username deve ter pelo menos 3 caracteres';
+                              return t.usernameValidatorLenght;
                             }
                             return null;
                           },
@@ -212,11 +216,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Campo: Nome*
                         _buildInputField(
                           controller: _nomeController,
-                          label: 'Nome *',
+                          label: t.nomePerfilLabel,
                           icon: Icons.person_outline,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'O nome é obrigatório';
+                              return t.nomeValidator;
                             }
                             return null;
                           },
@@ -226,7 +230,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Campo: Email* (NÃO EDITÁVEL)
                         _buildInputField(
                           controller: _emailController,
-                          label: 'E-mail * (Não editável)',
+                          label: t.emailPerfilLabel,
                           icon: Icons.email_outlined,
                           enabled: false,
                         ),
@@ -243,7 +247,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Campo: ID LEGO Insiders
                         _buildInputField(
                           controller: _legoInsidersController,
-                          label: 'ID LEGO Insiders',
+                          label: t.idlegoinsidersLabel,
                           icon: Icons.card_membership_rounded,
                           keyboardType: TextInputType.number,
                         ),
@@ -274,7 +278,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                   const Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'GUARDAR ALTERAÇÕES',
+                                    t.commonSave,
                                     style: GoogleFonts.varelaRound(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -350,16 +354,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   /// Widget do Seletor de Data de Nascimento
   Widget _buildDatePickerField() {
+    final t = AppLocalizations.of(context)!;
+
     final dateFormat = DateFormat('dd/MM/yyyy');
     final textoData = _dataNascimento != null
         ? dateFormat.format(_dataNascimento!)
-        : 'Selecionar data';
+        : t.datanacimentoHint;
 
     return InkWell(
       onTap: _selecionarDataNascimento,
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Data de Nascimento',
+          labelText: t.dataNascimentoLabel,
           labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark),
           prefixIcon: const Icon(Icons.cake_outlined, color: LegoColors.blueDark),
           filled: true,
@@ -382,11 +388,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   /// Widget do Dropdown para Seleção de Sexo
   Widget _buildDropdownSexo() {
+    final t = AppLocalizations.of(context)!;
+
     return DropdownButtonFormField<String>(
       initialValue: _sexoSelecionado,
       icon: const Icon(Icons.arrow_drop_down, color: LegoColors.blueDark),
       decoration: InputDecoration(
-        labelText: 'Sexo',
+        labelText: t.sexoPerfilLabel,
         labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark),
         prefixIcon: const Icon(Icons.people_outline, color: LegoColors.blueDark),
         filled: true,

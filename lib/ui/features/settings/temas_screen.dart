@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lego_app/ui/features/utils/lego_brick_loading.dart';
 
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Ecrã "Gerir temas" (Definições): mostra todos os temas com o número
 /// de sets de cada um, e permite apagar os que estiverem a zero — um
@@ -14,18 +16,19 @@ class TemasScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final temasAsync = ref.watch(temasComContagemProvider);
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gerir temas')),
+      appBar: AppBar(title: Text(t.settingsManageThemes)),
       body: temasAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro a carregar temas: $e')),
+        loading: () => const Center(child: LegoBrickLoading()),
+        error: (e, _) => Center(child: Text(t.themesErrorLoading(e.toString()))),
         data: (temas) {
           if (temas.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('Ainda não tens nenhum tema criado.', textAlign: TextAlign.center),
+                child: Text(t.themesEmpty, textAlign: TextAlign.center),
               ),
             );
           }
@@ -40,7 +43,7 @@ class TemasScreen extends ConsumerWidget {
               return ListTile(
                 title: Text(tema.nome),
                 subtitle: Text(
-                  vazio ? 'Nenhum set' : '${tema.quantidade} set${tema.quantidade == 1 ? '' : 's'}',
+                  vazio ? t.themesNoSets : t.themesSetCount(tema.quantidade),
                 ),
                 trailing: IconButton(
                   icon: Icon(
@@ -50,8 +53,8 @@ class TemasScreen extends ConsumerWidget {
                         : Theme.of(context).disabledColor,
                   ),
                   tooltip: vazio
-                      ? 'Apagar tema'
-                      : 'Não é possível apagar: ainda tem sets associados',
+                      ? t.themesDeleteTooltip
+                      : t.themesDeleteDisabledTooltip,
                   onPressed: () => _tocarApagar(context, ref, tema),
                 ),
               );
@@ -63,11 +66,12 @@ class TemasScreen extends ConsumerWidget {
   }
 
   Future<void> _tocarApagar(BuildContext context, WidgetRef ref, TemaComContagem tema) async {
+    final t = AppLocalizations.of(context)!;
+
     if (tema.quantidade > 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-            'O tema "${tema.nome}" tem ${tema.quantidade} set${tema.quantidade == 1 ? '' : 's'} — '
-                'muda-lhes o tema antes de o apagar.'),
+            t.themesDeleteBlockedMessage(tema.nome, tema.quantidade)),
       ));
       return;
     }
@@ -75,14 +79,14 @@ class TemasScreen extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Apagar tema?'),
-        content: Text('Vais apagar o tema "${tema.nome}". Não dá para desfazer.'),
+        title: Text(t.themesConfirmDeleteTitle),
+        content: Text(t.themesConfirmDeleteBody(tema.nome)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.commonCancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Apagar'),
+            child: Text(t.commonDelete),
           ),
         ],
       ),
@@ -94,8 +98,8 @@ class TemasScreen extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(apagado
-          ? 'Tema "${tema.nome}" apagado.'
-          : 'Não foi possível apagar — o tema deixou de estar vazio entretanto.'),
+          ? t.themesDeletedMessage(tema.nome)
+          : t.themesDeleteRaceMessage),
     ));
   }
 }

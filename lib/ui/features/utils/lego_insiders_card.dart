@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 
 
 class LegoInsidersCard extends StatelessWidget {
@@ -18,6 +20,8 @@ class LegoInsidersCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Definição da cor roxa oficial baseada na imagem fornecida
     const Color insidersPurple = Color(0xFF502379);
+
+    final t = AppLocalizations.of(context)!;
 
     return Container(
       width: 320,
@@ -115,7 +119,7 @@ class LegoInsidersCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'Your LEGO® Insiders Card',
+              t.insidersCardTitle,
               style: GoogleFonts.varelaRound(
                 color: Colors.white,
                 fontSize: 16,
@@ -143,7 +147,7 @@ class LegoInsidersCard extends StatelessWidget {
                   data: insidersId, // O ID real do utilizador
                   height: 100, // Altura aproximada à imagem
                   drawText: false, // Não desenhar o texto automático do pacote
-                  errorBuilder: (context, error) => const Text('Erro ao gerar código'),
+                  errorBuilder: (context, error) => Text(t.insidersCardError),
                 ),
                 const SizedBox(height: 10),
                 // Número do ID formatado por baixo
