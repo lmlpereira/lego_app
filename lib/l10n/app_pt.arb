@@ -116,7 +116,7 @@
 
   "@_COMENT_DELETEACOUNT": " --- DELETE ACCOUNT SECREEN ---",
   "titleDeleteAccount" : "Apagar conta?",
-  "contentDeleteAccount" :  "'Isto apaga definitivamente a tua conta (login, perfil e nome de utilizador). Não pode ser desfeito.\n\nA tua coleção guardada neste aparelho não é apagada por isto.'",
+  "contentDeleteAccount" : "Isto apaga definitivamente a tua conta (login, perfil e nome de utilizador). Não pode ser desfeito.\n\nA tua coleção guardada neste aparelho não é apagada por isto.",
   "resultDeleteAccount" : "Conta apagada",
   "writePassword" : "Escreve a tua palavra-passe.",
   "confirmIsYou" : "Confirma que és tu",
@@ -151,6 +151,11 @@
   "setsLabel" : "SETS",
   "pecasLabel" : "PEÇAS",
   "editarPerfilLabel" : "Editar Dados Pessoais",
+  "profileLanguage" : "Idioma",
+  "profileLanguageSubtitle" : "{idioma, select, pt{Português} en{English} other{Português}}",
+  "languageDialogTitle" : "Escolher idioma",
+  "languagePortuguese" : "Português",
+  "languageEnglish" : "English",
   "ajudaesuporte" : "Ajuda e Suporte",
   "ajudaesuporteContent" : "Developed by Dev4You\n\nEmail: dev4you.solutions@gmail.com",
   "sairContent" : "Tens a certeza que queres sair da tua conta?",
@@ -184,7 +189,7 @@
 
 
   "@_COMENT_IMPORT": " --- IMPORT SECREEN ---",
-  "errorNoDataImport" : "Não encontrei nenhuma linha válida na folha Lista Sets.\n'Confirma que o ficheiro tem essa folha e que a primeira coluna (Número) está preenchida.",
+  "errorNoDataImport" : "Não encontrei nenhuma linha válida na folha Lista Sets.\nConfirma que o ficheiro tem essa folha e que a primeira coluna (Número) está preenchida.",
   "errorGenerateModel" : "Não foi possível gerar o modelo: \"{error}\"",
   "importTitle" : "Importar via (xlsx)",
   "importContent" : "Escolhe o teu ficheiro Lista Legos (STOCK).xlsx.\nVou ler a folha Lista Sets e adicionar os dados à base de dados local.",

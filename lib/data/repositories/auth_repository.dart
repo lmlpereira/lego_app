@@ -16,6 +16,10 @@ class AppUser {
   final String? sexo;
   final String? photoUrl;
 
+  /// Preferência de idioma da app ('pt' ou 'en'). `null` = ainda não
+  /// escolheu explicitamente, a app segue o idioma do telemóvel.
+  final String? idioma;
+
   const AppUser({
     required this.uid,
     this.email,
@@ -25,6 +29,7 @@ class AppUser {
     this.idLegoInsiders,
     this.sexo,
     this.photoUrl,
+    this.idioma,
   });
 
   /// Perfil ainda não tem username escolhido — falta o passo de
@@ -98,6 +103,13 @@ abstract class AuthRepository {
   Future<void> repporPassword(String email);
 
   Future<void> terminarSessao();
+
+  /// Grava a preferência de idioma ('pt' ou 'en') no perfil do
+  /// utilizador (Firestore), para que fique sincronizada entre
+  /// dispositivos. Requer sessão ativa — para visitantes sem conta, a
+  /// UI deve guardar a preferência apenas localmente (ver
+  /// localeControllerProvider).
+  Future<void> atualizarIdioma(String idioma);
 
   /// Métodos de sign-in usados na conta atual (ex: "password",
   /// "google.com"). Vazio se não houver sessão. Usado pela UI para

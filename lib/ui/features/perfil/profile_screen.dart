@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../../data/auth_providers.dart';
+import '../../../data/locale_providers.dart';
 import '../../../data/providers.dart';
 import '../../../data/sync_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -90,7 +91,7 @@ class ProfileScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
 
                         // Menu de Opções / Definições
-                        _buildSettingsMenu(context),
+                        _buildSettingsMenu(context, ref),
 
                         const Spacer(),
 
@@ -416,8 +417,10 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Lista de Definições / Opções do Perfil
-  Widget _buildSettingsMenu(BuildContext context) {
+  Widget _buildSettingsMenu(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
+    final idiomaAtual = ref.watch(localeControllerProvider)?.languageCode ??
+        Localizations.localeOf(context).languageCode;
 
     return Container(
       decoration: BoxDecoration(
@@ -444,6 +447,13 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
               _buildMenuItem(
+                icon: Icons.language,
+                title: t.profileLanguage,
+                subtitle: t.profileLanguageSubtitle(idiomaAtual),
+                onTap: () => _dialogIdioma(context, ref),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              _buildMenuItem(
                 icon: Icons.help_outline,
                 title: t.ajudaesuporte,
                 onTap: () => _dialogSuporte(context),
@@ -458,6 +468,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
+    String? subtitle,
     required VoidCallback onTap,
   }) {
     return ListTile(
@@ -470,8 +481,69 @@ class ProfileScreen extends ConsumerWidget {
           color: LegoColors.blueDark,
         ),
       ),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle,
+              style: GoogleFonts.varelaRound(fontSize: 12, color: Colors.grey[600]),
+            ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
+    );
+  }
+
+  /// Diálogo de Escolha de Idioma
+  void _dialogIdioma(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+    final idiomaAtual = ref.read(localeControllerProvider)?.languageCode ??
+        Localizations.localeOf(context).languageCode;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: LegoColors.blueDark, width: 3),
+        ),
+        title: Text(
+          t.languageDialogTitle,
+          style: GoogleFonts.coiny(color: LegoColors.red),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              value: 'pt',
+              groupValue: idiomaAtual,
+              title: Text(t.languagePortuguese, style: GoogleFonts.varelaRound()),
+              onChanged: (valor) {
+                if (valor == null) return;
+                ref.read(localeControllerProvider.notifier).definirIdioma(valor);
+                Navigator.of(ctx).pop();
+              },
+            ),
+            RadioListTile<String>(
+              value: 'en',
+              groupValue: idiomaAtual,
+              title: Text(t.languageEnglish, style: GoogleFonts.varelaRound()),
+              onChanged: (valor) {
+                if (valor == null) return;
+                ref.read(localeControllerProvider.notifier).definirIdioma(valor);
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              t.commonCancel,
+              style: GoogleFonts.varelaRound(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -12,6 +12,7 @@ import 'package:lego_app/ui/features/utils/lego_block_style.dart';
 import 'package:lego_app/ui/features/utils/lego_brick_clipper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/locale_providers.dart';
 import 'data/sync_providers.dart';
 import 'firebase_options.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -26,28 +27,30 @@ void main() async {
   runApp(ProviderScope(child: LegoApp(isFirstTime: isFT)));
 }
 
-class LegoApp extends StatelessWidget {
+class LegoApp extends ConsumerWidget {
   final bool isFirstTime;
 
   const LegoApp({super.key, required this.isFirstTime});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const legoRed = Color(0xFFE3000B);
     const legoYellow = Color(0xFFFFD500);
     const legoDark = Color(0xFF1F1F1F);
     const legoBackground = Color(0xFFF4F4F4);
 
-    //final t = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeControllerProvider);
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.titleWelcomeScreen,
       debugShowCheckedModeBanner: false,
-      // Português e inglês, por agora. locale: null (omitido) = segue o
+      // Português e inglês. `locale` vem do localeControllerProvider:
+      // null (nenhuma escolha explícita, ver Perfil > Idioma) = segue o
       // idioma do telemóvel automaticamente; se não for nenhum dos dois
-      // suportados, cai no primeiro de supportedLocales (pt) — ver
-      // localeResolutionCallback abaixo para o caso de querer ser mais
-      // explícito no futuro (ex: um seletor de idioma nas Definições).
+      // suportados, cai no primeiro de supportedLocales (pt). Quando a
+      // pessoa escolhe um idioma explicitamente, esse valor passa a ser
+      // usado sempre, independentemente do idioma do aparelho.
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -195,6 +198,7 @@ class _BarraFlutuante extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
         child: Container(
           height: 68,
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(34),

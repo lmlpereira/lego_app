@@ -66,6 +66,7 @@ class FirebaseAuthRepository implements AuthRepository {
           idLegoInsiders: dados?['idLegoInsiders'] as String?,
           sexo: dados?['sexo'] as String?,
           photoUrl: fbUser.photoURL,
+          idioma: dados?['idioma'] as String?,
         );
       });
     });
@@ -99,6 +100,7 @@ class FirebaseAuthRepository implements AuthRepository {
       idLegoInsiders: dados?['idLegoInsiders'] as String?,
       sexo: dados?['sexo'] as String?,
       photoUrl: user.photoURL,
+      idioma: dados?['idioma'] as String?,
     );
   }
 
@@ -310,6 +312,22 @@ class FirebaseAuthRepository implements AuthRepository {
     } on fb.FirebaseAuthException catch (e) {
       throw AuthException(_mensagemErro(e.code));
     }
+  }
+
+  @override
+  Future<void> atualizarIdioma(String idioma) async {
+    final user = _auth.currentUser;
+    if (user == null) throw AuthException('Sem sessão ativa.');
+
+    // `merge: true` porque isto pode ser chamado antes de o perfil
+    // (users/{uid}) sequer existir ainda — ex: um utilizador Google que
+    // muda o idioma antes de completar o registo. Um set normal
+    // substituiria o documento inteiro; o merge só toca no campo
+    // 'idioma'.
+    await _db.collection('users').doc(user.uid).set(
+      {'idioma': idioma},
+      SetOptions(merge: true),
+    );
   }
 
   @override
