@@ -4,6 +4,7 @@ import 'package:lego_app/ui/features/utils/lego_set_card.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'edit_set_screen_new.dart';
 
 class SetsListScreenNew extends ConsumerStatefulWidget {
@@ -40,9 +41,11 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
     final temasAsync = ref.watch(temasProvider);
     //final euro = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
 
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Os meus sets'),
+        title: Text(t.mysetsScreenTitle),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(92),
           child: Padding(
@@ -53,7 +56,7 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
                   controller: _pesquisaCtrl,
                   onChanged: (v) => setState(() => _pesquisa = v),
                   decoration: InputDecoration(
-                    hintText: 'Pesquisar por número ou nome...',
+                    hintText: t.mysetsScreenSearch,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     isDense: true,
                     filled: true,
@@ -89,15 +92,13 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
       ),
       body: setsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro a carregar: $e')),
+        error: (e, _) => Center(child: Text(t.mysetsScreenLoadingError(e))),
         data: (todosOsSets) {
           if (todosOsSets.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text(
-                  'Ainda não tens nenhum set registado.\n'
-                      'Importa o teu xlsx ou adiciona um manualmente com o botão "+".',
+                child: Text(t.mysetsScreenNoData,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -110,11 +111,11 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
               .toList();
 
           if (sets.isEmpty) {
-            return const Center(
+            return  Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'Nenhum set corresponde aos filtros escolhidos.',
+                  t.mysetsScreenNoDataFilter,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -147,45 +148,6 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
                   );
                 },
               ));
-              /*return Dismissible(
-                key: ValueKey(set.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onErrorContainer),
-                ),
-                confirmDismiss: (_) => _confirmarApagar(context, set),
-                onDismissed: (_) => ref.read(setsRepositoryProvider).delete(set.id!),
-                child: ListTile(
-                  leading: set.imagemUrl != null
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      set.imagemUrl!,
-                      width: 44,
-                      height: 44,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          CircleAvatar(child: Text(set.tema.characters.first)),
-                    ),
-                  )
-                      : CircleAvatar(child: Text(set.tema.characters.first)),
-                  title: Text('${set.numeroSet} — ${set.descricao}'),
-                  subtitle: Text(
-                    '${set.tema} · ${euro.format(set.valorComprado)}'
-                        '${set.pecas != null ? ' · ${set.pecas} peças' : ''}'
-                        '${set.vendido ? ' · vendido' : ''}',
-                  ),
-                  trailing: set.vendido
-                      ? Icon(Icons.sell, color: Theme.of(context).colorScheme.primary)
-                      : null,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => EditSetScreenNew(set: set)),
-                  ),
-                ),
-              );*/
             },
           );
         },
@@ -202,13 +164,15 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
   /// Fila horizontal de chips para filtrar por tema — "Todos" mais um
   /// chip por cada tema já existente na coleção.
   Widget _filtroTemas(List<String> temas) {
+    final t = AppLocalizations.of(context)!;
+
     return ListView(
       scrollDirection: Axis.horizontal,
       children: [
         Padding(
           padding: const EdgeInsets.only(right: 6),
           child: ChoiceChip(
-            label: const Text('Todos'),
+            label: Text(t.mysetsScreenFilterAll),
             selected: _temaFiltro == null,
             onSelected: (_) => setState(() => _temaFiltro = null),
           ),
@@ -228,17 +192,20 @@ class _SetsListScreenStateNew extends ConsumerState<SetsListScreenNew> {
   }
 
   Future<bool> _confirmarApagar(BuildContext context, LegoSet set) async {
+
+    final t = AppLocalizations.of(context)!;
+
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Apagar set?'),
-        content: Text('Vais apagar "${set.numeroSet} — ${set.descricao}". Não dá para desfazer.'),
+        title: Text(t.mysetsScreenDialogDeleteTitle),
+        content: Text(t.mysetsScreenDialogDeleteContent(set.descricao, set.numeroSet)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.commonCancel)),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('Apagar'),
+            child: Text(t.commonDelete),
           ),
         ],
       ),

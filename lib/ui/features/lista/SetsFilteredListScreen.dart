@@ -5,6 +5,7 @@ import 'package:lego_app/ui/features/lista/edit_set_screen_new.dart';
 
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 final _moeda = NumberFormat.currency(locale: 'pt_PT', symbol: '€');
 final _data = DateFormat('dd/MM/yyyy');
@@ -50,7 +51,8 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
   @override
   Widget build(BuildContext context) {
     final setsAsync = ref.watch(todosOsSetsProvider);
-
+    final t = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.titulo),
@@ -62,7 +64,7 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
               controller: _pesquisaCtrl,
               onChanged: (v) => setState(() => _pesquisa = v),
               decoration: InputDecoration(
-                hintText: 'Pesquisar por número ou nome...',
+                hintText: t.mysetsScreenSearch,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 isDense: true,
                 filled: true,
@@ -87,7 +89,7 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
       ),
       body: setsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro a carregar: $e')),
+        error: (e, _) => Center(child: Text(t.mysetsScreenLoadingError(e))),
         data: (todos) {
           final sets = todos
               .where(widget.filtro)
@@ -98,8 +100,8 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
             return Center(
               child: Text(
                 _pesquisa.isEmpty
-                    ? 'Nenhum set encontrado.'
-                    : 'Nenhum set corresponde a "$_pesquisa".',
+                    ? t.setfilteredNoResults
+                    : t.setfilteredNoResultsFilter(_pesquisa),
                 textAlign: TextAlign.center,
               ),
             );
@@ -112,7 +114,7 @@ class _SetsFilteredListScreenState extends ConsumerState<SetsFilteredListScreen>
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '${sets.length} ${sets.length == 1 ? 'set' : 'sets'}',
+                    t.setfilteredResults(sets.length),
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
@@ -151,12 +153,13 @@ class _LinhaSet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     final detalhes = <String>[
       set.tema,
-      if (set.dataCompra != null) 'comprado em ${_data.format(set.dataCompra!)}',
+      if (set.dataCompra != null) t.setfilteredRowBuyDate(_data.format(set.dataCompra!)),
       if (set.quantidade > 1) 'x${set.quantidade}',
     ].join(' · ');
-
     return ListTile(
       onTap: onTap,
       title: Text('${set.numeroSet} — ${set.descricao}'),
@@ -169,8 +172,8 @@ class _LinhaSet extends StatelessWidget {
           if (set.vendido)
             Text(
               set.valorVenda != null
-                  ? 'Vendido: ${_moeda.format(set.valorVenda!)}'
-                  : 'Vendido',
+                  ? t.setfilteredRowVendidoValue(_moeda.format(set.valorVenda!))
+                  : t.setfilteredRowVendido,
               style: const TextStyle(color: Colors.green, fontSize: 12),
             ),
         ],

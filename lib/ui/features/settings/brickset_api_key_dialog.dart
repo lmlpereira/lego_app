@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/brickset_settings.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/brickset_service.dart';
 
 const _urlPedirChave = 'https://brickset.com/tools/webservices/requestkey';
@@ -68,6 +69,8 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
   }
 
   Future<bool> _verificar() async {
+    final t = AppLocalizations.of(context)!;
+
     final key = _ctrl.text.trim();
     if (key.isEmpty) return false;
 
@@ -86,12 +89,14 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
     setState(() {
       _aVerificar = false;
       _valida = ok;
-      _resultado = ok ? 'API key válida.' : 'API key inválida.';
+      _resultado = ok ? t.apiKeyDialogValid : t.apiKeyDialogInvalid;
     });
     return ok;
   }
 
   Future<void> _guardar() async {
+    final t = AppLocalizations.of(context)!;
+
     final key = _ctrl.text.trim();
     if (key.isEmpty) return;
 
@@ -106,18 +111,16 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
         final continuar = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Chave possivelmente inválida'),
-            content: const Text(
-                'Não consegui confirmar esta chave junto do Brickset. '
-                    'Queres guardá-la mesmo assim?'),
+            title: Text(t.apiKeyDialogInvalideKeyTitle),
+            content: Text(t.apiKeyDialogInvalideKeyContent),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
+                child: Text(t.commonCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Guardar na mesma'),
+                child: Text(t.apiKeyDialogInvalideKeySave),
               ),
             ],
           ),
@@ -143,10 +146,12 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
   }
 
   Future<void> _copiarLink() async {
+    final t = AppLocalizations.of(context)!;
+
     await Clipboard.setData(const ClipboardData(text: _urlPedirChave));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link copiado.'), duration: Duration(seconds: 2)),
+      SnackBar(content: Text(t.apiKeyDialogLink), duration: Duration(seconds: 2)),
     );
   }
 
@@ -154,23 +159,22 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
   Widget build(BuildContext context) {
     final vazio = _ctrl.text.trim().isEmpty;
 
+    final t = AppLocalizations.of(context)!;
+
     return AlertDialog(
       scrollable: true,
       title: Row(
         children: [
           Icon(Icons.key, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
-          const Text('API key do Brickset'),
+          Text(t.apiKeyDialogTitle),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Precisas de uma API key gratuita para ir buscar dados de sets '
-                'ao Brickset (nome, tema, peças, imagem, ...). Pede uma aqui '
-                '(toca para copiar o link):',
+          Text(t.apiKeyDialogContent,
             style: TextStyle(fontSize: 13),
           ),
           const SizedBox(height: 4),
@@ -196,18 +200,18 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
             obscureText: _oculto,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: 'API key',
+              labelText: t.apiKeyDialogLabel,
               border: const OutlineInputBorder(),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: 'Colar',
+                    tooltip: t.apiKeyDialogPaste,
                     icon: const Icon(Icons.content_paste, size: 20),
                     onPressed: _colar,
                   ),
                   IconButton(
-                    tooltip: _oculto ? 'Mostrar' : 'Ocultar',
+                    tooltip: _oculto ? t.apiKeyDialogShow : t.apiKeyDialogUnShow,
                     icon: Icon(
                       _oculto ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                       size: 20,
@@ -251,7 +255,7 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
               child: _aVerificar
                   ? const SizedBox(
                   width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Verificar'),
+                  :  Text(t.apiKeyDialogCheck),
             ),
             if (widget.apiKeyAtual.isNotEmpty)
               TextButton(
@@ -260,7 +264,7 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-                child: const Text('Remover'),
+                child: Text(t.apiKeyDialogRemove),
               ),
           ],
         ),
@@ -270,7 +274,7 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
           children: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
+              child: Text(t.commonCancel),
             ),
             const SizedBox(width: 4),
             FilledButton(
@@ -280,7 +284,7 @@ class _BricksetApiKeyDialogState extends ConsumerState<_BricksetApiKeyDialog> {
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Guardar'),
+                  : Text(t.commonSave),
             ),
           ],
         ),

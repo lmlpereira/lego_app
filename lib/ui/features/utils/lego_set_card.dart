@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:lego_app/ui/features/utils/lego_block_style.dart';
 
 import '../../../data/repositories/sets_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Card individual formatado fielmente com base no design de cartão arredondado
 class LegoSetCard extends StatelessWidget {
   final LegoSet legoSet;
   final VoidCallback? onTap;
+
 
   static const tagRed = LegoColors.red;
   static const cardBg = Colors.white;
@@ -21,8 +23,12 @@ class LegoSetCard extends StatelessWidget {
     this.onTap,
   });
 
+
   /// Formatação do subtítulo (ex: "6.167 peças • O Senhor dos Anéis")
-  String get _subtitleText {
+  String getSubtitleText(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     final parts = <String>[];
 
     if (legoSet.tema.isNotEmpty) {
@@ -38,7 +44,7 @@ class LegoSetCard extends StatelessWidget {
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
             (Match m) => '${m[1]}.',
       );
-      parts.add('$formattedPieces peças');
+      parts.add(t.mysetsScreenRowSubtitle(formattedPieces));
     }
 
 
@@ -50,6 +56,7 @@ class LegoSetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
@@ -108,7 +115,7 @@ class LegoSetCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       // Subtítulo: Peças • Tema
                       Text(
-                        _subtitleText,
+                        getSubtitleText(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../data/brickset_settings.dart';
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/brickset_service.dart';
 import '../settings/brickset_api_key_dialog.dart';
 import '../settings/brickset_search_sheet.dart';
@@ -80,6 +81,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
   @override
   Widget build(BuildContext context) {
     final temasAsync = ref.watch(temasProvider);
+    final t = AppLocalizations.of(context)!;
 
     return PopScope(
         canPop: false, // Bloqueia o pop automático para podermos validar primeiro
@@ -93,10 +95,10 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
         },
         child:Scaffold(
       appBar: AppBar(
-        title: Text(_aEditar ? 'Editar set' : 'Novo set'),
+        title: Text(_aEditar ? t.setEditTitle : t.setNewTitle),
         actions: [
           IconButton(
-            tooltip: 'API key do Brickset',
+            tooltip: t.apiKeyDialogTitle,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => showBricksetApiKeyDialog(context, ref),
           ),
@@ -127,8 +129,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
             TextFormField(
               controller: _numeroSetCtrl,
               decoration: InputDecoration(
-                labelText: 'Número do set',
-                helperText: 'Pesquisa no Brickset para preencher automaticamente',
+                labelText: t.setNumberLabel,
+                helperText: t.setNumberHelper,
                 suffixIcon: _aPesquisarBrickset
                     ? const Padding(
                     padding: EdgeInsets.all(12),
@@ -136,26 +138,26 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
                         width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)))
                     : IconButton(
                   icon: const Icon(Icons.search),
-                  tooltip: 'Pesquisar no Brickset',
+                  tooltip: t.setNumberTooltip,
                   onPressed: _pesquisarBrickset,
                 ),
               ),
               keyboardType: TextInputType.number,
-              validator: (v) => (v == null || int.tryParse(v) == null) ? 'Número inválido' : null,
+              validator: (v) => (v == null || int.tryParse(v) == null) ? t.setNumberInvalid : null,
             ),
             const SizedBox(height: 12),
 
             temasAsync.when(
               data: (temas) => _temaField(temas),
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text('Erro a carregar temas: $e'),
+              error: (e, _) => Text(t.setErrorLoadTheme(e)),
             ),
             const SizedBox(height: 12),
 
             TextFormField(
               controller: _descricaoCtrl,
-              decoration: const InputDecoration(labelText: 'Descrição'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+              decoration:  InputDecoration(labelText: t.setDescricaoLabel),
+              validator: (v) => (v == null || v.trim().isEmpty) ? t.setInvalidError : null,
             ),
             const SizedBox(height: 12),
 
@@ -164,7 +166,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
                 Expanded(
                   child: TextFormField(
                     controller: _anoCtrl,
-                    decoration: const InputDecoration(labelText: 'Ano de lançamento (opcional)'),
+                    decoration: InputDecoration(labelText: t.setAnoLancamentoLabel),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -172,7 +174,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
                 Expanded(
                   child: TextFormField(
                     controller: _pecasCtrl,
-                    decoration: const InputDecoration(labelText: 'Número de peças (opcional)'),
+                    decoration: InputDecoration(labelText: t.setNumeroPecasLabel),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -185,18 +187,18 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
                 Expanded(
                   child: TextFormField(
                     controller: _valorSetCtrl,
-                    decoration: const InputDecoration(labelText: 'Valor de tabela (€)'),
+                    decoration:  InputDecoration(labelText: t.setValorTabelaLabel),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? 'Inválido' : null,
+                    validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextFormField(
                     controller: _valorCompradoCtrl,
-                    decoration: const InputDecoration(labelText: 'Valor pago (€)'),
+                    decoration: InputDecoration(labelText: t.setValorPagoLabel),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? 'Inválido' : null,
+                    validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
                   ),
                 ),
               ],
@@ -212,14 +214,14 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
 
             TextFormField(
               controller: _quantidadeCtrl,
-              decoration: const InputDecoration(labelText: 'Quantidade'),
+              decoration: InputDecoration(labelText: t.setQuantidadeLabel),
               keyboardType: TextInputType.number,
-              validator: (v) => (v == null || int.tryParse(v) == null) ? 'Inválido' : null,
+              validator: (v) => (v == null || int.tryParse(v) == null) ? t.setInvalidError : null,
             ),
             const SizedBox(height: 12),
 
             _dataField(
-              label: 'Data de compra',
+              label: t.setDataCompraLabel,
               valor: _dataCompra,
               onEscolher: (d) => setState(() => _dataCompra = d),
             ),
@@ -227,7 +229,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
 
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Já vendido'),
+              title:  Text(t.setVendidoLabel),
               value: _vendido,
               onChanged: (v) => setState(() => _vendido = v),
             ),
@@ -235,16 +237,16 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
             if (_vendido) ...[
               TextFormField(
                 controller: _valorVendaCtrl,
-                decoration: const InputDecoration(labelText: 'Valor de venda (€)'),
+                decoration: InputDecoration(labelText: t.setValorVendaLabel),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (v) {
                   if (!_vendido) return null;
-                  return (v == null || double.tryParse(v) == null) ? 'Inválido' : null;
+                  return (v == null || double.tryParse(v) == null) ? t.setInvalidError : null;
                 },
               ),
               const SizedBox(height: 12),
               _dataField(
-                label: 'Data de venda',
+                label: t.setDataVendaLabel,
                 valor: _dataVenda,
                 onEscolher: (d) => setState(() => _dataVenda = d),
               ),
@@ -253,7 +255,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
 
             TextFormField(
               controller: _notasCtrl,
-              decoration: const InputDecoration(labelText: 'Notas (opcional)'),
+              decoration: InputDecoration(labelText: t.setNotasLabel),
               maxLines: 2,
             ),
             const SizedBox(height: 24),
@@ -264,7 +266,7 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
                   ? const SizedBox(
                   width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.save),
-              label: Text(_aEditar ? 'Guardar alterações' : 'Adicionar set'),
+              label: Text(_aEditar ? t.setbtnEditar : t.setbtnGuardar),
             ),
           ],
         ),
@@ -274,6 +276,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
 
   /// Constrói os dois cards com as diferenças calculadas
   Widget _buildCardsDiferenca() {
+    final t = AppLocalizations.of(context)!;
+
     final valorSet = double.tryParse(_valorSetCtrl.text.replaceAll(',', '.')) ?? 0.0;
     final valorComprado = double.tryParse(_valorCompradoCtrl.text.replaceAll(',', '.')) ?? 0.0;
 
@@ -295,8 +299,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  const Text(
-                    'Diferença (€)',
+                  Text(
+                    t.setLabelDiferenca("€"),
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
@@ -321,8 +325,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  const Text(
-                    'Diferença (%)',
+                  Text(
+                    t.setLabelDiferenca("%"),
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
@@ -344,25 +348,27 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
   }
 
   Future<bool> _confirmarSair() async {
+    final t = AppLocalizations.of(context)!;
+
     // Se não houver alterações, deixa sair diretamente
     if (!_temAlteracoes) return true;
 
     final Sair = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sair sem guardar?'),
-        content: const Text('Tens alterações não guardadas. Tens a certeza que queres sair?'),
+        title: Text(t.setDialogLeaveTitle),
+        content: Text(t.setDialogLeaveContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(t.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sair sem guardar'),
+            child: Text(t.setDialogSave),
           ),
         ],
       ),
@@ -403,6 +409,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
   }
 
   Widget _temaField(List<String> temas) {
+    final t = AppLocalizations.of(context)!;
+
     // Permite escolher um tema existente OU escrever um novo — não
     // obriga a ir a outro ecrã só para criar um tema.
     return Autocomplete<String>(
@@ -416,12 +424,12 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
         return TextFormField(
           controller: controller,
           focusNode: focusNode,
-          decoration: const InputDecoration(
-            labelText: 'Tema',
-            helperText: 'Escolhe um existente ou escreve um novo',
+          decoration: InputDecoration(
+            labelText: t.setThemeLabel,
+            helperText: t.setThemeHelper,
           ),
           onChanged: (v) => _temaSelecionado = v,
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+          validator: (v) => (v == null || v.trim().isEmpty) ? t.setValidator : null,
         );
       },
     );
@@ -432,6 +440,8 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
     required DateTime? valor,
     required ValueChanged<DateTime?> onEscolher,
   }) {
+    final t = AppLocalizations.of(context)!;
+
     return InkWell(
       onTap: () async {
         final agora = DateTime.now();
@@ -445,27 +455,29 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
       },
       child: InputDecorator(
         decoration: InputDecoration(labelText: label),
-        child: Text(valor == null ? 'Toca para escolher' : _dateFormat.format(valor)),
+        child: Text(valor == null ? t.setDataHelper : _dateFormat.format(valor)),
       ),
     );
   }
 
   Future<void> _pesquisarBrickset() async {
+    final t = AppLocalizations.of(context)!;
+
     final service = await obterBricksetServiceQuandoPronto(ref);
     if (service == null) {
       final configurar = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('API key do Brickset'),
-          content: const Text(
-              'Ainda não configuraste a tua API key do Brickset. Queres configurá-la agora?'),
+          title: Text(t.apiKeyDialogTitle),
+          content: Text(
+              t.setBricksetDialogContent),
           actions: [
             TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Agora não')),
+                child: Text(t.setBricksetDialogNo)),
             FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Configurar')),
+                child: Text(t.setBricksetDialogSim)),
           ],
         ),
       );
@@ -541,13 +553,14 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
 
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
+    final t = AppLocalizations.of(context)!;
 
     setState(() => _aGuardar = true);
 
     final novoSet = LegoSet(
       id: widget.set?.id,
       numeroSet: int.parse(_numeroSetCtrl.text),
-      tema: (_temaSelecionado ?? '').trim().isEmpty ? 'Sem tema' : _temaSelecionado!.trim(),
+      tema: (_temaSelecionado ?? '').trim().isEmpty ? t.setNoThemeLabel : _temaSelecionado!.trim(),
       descricao: _descricaoCtrl.text.trim(),
       ano: int.tryParse(_anoCtrl.text),
       valorSet: double.parse(_valorSetCtrl.text),

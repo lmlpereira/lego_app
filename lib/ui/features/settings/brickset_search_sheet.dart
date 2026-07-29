@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/brickset_settings.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/brickset_service.dart';
 
 /// Abre uma folha modal para pesquisar sets no Brickset (por número, nome,
@@ -49,10 +50,12 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   }
 
   Future<void> _pesquisar() async {
+    final t = AppLocalizations.of(context)!;
+
     final service = ref.read(bricksetServiceProvider);
     if (service == null) {
       setState(() => _erro =
-      'Falta configurar a API key do Brickset (ícone de definições no ecrã anterior).');
+      t.noAPIKEY);
       return;
     }
     final query = _queryCtrl.text.trim();
@@ -106,6 +109,7 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final alturaDisponivel = MediaQuery.of(context).size.height * 0.85;
+    final t = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -132,9 +136,9 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
                     child: TextField(
                       controller: _queryCtrl,
                       autofocus: widget.queryInicial.trim().isEmpty,
-                      decoration: const InputDecoration(
-                        labelText: 'Número ou nome do set',
-                        hintText: 'ex: 75894 ou Millennium Falcon',
+                      decoration: InputDecoration(
+                        labelText: t.labelNumber,
+                        hintText: t.labelNumberHint,
                         border: OutlineInputBorder(),
                       ),
                       onSubmitted: (_) => _pesquisar(),
@@ -167,15 +171,18 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
   }
 
   Widget _corpo() {
+
+    final t = AppLocalizations.of(context)!;
+
     if (_aPesquisar && _resultados == null) {
       return const Center(child: CircularProgressIndicator());
     }
     final resultados = _resultados;
     if (resultados == null) {
-      return const Center(child: Text('Escreve algo e pesquisa.'));
+      return  Center(child: Text(t.searchResultLabel));
     }
     if (resultados.isEmpty) {
-      return const Center(child: Text('Nenhum set encontrado.'));
+      return Center(child: Text(t.searchNoResults));
     }
 
     final temMais = resultados.length < _matches;
@@ -188,7 +195,7 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              '$_matches resultado${_matches == 1 ? '' : 's'}',
+              t.resultsMatches(_matches),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           );
@@ -213,7 +220,7 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
               subtitle: Text([
                 if (s.theme.isNotEmpty) s.theme,
                 if (s.year != null) '${s.year}',
-                if (s.pieces != null) '${s.pieces} peças',
+                if (s.pieces != null)  t.pecas(s.pieces.toString()),
               ].join(' · ')),
               onTap: () => Navigator.of(context).pop(s),
             ),
@@ -224,7 +231,7 @@ class _BricksetSearchSheetState extends ConsumerState<_BricksetSearchSheet> {
                     ? const CircularProgressIndicator()
                     : OutlinedButton(
                   onPressed: _carregarMais,
-                  child: const Text('Carregar mais'),
+                  child: Text(t.loadMore),
                 ),
               ),
           ],
