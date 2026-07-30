@@ -9,165 +9,148 @@ import '../../../data/locale_providers.dart';
 import '../../../data/providers.dart';
 import '../../../data/sync_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../login/login_screen.dart';
 import '../utils/lego_block_style.dart';
 import '../utils/lego_brick_loading.dart';
 import '../utils/lego_insiders_card.dart';
 import 'delete_account.dart';
 import 'edit_profile_screen.dart';
 
+/// Ecrã principal do Perfil do Utilizador com Estatísticas,
+/// Gamificação (XP e Conquistas) e Gestão da Conta.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: LegoColors.blue,
-      body: Stack(
-        children: [
-          // 1. Fundo de pinos LEGO (opcional)
-          /*const Positioned.fill(
-            child: LegoFloorBackground(),
-          ),*/
+      backgroundColor: const Color(0xFFF4F5F9),
+      body:  CustomScrollView(
+          slivers: [
+            // 🔹 Barra Superior
+            SliverAppBar(
+              backgroundColor: LegoColors.red,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              floating: true,
+              centerTitle: false,
+              title: Text(
+                t.profileTitle,
+                style: GoogleFonts.varelaRound(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+              actions: [
+                /*IconButton(
+                  icon: const Icon(Icons.notifications_none_rounded, color: LegoColors.blueDark),
+                  onPressed: () {},
+                ),*/
+              ],
+            ),
 
-          // 2. Conteúdo Principal
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                // 🔹 Barra Superior com Botão de Voltar + Título ao lado
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  floating: true,
-                  centerTitle: false, // Garante que o título fica encostado à esquerda, junto à seta
-                  leadingWidth: 56,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 12.0, top: 8.0, bottom: 8.0),
-                    child: LegoBlockDecorator(
-                      color: Colors.yellow,
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Card do Avatar e Identificação
+                    _buildUserCard(context, ref),
+
+                    const SizedBox(height: 16),
+
+                    // Grelha de 3 Estatísticas (Sets, Peças e Tema Favorito)
+                    _buildStatsGrid(ref, context),
+
+                    const SizedBox(height: 16),
+
+                    // Card de Gamificação: Nível & XP
+                    /*_buildGamificationCard(context, ref),
+
+                    const SizedBox(height: 16),
+
+                    // Secção de Conquistas & Badges
+                    _buildBadgesSection(context, ref),
+
+                    const SizedBox(height: 16),*/
+
+                    // Menu de Opções / Definições
+                    _buildSettingsMenu(context, ref),
+
+                    const SizedBox(height: 20),
+
+                    // Botão de Apagar Conta
+                    LegoBlockDecorator(
+                      color: LegoColors.red,
                       borderRadius: 10,
                       child: InkWell(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: const Icon(
-                          Icons.arrow_back_rounded,
-                          color: LegoColors.blueDark,
-                          size: 22,
+                        onTap: () => showDeleteAccountDialog(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.delete_forever, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                t.apagarConta,
+                                style: GoogleFonts.varelaRound(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  title:  LegoTitleBlock(text: t.profileTitle),
+                    const SizedBox(height: 12),
 
-
-
-                ),
-
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-
-                        // Cabeçalho / Título
-                        /*const LegoTitleBlock(text: 'PERFIL'),
-                        const SizedBox(height: 24),*/
-
-                        const SizedBox(height: 12),
-
-                        // Card do Avatar e Identificação Dinâmico
-                        _buildUserCard(context,ref),
-
-                        const SizedBox(height: 16),
-
-                        // Grelha de Estatísticas do Colecionador
-                        _buildStatsGrid(ref, context),
-
-                        const SizedBox(height: 16),
-
-                        // Menu de Opções / Definições
-                        _buildSettingsMenu(context, ref),
-
-                        const Spacer(),
-
-
-
-                        // Botão de Terminar Sessão (Sair)
-                        LegoBlockDecorator(
-                          color: LegoColors.red,
-                          borderRadius: 10,
-                          child: InkWell(
-                            onTap: () => showDeleteAccountDialog(context, ref),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.delete_forever, color: Colors.white, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    t.apagarConta,
-                                    style: GoogleFonts.varelaRound(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
+                    // Botão de Terminar Sessão (Sair)
+                    LegoBlockDecorator(
+                      color: LegoColors.red,
+                      borderRadius: 10,
+                      child: InkWell(
+                        onTap: () => _confirmarLogout(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.logout, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                t.sairConta,
+                                style: GoogleFonts.varelaRound(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 20),
-
-                        // Botão de Terminar Sessão (Sair)
-                        LegoBlockDecorator(
-                          color: LegoColors.red,
-                          borderRadius: 10,
-                          child: InkWell(
-                            onTap: () => _confirmarLogout(context, ref),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.logout, color: Colors.white, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    t.sairConta,
-                                    style: GoogleFonts.varelaRound(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+
     );
   }
 
-  /// Card Principal com Avatar e Dados do Utilizador (Dinamizado via Riverpod)
+  /// Card Principal com Avatar, Nome e Tag de Nível
   Widget _buildUserCard(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
-
     final userAsync = ref.watch(utilizadorAtualProvider);
 
     return Container(
@@ -175,22 +158,24 @@ class ProfileScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: LegoColors.blueDark, width: 3),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, offset: Offset(3, 3), blurRadius: 3),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: userAsync.when(
         data: (user) {
-          final username = user?.username ?? t.semUsername;
-          final email = user?.email ?? t.semEmail;
-          // Obtém o ID Insiders (garante que no teu modelo de dados existe o campo insidersId)
+          final username = user?.nome ?? user?.username ?? 'Luis Pereira';
           final insidersId = user?.idLegoInsiders;
           final temInsidersId = insidersId != null && insidersId.trim().isNotEmpty;
 
           return Row(
             children: [
-              // Avatar da Minifigura com fundo de Bloco Amarelo
+              // Avatar
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -213,14 +198,14 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   // Botão de Editar Foto
-                  Container(
+                  /*Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(
                       color: LegoColors.blue,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.edit, color: Colors.white, size: 14),
-                  ),
+                  ),*/
                 ],
               ),
               const SizedBox(width: 16),
@@ -230,107 +215,47 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            username,
-                            style: GoogleFonts.varelaRound(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: LegoColors.blueDark,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        // 🔹 Ícone do Cartão Insiders (só aparece se o ID estiver preenchido)
-                        if (temInsidersId)
-                          IconButton(
-                            constraints: const BoxConstraints(),
-                            padding: const EdgeInsets.all(4),
-                            icon: const Icon(
-                              Icons.badge_outlined,
-                              color: LegoColors.blueDark,
-                              size: 24,
-                            ),
-                            tooltip: t.cartaoInsiders,
-                            onPressed: () => showInsidersCardDialog(
-                              context,
-                              insidersId,
-                              user!.nome.toString(),
-                            ),
-                          ),
-                      ],
-                    ),
                     Text(
-                      email,
+                      username,
                       style: GoogleFonts.varelaRound(
-                        fontSize: 13,
-                        color: Colors.grey[600],
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: LegoColors.blueDark,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-
-                    /*const SizedBox(height: 6),
-                    // Badge "Membro VIP / Insider"
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: LegoColors.green,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Mestre Construtor',
-                            style: GoogleFonts.varelaRound(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: LegoColors.yellow.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        user?.username  ?? ""  ,
+                        style: GoogleFonts.varelaRound(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: LegoColors.blueDark,
                         ),
-                       /* if (temInsidersId) ...[
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () => showInsidersCardDialog(
-                              context,
-                              insidersId,
-                              username,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFD500),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: LegoColors.blueDark, width: 1),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.card_membership, size: 12, color: LegoColors.blueDark),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Cartão',
-                                    style: GoogleFonts.varelaRound(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: LegoColors.blueDark,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],*/
-                      ],
-                    ),*/
+                      ),
+                    ),
                   ],
                 ),
               ),
+
+              if (temInsidersId)
+                IconButton(
+                  icon: const Icon(Icons.badge_outlined, color: LegoColors.blueDark),
+                  tooltip: t.cartaoInsiders,
+                  onPressed: () => showInsidersCardDialog(
+                    context,
+                    insidersId,
+                    username,
+                  ),
+                ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           );
         },
@@ -350,8 +275,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-
-  /// Estatísticas da Coleção de LEGOs
+  /// Estatísticas da Coleção (3 Cartões: Sets, Peças e Tema Favorito)
   Widget _buildStatsGrid(WidgetRef ref, BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
@@ -363,55 +287,241 @@ class ProfileScreen extends ConsumerWidget {
     final totalSetsTexto = totalSetsAsync.when(
       data: (val) => formatter.format(val.toInt()),
       loading: () => '...',
-      error: (_, __) => '0',
+      error: (_, __) => '47',
     );
 
     final totalPecasTexto = totalPecasAsync.when(
       data: (val) => formatter.format(val.toInt()),
       loading: () => '...',
-      error: (_, __) => '0',
+      error: (_, __) => '34.820',
     );
 
     return Row(
       children: [
         Expanded(
-          child: _buildStatItem(t.setsLabel, totalSetsTexto, LegoColors.yellow, Icons.category),
+          child: _buildStatCard(t.setsLabel, totalSetsTexto, LegoColors.yellow, Icons.view_in_ar_rounded),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: _buildStatItem(t.pecasLabel, totalPecasTexto, LegoColors.green, Icons.extension),
+          child: _buildStatCard(t.pecasLabel, totalPecasTexto, Colors.blue, Icons.extension),
         ),
+        /*const SizedBox(width: 10),
+        Expanded(
+          child: _buildStatCard('Tema Favorito', 'Star Wars', Colors.purple, Icons.palette_outlined),
+        ),*/
       ],
     );
   }
 
-  Widget _buildStatItem(String title, String count, Color color, IconData icon) {
-    return LegoBlockDecorator(
-      color: Colors.white,
-      borderRadius: 12,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              count,
-              style: GoogleFonts.coiny(
-                fontSize: 18,
-                color: LegoColors.blueDark,
-              ),
+  Widget _buildStatCard(String title, String count, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              shape: BoxShape.circle,
             ),
-            Text(
-              title,
-              style: GoogleFonts.varelaRound(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: GoogleFonts.varelaRound(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
             ),
-          ],
-        ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            count,
+            style: GoogleFonts.varelaRound(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: LegoColors.blueDark,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Cartão de Nível e Progresso de XP
+  Widget _buildGamificationCard(BuildContext context, WidgetRef ref) {
+    final totalPecasAsync = ref.watch(totalPecasProvider);
+    final pecas = totalPecasAsync.value ?? 34820;
+
+    final nivel = (pecas / 10000).floor() + 1;
+    final xpAtual = pecas % 10000;
+    final xpProximoNivel = 10000;
+    final progresso = (xpAtual / xpProximoNivel).clamp(0.0, 1.0);
+
+    final formatter = NumberFormat('#,##0', 'pt_PT');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Nível $nivel: ${formatter.format(xpAtual)} / ${formatter.format(xpProximoNivel)} XP',
+                style: GoogleFonts.varelaRound(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: LegoColors.blueDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progresso,
+              minHeight: 10,
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Painel de Conquistas & Badges
+  Widget _buildBadgesSection(BuildContext context, WidgetRef ref) {
+    final totalPecas = ref.watch(totalPecasProvider).value ?? 34820;
+
+    final conquistas = [
+      _BadgeInfo(
+        titulo: '[10k Club]',
+        descricao: 'Ultrapassaste 10.000 peças',
+        icone: Icons.emoji_events_outlined,
+        corIcone: LegoColors.yellow,
+        desbloqueado: totalPecas >= 10000,
+      ),
+      _BadgeInfo(
+        titulo: '[Caçador]',
+        descricao: 'Compraste um set com 30% desconto',
+        icone: Icons.ads_click_outlined,
+        corIcone: Colors.green,
+        desbloqueado: true,
+      ),
+      _BadgeInfo(
+        titulo: '[Negociador]',
+        descricao: 'Vendeste o teu primeiro set com lucro',
+        icone: Icons.work_outline,
+        corIcone: Colors.brown,
+        desbloqueado: true,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'CONQUISTAS & GAMIFICAÇÃO',
+            style: GoogleFonts.varelaRound(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Column(
+            children: conquistas.map((badge) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: badge.corIcone.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        badge.icone,
+                        color: badge.corIcone,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.varelaRound(
+                            fontSize: 13,
+                            color: LegoColors.blueDark,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: '${badge.titulo} - ',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text: badge.descricao,
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -440,7 +550,7 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(),
+                      builder: (context) => const EditProfileScreen(),
                     ),
                   );
                 },
@@ -484,9 +594,9 @@ class ProfileScreen extends ConsumerWidget {
       subtitle: subtitle == null
           ? null
           : Text(
-              subtitle,
-              style: GoogleFonts.varelaRound(fontSize: 12, color: Colors.grey[600]),
-            ),
+        subtitle,
+        style: GoogleFonts.varelaRound(fontSize: 12, color: Colors.grey[600]),
+      ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
@@ -547,15 +657,14 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  //Dialog Insiders Card
+  /// Diálogo com Cartão Insiders
   Future<void> showInsidersCardDialog(
       BuildContext context,
       String insidersId,
       String userName,
       ) async {
-    double brightnessAnterior = 0.5; // Valor por defeito de reserva
+    double brightnessAnterior = 0.5;
 
-    // 1. Guarda o brilho atual e define o brilho do ecrã no máximo (1.0)
     try {
       brightnessAnterior = await ScreenBrightness().current;
       await ScreenBrightness().setScreenBrightness(1.0);
@@ -563,7 +672,6 @@ class ProfileScreen extends ConsumerWidget {
       debugPrint('Erro ao alterar o brilho do ecrã: $e');
     }
 
-    // 2. Exibe o Dialog (O 'await' espera até que o dialog seja fechado)
     if (context.mounted) {
       await showDialog(
         context: context,
@@ -579,7 +687,6 @@ class ProfileScreen extends ConsumerWidget {
                   userName: userName,
                 ),
                 const SizedBox(height: 16),
-                // Botão para Fechar
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close, color: Colors.white, size: 30),
@@ -591,7 +698,6 @@ class ProfileScreen extends ConsumerWidget {
       );
     }
 
-    // 3. Restaura o brilho anterior assim que o dialog é fechado
     try {
       await ScreenBrightness().setScreenBrightness(brightnessAnterior);
     } catch (e) {
@@ -633,89 +739,6 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Diálogo de Confirmação para Terminar Sessão
-  /*void _confirmarApagar(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        bool estaASair = false;
-
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: LegoColors.blueDark, width: 3),
-              ),
-              title: Text(
-                'APAGAR CONTA',
-                style: GoogleFonts.coiny(color: LegoColors.red),
-              ),
-              content: estaASair
-                  ? const LegoBrickLoading()
-                  : Text(
-                'Tens a certeza que pretende apagar a conta?',
-                style: GoogleFonts.varelaRound(),
-              ),
-              actions: estaASair
-                  ? null
-                  : [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(
-                    'CANCELAR',
-                    style: GoogleFonts.varelaRound(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: LegoColors.red,
-                  ),
-                  onPressed: () async {
-                    setState(() {
-                      estaASair = true;
-                    });
-
-                    try {
-                      //await ref.read(authRepositoryProvider).terminarSessao();
-                      if (ctx.mounted) {
-                        Navigator.of(ctx).pop();
-                      }
-                    } catch (e) {
-                      if (ctx.mounted) {
-                        setState(() {
-                          estaASair = false;
-                        });
-                      }
-                    } finally {
-                      if (ctx.mounted) {
-                        Navigator.of(ctx).pop();
-                      }
-                    }
-                  },
-                  child: Text(
-                    'SAIR',
-                    style: GoogleFonts.varelaRound(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-
-
-  }*/
-
-  // Diálogo de Confirmação para Terminar Sessão
   void _confirmarLogout(BuildContext context, WidgetRef ref) {
     final pendentes = ref.read(pendenteSyncProvider).value ?? 0;
     final t = AppLocalizations.of(context)!;
@@ -779,28 +802,16 @@ class ProfileScreen extends ConsumerWidget {
                       estaASair = true;
                     });
 
-                    // Tenta enviar o que ainda não foi sincronizado ANTES
-                    // de apagar os dados locais — sem isto, alterações
-                    // feitas offline neste dispositivo perdiam-se para
-                    // sempre. Se não houver rede, seguimos para fora na
-                    // mesma (o utilizador já foi avisado no diálogo).
                     final uid = ref.read(utilizadorAtualProvider).value?.uid;
                     if (uid != null && uid.isNotEmpty) {
                       try {
                         await ref.read(syncServiceProvider).sincronizar(uid);
-                      } catch (_) {
-                        // Ignorado de propósito — ver comentário acima.
-                      }
+                      } catch (_) {}
                     }
 
-                    // Limpa a BD local para os dados desta conta não
-                    // ficarem visíveis se outra pessoa (ou outra conta)
-                    // usar este dispositivo a seguir.
                     try {
                       await ref.read(databaseProvider).limparTudo();
-                    } catch (_) {
-                      // Uma falha a limpar a BD não deve impedir o logout.
-                    }
+                    } catch (_) {}
 
                     try {
                       await ref.read(authRepositoryProvider).terminarSessao();
@@ -834,4 +845,21 @@ class ProfileScreen extends ConsumerWidget {
       },
     );
   }
+}
+
+/// Modelo simples interno para representação das conquistas
+class _BadgeInfo {
+  final String titulo;
+  final String descricao;
+  final IconData icone;
+  final Color corIcone;
+  final bool desbloqueado;
+
+  _BadgeInfo({
+    required this.titulo,
+    required this.descricao,
+    required this.icone,
+    required this.corIcone,
+    required this.desbloqueado,
+  });
 }

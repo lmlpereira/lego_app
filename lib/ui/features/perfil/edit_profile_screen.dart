@@ -49,8 +49,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         setState(() {
           _usernameController.text = user.username ?? '';
           _emailController.text = user.email ?? '';
-          // Caso a tua classe User tenha estes campos no futuro:
-           _nomeController.text = user.nome ?? '';
+          _nomeController.text = user.nome ?? '';
           _legoInsidersController.text = user.idLegoInsiders ?? '';
           _dataNascimento = user.dataNascimento;
           _sexoSelecionado = user.sexo;
@@ -104,8 +103,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isCarregando = true);
 
     try {
-      await ref.read(authRepositoryProvider).atualizarPerfil(nome:_nomeController.text, dataNascimento: _dataNascimento, idLegoInsiders:  _legoInsidersController.text, sexo:  _sexoSelecionado);
-
+      await ref.read(authRepositoryProvider).atualizarPerfil(
+        nome: _nomeController.text,
+        dataNascimento: _dataNascimento,
+        idLegoInsiders: _legoInsidersController.text,
+        sexo: _sexoSelecionado,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -115,6 +118,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               style: GoogleFonts.varelaRound(fontWeight: FontWeight.bold),
             ),
             backgroundColor: LegoColors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
         Navigator.of(context).pop();
@@ -128,6 +133,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               style: GoogleFonts.varelaRound(fontWeight: FontWeight.bold),
             ),
             backgroundColor: LegoColors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -141,66 +148,39 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: LegoColors.blue,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // AppBar com botão de voltar e Título
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              floating: true,
-              leadingWidth: 56,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 12.0, top: 8.0, bottom: 8.0),
-                child: LegoBlockDecorator(
-                  color: Colors.yellow,
-                  borderRadius: 10,
-                  child: InkWell(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: LegoColors.blueDark,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ),
-              title: Text(
-                t.editProfileTitle,
-                style: GoogleFonts.coiny(
-                  color: Colors.white,
-                  fontSize: 22,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ),
+      backgroundColor: const Color(0xFFF4F5F9),
+      body: Column(
+        children: [
+          // Header Top Bar
+          _buildCustomAppBar(context, t),
 
-            // Formulário Principal
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: LegoColors.blueDark, width: 3),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black26, offset: Offset(3, 3), blurRadius: 3),
-                    ],
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Campo: Username*
+          // Scrollable Content
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Avatar Card
+                      _buildHeaderAvatarCard(),
+
+                      const SizedBox(height: 20),
+
+                      // Secção: Informações da Conta
+                      _buildSectionTitle(t.dadosdacontaLabel),
+                      const SizedBox(height: 10),
+                      _buildCardGroup([
                         _buildInputField(
                           enabled: false,
                           controller: _usernameController,
                           label: t.usernamePerfilLabel,
                           icon: Icons.alternate_email,
+                          suffixIcon: Icons.lock_outline_rounded,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return t.usernameValidator;
@@ -211,9 +191,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
+                        _buildInputField(
+                          controller: _emailController,
+                          label: t.emailPerfilLabel,
+                          icon: Icons.email_outlined,
+                          suffixIcon: Icons.lock_outline_rounded,
+                          enabled: false,
+                        ),
+                      ]),
 
-                        // Campo: Nome*
+                      const SizedBox(height: 24),
+
+                      // Secção: Informações Pessoais
+                      _buildSectionTitle(t.personalDetailsLabel),
+                      const SizedBox(height: 10),
+                      _buildCardGroup([
                         _buildInputField(
                           controller: _nomeController,
                           label: t.nomePerfilLabel,
@@ -225,88 +218,250 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
-
-                        // Campo: Email* (NÃO EDITÁVEL)
-                        _buildInputField(
-                          controller: _emailController,
-                          label: t.emailPerfilLabel,
-                          icon: Icons.email_outlined,
-                          enabled: false,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Campo: Data de Nascimento
+                        const SizedBox(height: 14),
                         _buildDatePickerField(),
-                        const SizedBox(height: 16),
-
-                        // Campo: Sexo
+                        const SizedBox(height: 14),
                         _buildDropdownSexo(),
-                        const SizedBox(height: 16),
+                      ]),
 
-                        // Campo: ID LEGO Insiders
-                        _buildInputField(
-                          controller: _legoInsidersController,
-                          label: t.idlegoinsidersLabel,
-                          icon: Icons.card_membership_rounded,
-                          keyboardType: TextInputType.number,
-                        ),
-                        const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
-                        // Botão de Guardar
-                        LegoBlockDecorator(
-                          color: LegoColors.green,
-                          borderRadius: 12,
-                          child: InkWell(
-                            onTap: _isCarregando ? null : _guardarPerfil,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              child: _isCarregando
-                                  ? const Center(
-                                child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                                  : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    t.commonSave,
-                                    style: GoogleFonts.varelaRound(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      // Secção: LEGO Insiders VIP
+                      _buildSectionTitle(t.programaLegoInsidersLabel),
+                      const SizedBox(height: 10),
+                      _buildInsidersCardGroup(t),
+
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
+          ),
+
+          // Bottom Save Action Bar
+          _buildBottomActionBar(t),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomAppBar(BuildContext context, AppLocalizations t) {
+    return Container(
+      color: LegoColors.red,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              LegoBlockDecorator(
+                color: LegoColors.yellow,
+                borderRadius: 10,
+                child: InkWell(
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.arrow_back_rounded,
+                      color: LegoColors.blueDark,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                t.editProfileTitle,
+                style: GoogleFonts.varelaRound(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Helper genérico para criar TextFormFields estilizados
+  Widget _buildHeaderAvatarCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: LegoColors.yellow,
+                child: Icon(
+                  Icons.person,
+                  size: 48,
+                  color: LegoColors.blueDark,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: LegoColors.blueDark,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    size: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _nomeController.text.isNotEmpty
+                ? _nomeController.text
+                : (_usernameController.text.isNotEmpty ? _usernameController.text : ''),
+            style: GoogleFonts.varelaRound(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: LegoColors.blueDark,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            _emailController.text,
+            style: GoogleFonts.varelaRound(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        title,
+        style: GoogleFonts.varelaRound(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey[600],
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardGroup(List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildInsidersCardGroup(AppLocalizations t) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: LegoColors.yellow, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: LegoColors.blueDark,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.card_membership_rounded,
+                  color: LegoColors.yellow,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.digitalCardInsidersLabel,
+                      style: GoogleFonts.varelaRound(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: LegoColors.blueDark,
+                      ),
+                    ),
+                    Text(
+                      t.digitalCardInsidersContent,
+                      style: GoogleFonts.varelaRound(
+                        fontSize: 11,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInputField(
+            controller: _legoInsidersController,
+            label: t.idlegoinsidersLabel,
+            icon: Icons.numbers_rounded,
+            keyboardType: TextInputType.number,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInputField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    IconData? suffixIcon,
     bool enabled = true,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
@@ -319,40 +474,49 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       style: GoogleFonts.varelaRound(
         color: enabled ? LegoColors.blueDark : Colors.grey[600],
         fontWeight: FontWeight.w600,
+        fontSize: 14,
       ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.varelaRound(
           color: enabled ? LegoColors.blueDark : Colors.grey[500],
+          fontSize: 13,
         ),
-        prefixIcon: Icon(icon, color: enabled ? LegoColors.blueDark : Colors.grey[400]),
+        prefixIcon: Icon(
+          icon,
+          color: enabled ? LegoColors.blueDark : Colors.grey[400],
+          size: 20,
+        ),
+        suffixIcon: suffixIcon != null
+            ? Icon(suffixIcon, color: Colors.grey[400], size: 18)
+            : null,
         filled: true,
-        fillColor: enabled ? Colors.grey[50] : Colors.grey[200],
+        fillColor: enabled ? const Color(0xFFFAFAFA) : Colors.grey[100],
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: LegoColors.blueDark, width: 2),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 2),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+          borderSide: BorderSide(color: Colors.grey[200]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: LegoColors.blueDark, width: 2.5),
+          borderSide: const BorderSide(color: LegoColors.blueDark, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: LegoColors.red, width: 2),
+          borderSide: const BorderSide(color: LegoColors.red, width: 1.5),
         ),
       ),
     );
   }
 
-  /// Widget do Seletor de Data de Nascimento
   Widget _buildDatePickerField() {
     final t = AppLocalizations.of(context)!;
 
@@ -363,16 +527,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return InkWell(
       onTap: _selecionarDataNascimento,
+      borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: t.dataNascimentoLabel,
-          labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark),
-          prefixIcon: const Icon(Icons.cake_outlined, color: LegoColors.blueDark),
+          labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark, fontSize: 13),
+          prefixIcon: const Icon(Icons.cake_outlined, color: LegoColors.blueDark, size: 20),
+          suffixIcon: const Icon(Icons.calendar_month_rounded, color: LegoColors.blueDark, size: 18),
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: const Color(0xFFFAFAFA),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!, width: 2),
+            borderSide: BorderSide(color: Colors.grey[300]!),
           ),
         ),
         child: Text(
@@ -380,32 +547,33 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           style: GoogleFonts.varelaRound(
             color: _dataNascimento != null ? LegoColors.blueDark : Colors.grey[600],
             fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),
     );
   }
 
-  /// Widget do Dropdown para Seleção de Sexo
   Widget _buildDropdownSexo() {
     final t = AppLocalizations.of(context)!;
 
     return DropdownButtonFormField<String>(
-      initialValue: _sexoSelecionado,
+      value: _sexoSelecionado,
       icon: const Icon(Icons.arrow_drop_down, color: LegoColors.blueDark),
       decoration: InputDecoration(
         labelText: t.sexoPerfilLabel,
-        labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark),
-        prefixIcon: const Icon(Icons.people_outline, color: LegoColors.blueDark),
+        labelStyle: GoogleFonts.varelaRound(color: LegoColors.blueDark, fontSize: 13),
+        prefixIcon: const Icon(Icons.people_outline, color: LegoColors.blueDark, size: 20),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: const Color(0xFFFAFAFA),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 2),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: LegoColors.blueDark, width: 2.5),
+          borderSide: const BorderSide(color: LegoColors.blueDark, width: 2),
         ),
       ),
       items: _opcoesSexo.map((String sexo) {
@@ -416,6 +584,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             style: GoogleFonts.varelaRound(
               color: LegoColors.blueDark,
               fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
         );
@@ -425,6 +594,59 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           _sexoSelecionado = novoValor;
         });
       },
+    );
+  }
+
+  Widget _buildBottomActionBar(AppLocalizations t) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: LegoBlockDecorator(
+        color: LegoColors.green,
+        borderRadius: 12,
+        child: InkWell(
+          onTap: _isCarregando ? null : _guardarPerfil,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: _isCarregando
+                ? const Center(
+              child: SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  t.commonSave,
+                  style: GoogleFonts.varelaRound(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

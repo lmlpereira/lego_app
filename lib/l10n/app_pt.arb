@@ -139,6 +139,12 @@
   "datanacimentoPerfil" : "Data de Nascimento",
   "datanacimentoHint" : "Selecione uma data",
   "sexoPerfilLabel" : "Sexo",
+  "personalDetailsLabel" : "INFORMAÇÕES PESSOAIS",
+  "dadosdacontaLabel" : "DADOS DA CONTA",
+  "programaLegoInsidersLabel" : "PROGRAMA LEGO® INSIDERS",
+  "digitalCardInsidersLabel" : "Cartão Digital Insiders",
+  "digitalCardInsidersContent" : "Regista o teu número para acesso ao teu código QR VIP.",
+
 
   "@_COMENT_PROFILE": " --- PROFILE SECREEN ---",
   "profileTitle" : "PERFIL",

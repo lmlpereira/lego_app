@@ -209,6 +209,12 @@
   "datanacimentoPerfil" : "Date of Birth",
   "datanacimentoHint" : "Select a date",
   "sexoPerfilLabel" : "Gender",
+  "personalDetailsLabel" : "PERSONAL DATA",
+  "dadosdacontaLabel" : "ACCOUNT DETAILS",
+  "programaLegoInsidersLabel" : "LEGO® INSIDERS PROGRAM",
+  "digitalCardInsidersLabel" : "Digital Insiders Card",
+  "digitalCardInsidersContent" : "Register your number to access your VIP QR code.",
+
 
   "@_COMENT_PROFILE": " --- PROFILE SECREEN ---",
   "profileTitle" : "PROFILE",
