@@ -48,6 +48,12 @@ final resumoComprasPorAnoProvider = StreamProvider<List<AnoCompraResumo>>((ref) 
   return ref.watch(setsRepositoryProvider).watchResumoComprasPorAno();
 });
 
+// Vamos buscar o tema que mais tenho na coleção
+final temaFavoritoProvider = Provider<AsyncValue<TemaResumo?>>((ref) {
+  final contagem = ref.watch(contagemPorTemaProvider);
+  return contagem.whenData((lista) => lista.isEmpty ? null : lista.first);
+});
+
 /// Valor total gasto apenas nos sets já vendidos — para comparar
 /// diretamente com o valor das vendas (lucro real), sem incluir sets
 /// ainda em stock por vender. Derivado de todosOsSetsProvider em vez de

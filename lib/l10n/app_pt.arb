@@ -170,6 +170,12 @@
   "@_COMENT_LEGOINSIDERSCARD": " --- LEGO INSIDERS CARD ---",
   "insidersCardTitle" : "O seu LEGO® Insiders Card",
   "insidersCardError" : "Erro ao gerar código",
+  "favoriteThemeLabel": "Tema Favorito",
+  "noThemeYet": "Sem tema",
+
+
+
+
 
 
   "@_COMENT_DASHBOARD": " --- DASHBOARD SECREEN ---",

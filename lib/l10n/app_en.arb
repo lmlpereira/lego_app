@@ -236,6 +236,9 @@
   "ajudaesuporteContent" : "Developed by Dev4You\n\nEmail: dev4you.solutions@gmail.com",
   "sairContent" : "Are you sure you want to log out of your account?",
   "alertDialogPendentes" : "You have \"{pendentes}\" {pendentes, plural, one{1 change} other{{pendentes} changes}} to submit.\nLet’s try to synchronise them before you leave.",
+  "favoriteThemeLabel": "Favorite theme",
+  "noThemeYet": "No theme",
+
 
   "@_COMENT_LEGOINSIDERSCARD": " --- LEGO INSIDERS CARD ---",
   "insidersCardTitle" : "Your LEGO® Insiders Card",

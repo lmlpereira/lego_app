@@ -283,6 +283,7 @@ class ProfileScreen extends ConsumerWidget {
 
     final totalSetsAsync = ref.watch(totalSetsProvider);
     final totalPecasAsync = ref.watch(totalPecasProvider);
+    final temaFavoritoAsync = ref.watch(temaFavoritoProvider);
 
     final totalSetsTexto = totalSetsAsync.when(
       data: (val) => formatter.format(val.toInt()),
@@ -296,7 +297,15 @@ class ProfileScreen extends ConsumerWidget {
       error: (_, __) => '34.820',
     );
 
-    return Row(
+    final temaFavoritoTexto = temaFavoritoAsync.when(
+      data: (tema) => tema?.tema ?? t.noThemeYet,
+      loading: () => '...',
+      error: (_, __) => '-',
+    );
+
+
+
+    /*return Row(
       children: [
         Expanded(
           child: _buildStatCard(t.setsLabel, totalSetsTexto, LegoColors.yellow, Icons.view_in_ar_rounded),
@@ -305,13 +314,41 @@ class ProfileScreen extends ConsumerWidget {
         Expanded(
           child: _buildStatCard(t.pecasLabel, totalPecasTexto, Colors.blue, Icons.extension),
         ),
-        /*const SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
-          child: _buildStatCard('Tema Favorito', 'Star Wars', Colors.purple, Icons.palette_outlined),
-        ),*/
+          child: _buildStatCard(t.favoriteThemeLabel, temaFavoritoTexto, Colors.purple, Icons.palette_outlined),
+        ),
+      ],
+    );*/
+
+    return Column(
+      children: [
+        // Primeiramente: 2 cards na primeira linha
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(t.setsLabel, totalSetsTexto, LegoColors.yellow, Icons.view_in_ar_rounded),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildStatCard(t.pecasLabel, totalPecasTexto, Colors.blue, Icons.extension),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10), // Espaçamento vertical entre as linhas
+        // Em seguida: 1 card na segunda linha
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(t.favoriteThemeLabel, temaFavoritoTexto, Colors.purple, Icons.palette_outlined),
+            ),
+          ],
+        ),
       ],
     );
   }
+
+
 
   Widget _buildStatCard(String title, String count, Color color, IconData icon) {
     return Container(

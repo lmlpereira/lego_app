@@ -13,6 +13,7 @@ dependencies:
   flutter_localizations: # <-- ADICIONA ISTO
     sdk: flutter              # <-- E ISTO
 
+  mobile_scanner: ^5.2.3
 
   package_info_plus: ^10.2.1
   google_fonts: ^6.1.0 # Para a fonte Varela Round (parecida com a da LEGO)

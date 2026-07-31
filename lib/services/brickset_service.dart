@@ -209,5 +209,32 @@ class BricksetService {
     }
   }
 
+  Future<String?> lookupSetByBarcode(String ean) async {
+
+    if (apiKey.trim().isEmpty) {
+      throw BricksetException(
+          'Falta configurar a API key do Brickset (Definições > Brickset).');
+    }
+
+    final uri = Uri.parse('$_baseUrl/getSets').replace(
+      queryParameters: {
+        'apiKey': apiKey,
+        'userHash': '', // pode ir vazio '' se não precisares de dados de coleção do Brickset
+        'params': jsonEncode({'EAN': ean}),
+      },
+    );
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success' && (data['matches'] as int) > 0) {
+        final sets = data['sets'] as List;
+        return sets.first['number']; // ex: "75192-1"
+      }
+    }
+    return null;
+  }
+
   void dispose() => _client.close();
 }
