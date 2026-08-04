@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Erro devolvido pela API do Brickset (ex: API key inválida, parâmetros
@@ -163,6 +164,12 @@ class BricksetService {
     } catch (e) {
       throw BricksetException('Sem ligação à internet ou ao Brickset ($e).');
     }
+
+    // DEBUG TEMPORÁRIO: para diagnosticar a mensagem "invalid parameters".
+    // Remove isto assim que o problema estiver identificado.
+    debugPrint('[Brickset] params enviados: ${corpoPedido['params']}');
+    debugPrint('[Brickset] status HTTP: ${resposta.statusCode}');
+    debugPrint('[Brickset] corpo da resposta: ${resposta.body}');
 
     if (resposta.statusCode != 200) {
       String detalhe = 'HTTP ${resposta.statusCode}';
