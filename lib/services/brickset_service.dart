@@ -209,30 +209,20 @@ class BricksetService {
     }
   }
 
-  Future<String?> lookupSetByBarcode(String ean) async {
+  /// Vai buscar o set correspondente a um código de barras lido na câmara.
+  /// Tenta primeiro por EAN (mais comum nas caixas europeias) e, se não
+  /// encontrar nada, tenta por UPC (comum nas caixas norte-americanas).
+  ///
+  /// Devolve o [BricksetSet] completo (imagem, tema, peças, preço
+  /// sugerido...) — não só o número — para poderes pré-preencher o
+  /// formulário de "Novo Set" sem uma segunda chamada à API.
+  Future<BricksetSet?> getByBarcode(String codigo) async {
+    final porEan = await _getSets({'EAN': codigo});
+    if (porEan.sets.isNotEmpty) return porEan.sets.first;
 
-    if (apiKey.trim().isEmpty) {
-      throw BricksetException(
-          'Falta configurar a API key do Brickset (Definições > Brickset).');
-    }
+    final porUpc = await _getSets({'UPC': codigo});
+    if (porUpc.sets.isNotEmpty) return porUpc.sets.first;
 
-    final uri = Uri.parse('$_baseUrl/getSets').replace(
-      queryParameters: {
-        'apiKey': apiKey,
-        'userHash': '', // pode ir vazio '' se não precisares de dados de coleção do Brickset
-        'params': jsonEncode({'EAN': ean}),
-      },
-    );
-
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == 'success' && (data['matches'] as int) > 0) {
-        final sets = data['sets'] as List;
-        return sets.first['number']; // ex: "75192-1"
-      }
-    }
     return null;
   }
 

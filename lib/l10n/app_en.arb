@@ -50,6 +50,8 @@
   "@navMySets": {"description": "Bottom nav bar label"},
   "navSettings": "Others",
   "@navSettings": {"description": "Bottom nav bar label"},
+  "navBarcode": "Barcode",
+
 
   "@_COMENT_SETTING": " --- SETTINGS SECREEN ---",
   "settingsAppBarTitle": "General Settings",

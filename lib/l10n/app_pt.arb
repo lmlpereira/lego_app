@@ -21,6 +21,7 @@
   "navDashboard": "Dashboard",
   "navMySets": "Meus Sets",
   "navSettings": "Outros",
+  "navBarcode": "Código de Barras",
 
   "@_COMENT_SETTING": " --- SETTINGS SECREEN ---",
   "profileNoSession" : "Sem sessão (Visitante)",
