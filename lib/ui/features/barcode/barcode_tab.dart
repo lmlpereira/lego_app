@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'barcode_scanner_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../lista/edit_set_screen_new.dart';
 import '../utils/lego_block_style.dart';
+import 'scanflow.dart';
 
-class BarcodeTab extends StatelessWidget {
+class BarcodeTab extends ConsumerWidget {
   const BarcodeTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Center(
         child: Column(
@@ -19,32 +21,29 @@ class BarcodeTab extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: const Text(
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
                 'Clica no botão abaixo para ler o código de barras da caixa e identificar o set automaticamente.',
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () async {
-                // Abre o scanner como um ecrã novo (Full Screen)
-                final code = await Navigator.push<String>(
+              onPressed: () => iniciarFluxoDeScan(
+                context,
+                ref,
+                // Set ainda não está na coleção e o utilizador carregou em
+                // "Adicionar à coleção" na SetFoundSheet: abre o formulário
+                // de "Novo Set" já pré-preenchido com os dados do Brickset,
+                // deixando o valor pago/data de compra por preencher.
+                onSetNaoEncontrado: (set) => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
-                );
-
-                if (code != null) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Código lido: $code')),
-                    );
-                  }
-                  // Aqui podes disparar a lógica para procurar o set
-                  print("Código lido: $code");
-                }
-              },
+                  MaterialPageRoute(
+                    builder: (_) => EditSetScreenNew(initialBricksetSet: set),
+                  ),
+                ),
+              ),
               icon: const Icon(Icons.camera_alt),
               label: const Text('ABRIR SCANNER'),
               style: ElevatedButton.styleFrom(

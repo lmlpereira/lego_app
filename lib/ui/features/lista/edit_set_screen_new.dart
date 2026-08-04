@@ -12,9 +12,15 @@ import '../settings/brickset_search_sheet.dart';
 
 /// Ecrã de formulário. Se [set] for null, cria um set novo; caso
 /// contrário, edita o set passado (usa o mesmo ecrã para os dois casos).
+///
+/// [initialBricksetSet] permite abrir o formulário JÁ pré-preenchido a
+/// partir de um resultado do Brickset (ex: vindo do scanner de código de
+/// barras) — só é considerado quando [set] é null (criação). Se ambos
+/// forem passados, [set] tem prioridade (estamos a editar um set real).
 class EditSetScreenNew extends ConsumerStatefulWidget {
   final LegoSet? set;
-  const EditSetScreenNew({super.key, this.set});
+  final BricksetSet? initialBricksetSet;
+  const EditSetScreenNew({super.key, this.set, this.initialBricksetSet});
 
   @override
   ConsumerState<EditSetScreenNew> createState() => _EditSetScreenStateNew();
@@ -62,6 +68,22 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
     _dataVenda = s?.dataVenda;
     _vendido = s?.vendido ?? false;
     _imagemUrl = s?.imagemUrl;
+
+    // Vindo do scanner: pré-preenche com os dados do Brickset. Só entra
+    // aqui na criação (widget.set == null) — se estivermos a editar um
+    // set já existente, os dados reais desse set têm sempre prioridade.
+    final bs = widget.initialBricksetSet;
+    if (!_aEditar && bs != null) {
+      _numeroSetCtrl.text = bs.number;
+      _descricaoCtrl.text = bs.descricaoSugerida;
+      if (bs.year != null) _anoCtrl.text = '${bs.year}';
+      if (bs.pieces != null) _pecasCtrl.text = '${bs.pieces}';
+      _imagemUrl = bs.imageUrl ?? bs.thumbnailUrl;
+      _temaSelecionado = bs.theme;
+      if (bs.precoSugeridoEUR != null) {
+        _valorSetCtrl.text = '${bs.precoSugeridoEUR}';
+      }
+    }
   }
 
   @override
@@ -94,184 +116,184 @@ class _EditSetScreenStateNew extends ConsumerState<EditSetScreenNew> {
           }
         },
         child:Scaffold(
-      appBar: AppBar(
-        title: Text(_aEditar ? t.setEditTitle : t.setNewTitle),
-        actions: [
-          IconButton(
-            tooltip: t.apiKeyDialogTitle,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => showBricksetApiKeyDialog(context, ref),
+          appBar: AppBar(
+            title: Text(_aEditar ? t.setEditTitle : t.setNewTitle),
+            actions: [
+              IconButton(
+                tooltip: t.apiKeyDialogTitle,
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => showBricksetApiKeyDialog(context, ref),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (_imagemUrl != null) ...[
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    _imagemUrl!,
-                    height: 160,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const SizedBox(
-                      height: 160,
-                      child: Center(child: Icon(Icons.image_not_supported, size: 48)),
+          body: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                if (_imagemUrl != null) ...[
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _imagemUrl!,
+                        height: 160,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const SizedBox(
+                          height: 160,
+                          child: Center(child: Icon(Icons.image_not_supported, size: 48)),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            TextFormField(
-              controller: _numeroSetCtrl,
-              decoration: InputDecoration(
-                labelText: t.setNumberLabel,
-                helperText: t.setNumberHelper,
-                suffixIcon: _aPesquisarBrickset
-                    ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                        width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)))
-                    : IconButton(
-                  icon: const Icon(Icons.search),
-                  tooltip: t.setNumberTooltip,
-                  onPressed: _pesquisarBrickset,
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) => (v == null || int.tryParse(v) == null) ? t.setNumberInvalid : null,
-            ),
-            const SizedBox(height: 12),
-
-            temasAsync.when(
-              data: (temas) => _temaField(temas),
-              loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text(t.setErrorLoadTheme(e)),
-            ),
-            const SizedBox(height: 12),
-
-            TextFormField(
-              controller: _descricaoCtrl,
-              decoration:  InputDecoration(labelText: t.setDescricaoLabel),
-              validator: (v) => (v == null || v.trim().isEmpty) ? t.setInvalidError : null,
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _anoCtrl,
-                    decoration: InputDecoration(labelText: t.setAnoLancamentoLabel),
-                    keyboardType: TextInputType.number,
+                  const SizedBox(height: 12),
+                ],
+                TextFormField(
+                  controller: _numeroSetCtrl,
+                  decoration: InputDecoration(
+                    labelText: t.setNumberLabel,
+                    helperText: t.setNumberHelper,
+                    suffixIcon: _aPesquisarBrickset
+                        ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                            width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)))
+                        : IconButton(
+                      icon: const Icon(Icons.search),
+                      tooltip: t.setNumberTooltip,
+                      onPressed: _pesquisarBrickset,
+                    ),
                   ),
+                  keyboardType: TextInputType.number,
+                  validator: (v) => (v == null || int.tryParse(v) == null) ? t.setNumberInvalid : null,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _pecasCtrl,
-                    decoration: InputDecoration(labelText: t.setNumeroPecasLabel),
-                    keyboardType: TextInputType.number,
+                const SizedBox(height: 12),
+
+                temasAsync.when(
+                  data: (temas) => _temaField(temas),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, _) => Text(t.setErrorLoadTheme(e)),
+                ),
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _descricaoCtrl,
+                  decoration:  InputDecoration(labelText: t.setDescricaoLabel),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? t.setInvalidError : null,
+                ),
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _anoCtrl,
+                        decoration: InputDecoration(labelText: t.setAnoLancamentoLabel),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _pecasCtrl,
+                        decoration: InputDecoration(labelText: t.setNumeroPecasLabel),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _valorSetCtrl,
+                        decoration:  InputDecoration(labelText: t.setValorTabelaLabel),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _valorCompradoCtrl,
+                        decoration: InputDecoration(labelText: t.setValorPagoLabel),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Exibir os dois cards apenas em modo de edição
+                if (_aEditar) ...[
+                  const SizedBox(height: 12),
+                  _buildCardsDiferenca(),
+                ],
+
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _quantidadeCtrl,
+                  decoration: InputDecoration(labelText: t.setQuantidadeLabel),
+                  keyboardType: TextInputType.number,
+                  validator: (v) => (v == null || int.tryParse(v) == null) ? t.setInvalidError : null,
+                ),
+                const SizedBox(height: 12),
+
+                _dataField(
+                  label: t.setDataCompraLabel,
+                  valor: _dataCompra,
+                  onEscolher: (d) => setState(() => _dataCompra = d),
+                ),
+                const SizedBox(height: 12),
+
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title:  Text(t.setVendidoLabel),
+                  value: _vendido,
+                  onChanged: (v) => setState(() => _vendido = v),
+                ),
+
+                if (_vendido) ...[
+                  TextFormField(
+                    controller: _valorVendaCtrl,
+                    decoration: InputDecoration(labelText: t.setValorVendaLabel),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    validator: (v) {
+                      if (!_vendido) return null;
+                      return (v == null || double.tryParse(v) == null) ? t.setInvalidError : null;
+                    },
                   ),
+                  const SizedBox(height: 12),
+                  _dataField(
+                    label: t.setDataVendaLabel,
+                    valor: _dataVenda,
+                    onEscolher: (d) => setState(() => _dataVenda = d),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                TextFormField(
+                  controller: _notasCtrl,
+                  decoration: InputDecoration(labelText: t.setNotasLabel),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 24),
+
+                FilledButton.icon(
+                  onPressed: _aGuardar ? null : _guardar,
+                  icon: _aGuardar
+                      ? const SizedBox(
+                      width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.save),
+                  label: Text(_aEditar ? t.setbtnEditar : t.setbtnGuardar),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _valorSetCtrl,
-                    decoration:  InputDecoration(labelText: t.setValorTabelaLabel),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _valorCompradoCtrl,
-                    decoration: InputDecoration(labelText: t.setValorPagoLabel),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) => (v == null || double.tryParse(v) == null) ? t.setInvalidError : null,
-                  ),
-                ),
-              ],
-            ),
-
-            // Exibir os dois cards apenas em modo de edição
-            if (_aEditar) ...[
-              const SizedBox(height: 12),
-              _buildCardsDiferenca(),
-            ],
-
-            const SizedBox(height: 12),
-
-            TextFormField(
-              controller: _quantidadeCtrl,
-              decoration: InputDecoration(labelText: t.setQuantidadeLabel),
-              keyboardType: TextInputType.number,
-              validator: (v) => (v == null || int.tryParse(v) == null) ? t.setInvalidError : null,
-            ),
-            const SizedBox(height: 12),
-
-            _dataField(
-              label: t.setDataCompraLabel,
-              valor: _dataCompra,
-              onEscolher: (d) => setState(() => _dataCompra = d),
-            ),
-            const SizedBox(height: 12),
-
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title:  Text(t.setVendidoLabel),
-              value: _vendido,
-              onChanged: (v) => setState(() => _vendido = v),
-            ),
-
-            if (_vendido) ...[
-              TextFormField(
-                controller: _valorVendaCtrl,
-                decoration: InputDecoration(labelText: t.setValorVendaLabel),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (v) {
-                  if (!_vendido) return null;
-                  return (v == null || double.tryParse(v) == null) ? t.setInvalidError : null;
-                },
-              ),
-              const SizedBox(height: 12),
-              _dataField(
-                label: t.setDataVendaLabel,
-                valor: _dataVenda,
-                onEscolher: (d) => setState(() => _dataVenda = d),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            TextFormField(
-              controller: _notasCtrl,
-              decoration: InputDecoration(labelText: t.setNotasLabel),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 24),
-
-            FilledButton.icon(
-              onPressed: _aGuardar ? null : _guardar,
-              icon: _aGuardar
-                  ? const SizedBox(
-                  width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.save),
-              label: Text(_aEditar ? t.setbtnEditar : t.setbtnGuardar),
-            ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
   /// Constrói os dois cards com as diferenças calculadas

@@ -220,8 +220,16 @@ class BricksetService {
     final porEan = await _getSets({'EAN': codigo});
     if (porEan.sets.isNotEmpty) return porEan.sets.first;
 
-    final porUpc = await _getSets({'UPC': codigo});
-    if (porUpc.sets.isNotEmpty) return porUpc.sets.first;
+    // A tentativa por UPC é um "bónus" — se a API não reconhecer este
+    // parâmetro (ou rejeitar por qualquer outro motivo), tratamos como
+    // "não encontrado" em vez de deixar o erro da API rebentar até à UI
+    // e mascarar o que devia ser um simples "sem correspondência".
+    try {
+      final porUpc = await _getSets({'UPC': codigo});
+      if (porUpc.sets.isNotEmpty) return porUpc.sets.first;
+    } on BricksetException {
+      // ignora — cai para o "não encontrado" abaixo
+    }
 
     return null;
   }

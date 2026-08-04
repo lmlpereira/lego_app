@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lego_app/ui/features/barcode/set_found_sheet.dart';
 
+import '../../../data/brickset_settings.dart';
 import '../../../data/providers.dart';
 import '../../../data/repositories/sets_repository.dart';
 import '../../../services/brickset_service.dart';
+import '../settings/brickset_api_key_dialog.dart';
 import 'barcode_scanner_screen.dart';
 
 
@@ -42,6 +44,38 @@ Future<void> iniciarFluxoDeScan(
     WidgetRef ref, {
       void Function(BricksetSet set)? onSetNaoEncontrado,
     }) async {
+  // Verifica a API key ANTES de abrir a câmara — não faz sentido pedir
+  // ao utilizador para apontar e ler um código só para, no fim, lhe
+  // dizermos que falta configurar a key.
+  final brickset = await obterBricksetServiceQuandoPronto(ref);
+  if (brickset == null) {
+    if (!context.mounted) return;
+    final configurar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('API key do Brickset em falta'),
+        content: const Text(
+          'Para identificar sets pelo código de barras precisas de configurar '
+              'a tua API key do Brickset em Definições. Queres configurar agora?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Agora não'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Configurar'),
+          ),
+        ],
+      ),
+    );
+    if (configurar == true && context.mounted) {
+      await showBricksetApiKeyDialog(context, ref);
+    }
+    return;
+  }
+
   final code = await Navigator.push<String>(
     context,
     MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
@@ -53,8 +87,6 @@ Future<void> iniciarFluxoDeScan(
     barrierDismissible: false,
     builder: (_) => const Center(child: CircularProgressIndicator()),
   );
-
-  final brickset = ref.read(bricksetServiceProvider);
 
   try {
     final set = await brickset.getByBarcode(code);
@@ -98,6 +130,11 @@ Future<void> iniciarFluxoDeScan(
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Erro inesperado ao consultar o Brickset.')),
     );
+  } finally {
+    // Este service é criado ad-hoc (não vem de um provider gerido pelo
+    // Riverpod, ver obterBricksetServiceQuandoPronto), por isso temos de
+    // o fechar nós, senão a ligação http fica aberta.
+    brickset.dispose();
   }
 }
 

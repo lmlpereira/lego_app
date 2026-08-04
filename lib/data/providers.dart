@@ -1,27 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
-import '../services/brickset_service.dart';
 import 'database.dart';
 import 'repositories/sets_repository.dart';
 import 'repositories/drift_sets_repository.dart';
 
-// ---- Brickset ----
-
-/// TODO: liga isto ao teu ecrã de Definições > Brickset (a mensagem de erro
-/// em BricksetService já assume que a key vive algures ali). Se já tens um
-/// provider a guardar essa key (ex: via SharedPreferences), apaga este
-/// StateProvider e usa o teu — só é preciso que bricksetServiceProvider
-/// abaixo passe a ler dele.
-final bricksetApiKeyProvider = StateProvider<String>((ref) => '');
-
-final bricksetServiceProvider = Provider<BricksetService>((ref) {
-  final apiKey = ref.watch(bricksetApiKeyProvider);
-  final service = BricksetService(apiKey: apiKey);
-  ref.onDispose(service.dispose);
-  return service;
-});
-
+// Nota: o provider do Brickset (bricksetApiKeyProvider / bricksetServiceProvider)
+// vive em data/brickset_settings.dart — é o que está ligado às Definições
+// (SharedPreferences). Não dupliques aqui: um segundo provider com o
+// mesmo nome mas API key sempre vazia já causou o scanner a não usar a
+// key configurada pelo utilizador.
 /// Uma única instância da base de dados para toda a app.
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
