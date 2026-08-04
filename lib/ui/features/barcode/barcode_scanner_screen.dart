@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lego_app/ui/features/utils/lego_brick_loading.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Ecrã simples que abre a câmara, deteta o primeiro código de barras
@@ -48,19 +49,18 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       if (code != null && code.isNotEmpty) {
         _jaDetetado = true;
 
-        // Mostra o overlay de loading ANTES de parar a câmara — é isto
-        // que tapa o frame preto que o MobileScanner mostra enquanto o
-        // preview está a desligar.
+        // Mostra o overlay de loading imediatamente
         setState(() => _aProcessar = true);
 
-        // Importante: parar a câmara ANTES de navegar. Se saíres do
-        // ecrã com a câmara ainda ativa, ela continua a produzir frames
-        // durante a transição/animação e é nesse intervalo que o
-        // buffer se enche e a sessão de câmara é fechada com erro.
-        await _controller.stop();
-
+        // Primeiro navegamos de volta com o código.
+        // O pop deve acontecer antes do stop para ser instantâneo.
         if (!mounted) return;
         Navigator.pop(context, code);
+
+        // O stop() e dispose() serão tratados pelo ciclo de vida
+        // do widget, mas podemos chamar o stop aqui sem o 'await'
+        // para libertar o hardware o quanto antes sem bloquear a UI.
+        _controller.stop();
         return;
       }
     }
@@ -126,12 +126,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           if (_aProcessar)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.85),
+                color: const Color(0xFF1976D2), // Azul sólido (LegoColors.blue)
                 child: const Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(color: Colors.white),
+                      LegoBrickLoading(),
                       SizedBox(height: 16),
                       Text(
                         'A identificar o set...',
