@@ -93,8 +93,18 @@ class UpcLookupService {
     if (items.isEmpty) return null;
 
     final item = items.first as Map<String, dynamic>;
-    final titulo = (item['title'] as String?) ?? '';
-    if (titulo.isEmpty) return null;
+
+    final model = (item['model'] as String?) ?? '';
+    String titulo;
+    if(model.isEmpty){
+      titulo = (item['title'] as String?) ?? '';
+      if (titulo.isEmpty) return null;
+    }else{
+      titulo = model;
+    }
+
+
+
 
     return UpcLookupResult(
       titulo: titulo,
