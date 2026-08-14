@@ -136,7 +136,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   static final _ecrans = [
     LegoDashboardScreen(),
     SetsListScreenNew(),
-    BarcodeTab(),
+    //BarcodeTab(),
     SettingsScreen(),
   ];
 
@@ -187,12 +187,12 @@ class _BarraFlutuante extends StatelessWidget {
         iconeAtivo: Icons.widgets,
         label: t.navMySets,
       ),
-      _ItemNav(
+      /*_ItemNav(
         corAtiva: LegoColors.blueDark,
         icone: Icons.barcode_reader,
         iconeAtivo: Icons.barcode_reader,
         label: t.navBarcode,
-      ),
+      ),*/
       _ItemNav(
         corAtiva: LegoColors.yellow,
         icone: Icons.settings_applications_outlined,

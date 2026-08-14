@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Erro devolvido pela API do Brickset (ex: API key inválida, parâmetros
@@ -31,6 +30,8 @@ class BricksetSet {
   final double? retailPriceUS;
   final double? retailPriceUK;
   final double? retailPriceDE; // em euros — o mais útil para utilizadores PT
+  final String? ean; // código de barras oficial (Europa) — só vem preenchido
+  final String? upc; // código de barras oficial (América do Norte)
 
   const BricksetSet({
     required this.setID,
@@ -47,7 +48,15 @@ class BricksetSet {
     this.retailPriceUS,
     this.retailPriceUK,
     this.retailPriceDE,
+    this.ean,
+    this.upc,
   });
+
+  /// True se [codigo] (o que a câmara leu) corresponde ao EAN ou UPC
+  /// oficial deste set — usado para desempatar entre vários números
+  /// candidatos extraídos do título de um produto (ver
+  /// lib/services/upc_lookup_service.dart e scanflow.dart).
+  bool correspondeAoCodigo(String codigo) => codigo == ean || codigo == upc;
 
   /// Número completo no formato usado pelo Brickset, ex: "75894-1".
   String get numeroCompleto => '$number-$numberVariant';
@@ -72,6 +81,7 @@ class BricksetSet {
     final us = legoCom?['US'] as Map<String, dynamic>?;
     final uk = legoCom?['UK'] as Map<String, dynamic>?;
     final de = legoCom?['DE'] as Map<String, dynamic>?;
+    final barcode = json['barcode'] as Map<String, dynamic>?;
 
     return BricksetSet(
       setID: json['setID'] as int? ?? 0,
@@ -88,6 +98,8 @@ class BricksetSet {
       retailPriceUS: (us?['retailPrice'] as num?)?.toDouble(),
       retailPriceUK: (uk?['retailPrice'] as num?)?.toDouble(),
       retailPriceDE: (de?['retailPrice'] as num?)?.toDouble(),
+      ean: barcode?['EAN'] as String?,
+      upc: barcode?['UPC'] as String?,
     );
   }
 }
@@ -110,6 +122,15 @@ class BricksetSearchResult {
 /// Nota: o plano gratuito só permite 100 chamadas por dia ao método
 /// getSets — chega perfeitamente para autocomplete manual (não é para
 /// chamar em cada tecla premida).
+///
+/// IMPORTANTE: a Brickset NÃO permite pesquisar sets por código de
+/// barras (EAN/UPC) — não é um parâmetro válido do getSets, apesar de
+/// cada set devolvido incluir o seu próprio EAN/UPC (ver [BricksetSet.ean]
+/// / [BricksetSet.upc]). Para identificar um set a partir de um código
+/// lido na câmara, usa primeiro o UpcLookupService
+/// (lib/services/upc_lookup_service.dart) para obter candidatos a número
+/// de set, e só depois confirma cada um com [getBySetNumber] — ver
+/// lib/ui/features/barcode/scanflow.dart para o fluxo completo.
 class BricksetService {
   static const _baseUrl = 'https://brickset.com/api/v3.asmx';
 
@@ -165,12 +186,6 @@ class BricksetService {
       throw BricksetException('Sem ligação à internet ou ao Brickset ($e).');
     }
 
-    // DEBUG TEMPORÁRIO: para diagnosticar a mensagem "invalid parameters".
-    // Remove isto assim que o problema estiver identificado.
-    debugPrint('[Brickset] params enviados: ${corpoPedido['params']}');
-    debugPrint('[Brickset] status HTTP: ${resposta.statusCode}');
-    debugPrint('[Brickset] corpo da resposta: ${resposta.body}');
-
     if (resposta.statusCode != 200) {
       String detalhe = 'HTTP ${resposta.statusCode}';
       try {
@@ -214,31 +229,6 @@ class BricksetService {
     } catch (_) {
       return false;
     }
-  }
-
-  /// Vai buscar o set correspondente a um código de barras lido na câmara.
-  /// Tenta primeiro por EAN (mais comum nas caixas europeias) e, se não
-  /// encontrar nada, tenta por UPC (comum nas caixas norte-americanas).
-  ///
-  /// Devolve o [BricksetSet] completo (imagem, tema, peças, preço
-  /// sugerido...) — não só o número — para poderes pré-preencher o
-  /// formulário de "Novo Set" sem uma segunda chamada à API.
-  Future<BricksetSet?> getByBarcode(String codigo) async {
-    final porEan = await _getSets({'EAN': codigo});
-    if (porEan.sets.isNotEmpty) return porEan.sets.first;
-
-    // A tentativa por UPC é um "bónus" — se a API não reconhecer este
-    // parâmetro (ou rejeitar por qualquer outro motivo), tratamos como
-    // "não encontrado" em vez de deixar o erro da API rebentar até à UI
-    // e mascarar o que devia ser um simples "sem correspondência".
-    try {
-      final porUpc = await _getSets({'UPC': codigo});
-      if (porUpc.sets.isNotEmpty) return porUpc.sets.first;
-    } on BricksetException {
-      // ignora — cai para o "não encontrado" abaixo
-    }
-
-    return null;
   }
 
   void dispose() => _client.close();
