@@ -17,7 +17,7 @@ class BarcodeTab extends ConsumerWidget {
             const Icon(Icons.barcode_reader, size: 80, color: LegoColors.blueDark),
             const SizedBox(height: 20),
             const Text(
-              'Tens um novo set para adicionar? ',
+              'Tens um novo set para adicionar?',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
