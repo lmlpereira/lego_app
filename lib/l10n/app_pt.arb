@@ -321,7 +321,10 @@
 
   "@_COMENT_SPLASH": " --- SPLASH SECREEN ---",
   "splashScreenSubtitle" : "Gestão de Coleção",
-  "loadingColection" : "A carregar a coleção..."
+  "loadingColection" : "A carregar a coleção...",
+
+
+  "@_COMENT_BARCODESCREEB": " --- BARCODE SCREEN ---"
 
 
 
