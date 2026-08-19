@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../lista/edit_set_screen_new.dart';
 import '../utils/lego_block_style.dart';
 import 'scanflow.dart';
@@ -9,6 +10,8 @@ class BarcodeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -16,15 +19,15 @@ class BarcodeTab extends ConsumerWidget {
           children: [
             const Icon(Icons.barcode_reader, size: 80, color: LegoColors.blueDark),
             const SizedBox(height: 20),
-            const Text(
-              'Tens um novo set para adicionar?',
+            Text(
+              t.barcodeTitle,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Clica no botão abaixo para ler o código de barras da caixa e identificar o set automaticamente.',
+                t.barcodeSubtitle,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -45,7 +48,7 @@ class BarcodeTab extends ConsumerWidget {
                 ),
               ),
               icon: const Icon(Icons.camera_alt),
-              label: const Text('ABRIR SCANNER'),
+              label: Text(t.barcodeButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: LegoColors.blueDark,
                 foregroundColor: Colors.white,

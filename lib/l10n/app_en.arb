@@ -412,6 +412,21 @@
   "sexoHint" : "Choose an option",
   "criarConta" : "CREATE ACCOUNT!",
   "alredyConta" : "Do you already have an account? Log in",
-  "error_create_account" : "An error occurred whilst creating the account."
+  "error_create_account" : "An error occurred whilst creating the account.",
+
+  "@_COMENT_BARCODESCREEB": " --- BARCODE SCREEN ---",
+  "barcodeTitle" : "Do you have a new set to add?",
+  "barcodeSubtitle" : "Click the button below to scan the barcode on the box and identify the set automatically.",
+  "barcodeButton" : "OPEN SCANNER",
+  "barcodePecas": "pieces",
+  "barcodeMinifigs": "minifigs",
+  "barcodeTablePriceAPX": "Approximate list price: €",
+  "barcodeTablePrice": "List price €",
+  "barcodeJaExiste": "You already have this set in your collection",
+  "barcodeNExiste": "You don’t have this set in your collection yet",
+  "barcodeAdicionar": "Add to your collection",
+  "barcodeSTitle": "Scan barcode",
+  "barcodeSSubtitle": "Point the camera at the barcode on the box"
+
 
 }

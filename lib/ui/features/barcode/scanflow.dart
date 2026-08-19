@@ -204,18 +204,21 @@ Future<void> _mostrarResultado(
   // variante (-1), tal como set.number (só a parte base do Brickset).
   final numeroProcurado = int.tryParse(set.number);
   final todos = await ref.read(todosOsSetsProvider.future);
-  final jaTenho = numeroProcurado != null &&
-      todos.any((s) => s.numeroSet == numeroProcurado);
+  final existentes = numeroProcurado == null
+      ? const <LegoSet>[]
+      : todos.where((s) => s.numeroSet == numeroProcurado).toList();
+  final quantidadeNaColecao = existentes.fold<int>(0, (acc, s) => acc + s.quantidade);
 
   if (!context.mounted) return;
 
   await SetFoundSheet.show(
     context,
     set: set,
-    jaNaColecao: jaTenho,
-    onAdicionar: jaTenho
-        ? null
-        : () => _adicionar(context, ref, set, onSetNaoEncontrado),
+    jaNaColecao: existentes.isNotEmpty,
+    quantidadeNaColecao: quantidadeNaColecao > 0 ? quantidadeNaColecao : null,
+    // Disponível sempre — mesmo já tendo o set, para poderes registar
+    // duplicados que compraste (ver pedido do utilizador).
+    onAdicionar: () => _adicionar(context, ref, set, onSetNaoEncontrado),
   );
 }
 

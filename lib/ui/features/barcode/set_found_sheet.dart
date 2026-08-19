@@ -5,17 +5,21 @@ import '../../../services/brickset_service.dart';
 
 /// Folha modal mostrada depois do lookup por código de barras ter sucesso.
 /// `jaNaColecao` diz-te se o set já existe na tua coleção (comparado por
-/// numeroSet). `onAdicionar` só é chamado se o utilizador ainda não o
-/// tiver e carregar no botão.
+/// numeroSet). `quantidadeNaColecao` é opcional — se souberes quantas
+/// unidades já tens, mostra-se entre parêntesis. `onAdicionar` está
+/// sempre disponível (mesmo já tendo o set, para poderes registar
+/// duplicados que compraste).
 class SetFoundSheet extends StatelessWidget {
   final BricksetSet set;
   final bool jaNaColecao;
+  final int? quantidadeNaColecao;
   final VoidCallback? onAdicionar;
 
   const SetFoundSheet({
     super.key,
     required this.set,
     required this.jaNaColecao,
+    this.quantidadeNaColecao,
     this.onAdicionar,
   });
 
@@ -23,6 +27,7 @@ class SetFoundSheet extends StatelessWidget {
       BuildContext context, {
         required BricksetSet set,
         required bool jaNaColecao,
+        int? quantidadeNaColecao,
         VoidCallback? onAdicionar,
       }) {
     return showModalBottomSheet(
@@ -34,6 +39,7 @@ class SetFoundSheet extends StatelessWidget {
       builder: (_) => SetFoundSheet(
         set: set,
         jaNaColecao: jaNaColecao,
+        quantidadeNaColecao: quantidadeNaColecao,
         onAdicionar: onAdicionar,
       ),
     );
@@ -127,13 +133,29 @@ class SetFoundSheet extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 20),
-            if (jaNaColecao)
-              const _Estado(
+            if (jaNaColecao) ...[
+              _Estado(
                 icone: Icons.check_circle,
                 cor: Colors.green,
-                texto: 'Já tens este set na coleção',
-              )
-            else ...[
+                texto: quantidadeNaColecao != null && quantidadeNaColecao! > 1
+                    ? 'Já tens este set na coleção ($quantidadeNaColecao unidades)'
+                    : 'Já tens este set na coleção',
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Adicionar mais um'),
+                  onPressed: onAdicionar == null
+                      ? null
+                      : () {
+                    onAdicionar!.call();
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ] else ...[
               const _Estado(
                 icone: Icons.info_outline,
                 cor: Colors.orange,
@@ -148,8 +170,9 @@ class SetFoundSheet extends StatelessWidget {
                   onPressed: onAdicionar == null
                       ? null
                       : () {
-                    onAdicionar!.call();
                     Navigator.pop(context);
+                    onAdicionar!.call();
+
                   },
                 ),
               ),

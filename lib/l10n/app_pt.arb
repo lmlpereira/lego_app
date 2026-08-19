@@ -324,7 +324,20 @@
   "loadingColection" : "A carregar a coleção...",
 
 
-  "@_COMENT_BARCODESCREEB": " --- BARCODE SCREEN ---"
+  "@_COMENT_BARCODESCREEB": " --- BARCODE SCREEN ---",
+  "barcodeTitle" : "Tens um novo set para adicionar?",
+  "barcodeSubtitle" : "Clica no botão abaixo para ler o código de barras da caixa e identificar o set automaticamente.",
+  "barcodeButton" : "ABRIR SCANNER",
+  "barcodePecas": "peças",
+  "barcodeMinifigs": "minifigs",
+  "barcodeTablePriceAPX": "Preço de tabela aproximado: €",
+  "barcodeTablePrice": "Preço de tabela: €",
+  "barcodeJaExiste": "Já tens este set na coleção",
+  "barcodeNExiste": "Ainda não tens este set na coleção",
+  "barcodeAdicionar": "Adicionar à coleção",
+  "barcodeSTitle": "Ler código de barras",
+  "barcodeSSubtitle": "Aponte a câmara para o código de barras da caixa"
+
 
 
 

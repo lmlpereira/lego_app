@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lego_app/ui/features/utils/lego_brick_loading.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 /// Ecrã simples que abre a câmara, deteta o primeiro código de barras
 /// válido e devolve-o via Navigator.pop(context, code).
 ///
@@ -74,9 +76,11 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ler código de barras'),
+        title: Text(t.barcodeSTitle),
         actions: [
           IconButton(
             icon: ValueListenableBuilder(
@@ -109,12 +113,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             bottom: 32,
             left: 0,
             right: 0,
             child: Text(
-              'Aponta a câmara para o código de barras da caixa',
+              t.barcodeSSubtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
